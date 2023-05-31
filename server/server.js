@@ -16,6 +16,6 @@ app.listen(port, () => {
  * 
  * token id
  * indirizzo ipfs
- * 
+ * etc
  * 
  */
