@@ -7,6 +7,11 @@ const counterContract = useCounterContract();
 
 onMounted(async () => {
   await counterContract.setUp();
+
+  // Test api
+  let resp = await fetch('/api');
+  let respJson = await resp.json();
+  console.log(respJson.msg);
 })
 
 </script>
