@@ -18,9 +18,9 @@ To start frontend
 npm run frontend
 ```
 
-To start backend
+To start backend (hot reload)
 ```sh
-npm run server
+npm run server-dev
 ```
 
 Type-Check, Compile and Minify for Production
