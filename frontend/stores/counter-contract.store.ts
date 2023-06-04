@@ -3,18 +3,22 @@ import { defineStore } from 'pinia';
 import Web3 from 'web3';
 import contractABI from '../../build/contracts/Counter.json';
 
-// FIXME to change whenever contract is deployed... is there a better solution?
-const contractAddress = '0x3c2584567356F0e12A18BDA0F5DE794aa9277077';
-
 export const useCounterContract = defineStore('counter-contract', () => {
     // Account of user's wallet
     const account = ref<string | null>(null);
 
     const count = ref<number | null>(null);
+    const contractAddress = ref<string | null>(null);
     const counterContract = ref<any | null>(null);
 
     async function setUp() {
         try {
+            // Get contract address: read last network deployment
+            const lastDeploy = Object.keys(contractABI.networks).pop();
+            if (lastDeploy) {
+                contractAddress.value = contractABI.networks[lastDeploy].address;
+            }
+
             // Get web3 instance from browser: connect to MetaMask
             await window.ethereum.request({ method: 'eth_requestAccounts' });
             const web3 = new Web3(window.ethereum);
@@ -24,7 +28,7 @@ export const useCounterContract = defineStore('counter-contract', () => {
             account.value = accounts[0];
 
             // Setup contract
-            counterContract.value = new web3.eth.Contract(contractABI.abi, contractAddress);
+            counterContract.value = new web3.eth.Contract(contractABI.abi, contractAddress.value);
             const result = await counterContract.value.methods.getCount().call({ from: account.value });
             count.value = result;
         } catch (err) {
