@@ -6,8 +6,10 @@
     <div class="info-header">
         <img src="@/assets/blockchain.png" height="200" />
         <h2 class="info-header-title">ProjectsChain</h2>
-        <p class="info-header-text">Protect the intellectual property of your 3D projects and manage royalties using Smart
-            Contracts and the Blockchain technology</p>
+        <p class="info-header-text">
+            Protect the intellectual property of your 3D projects and manage royalties using Smart
+            Contracts and Blockchain technology
+        </p>
     </div>
 </template>
 
