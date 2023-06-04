@@ -5,7 +5,7 @@ import type { AbiItem } from 'web3-utils';
 import contractABI from '../../build/contracts/Counter.json';
 
 export const useCounterContract = defineStore('counter-contract', () => {
-    // Account of user's wallet
+    // Address of user's wallet
     const account = ref<string | null>(null);
 
     const count = ref<number | null>(null);
