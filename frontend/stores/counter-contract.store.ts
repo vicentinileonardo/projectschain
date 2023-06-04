@@ -1,6 +1,7 @@
 import { ref, computed } from 'vue';
 import { defineStore } from 'pinia';
 import Web3 from 'web3';
+import type { AbiItem } from 'web3-utils';
 import contractABI from '../../build/contracts/Counter.json';
 
 export const useCounterContract = defineStore('counter-contract', () => {
@@ -12,27 +13,31 @@ export const useCounterContract = defineStore('counter-contract', () => {
     const counterContract = ref<any | null>(null);
 
     async function setUp() {
-        try {
-            // Get contract address: read last network deployment
-            const lastDeploy = Object.keys(contractABI.networks).pop();
-            if (lastDeploy) {
-                contractAddress.value = contractABI.networks[lastDeploy].address;
+        // Get contract address: read last network deployment
+        const lastDeploy = Object.keys(contractABI.networks).pop();
+        if (lastDeploy) {
+            contractAddress.value = (contractABI.networks as any)[lastDeploy].address;
+        }
+
+        if (contractAddress.value) {
+            try {
+                // Get web3 instance from browser: connect to MetaMask
+                await window.ethereum.request({ method: 'eth_requestAccounts' });
+                const web3 = new Web3(window.ethereum);   
+    
+                // Get account
+                const accounts = await web3.eth.getAccounts();
+                account.value = accounts[0];
+    
+                // Setup contract
+                counterContract.value = new web3.eth.Contract(contractABI.abi as AbiItem[], contractAddress.value);
+                const result = await counterContract.value.methods.getCount().call({ from: account.value });
+                count.value = result;
+            } catch (err) {
+                console.error("Error in setting up connection to blockchain", err);
             }
-
-            // Get web3 instance from browser: connect to MetaMask
-            await window.ethereum.request({ method: 'eth_requestAccounts' });
-            const web3 = new Web3(window.ethereum);
-
-            // Get account
-            const accounts = await web3.eth.getAccounts();
-            account.value = accounts[0];
-
-            // Setup contract
-            counterContract.value = new web3.eth.Contract(contractABI.abi, contractAddress.value);
-            const result = await counterContract.value.methods.getCount().call({ from: account.value });
-            count.value = result;
-        } catch (err) {
-            console.error("Error in setting up connection to blockchain", err);
+        } else {
+            console.error("Was not able to obtain contract address");
         }
     }
 
