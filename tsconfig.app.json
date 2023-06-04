@@ -1,6 +1,12 @@
 {
   "extends": "@vue/tsconfig/tsconfig.dom.json",
-  "include": ["env.d.ts", "frontend/**/*", "frontend/**/*.vue"],
+  "include": [
+    "env.d.ts", 
+    "frontend/**/*", 
+    "frontend/**/*.vue", 
+    // Need to include compiled contracts ABIs
+    "build/contracts/Counter.json"
+  ],
   "exclude": ["frontend/**/__tests__/*"],
   "compilerOptions": {
     "composite": true,
