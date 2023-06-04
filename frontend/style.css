@@ -5,10 +5,19 @@
 body {
     margin: 0;
     padding: 0;
-    background: linear-gradient(45deg, #b8d7ff, #fcfbc5) fixed;
+    background: linear-gradient(45deg, #a6ccff, #fcfbc5) fixed;
+}
+
+a {
+    text-decoration: none;
 }
 
 .bg-primary {
     background-color: var(--primary);
+    color: white;
+}
+
+.bg-danger {
+    background-color: red;
     color: white;
 }

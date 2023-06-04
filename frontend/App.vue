@@ -9,7 +9,10 @@ import AppNavbar from './components/AppNavbar.vue';
 
   <AppNavbar />
 
-  <RouterView />
+  <div style="padding: 0.5em;">
+    <RouterView />
+  </div>
+  
 </template>
 
 <style scoped>

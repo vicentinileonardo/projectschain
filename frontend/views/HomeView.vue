@@ -9,14 +9,19 @@ import AppButton from '@/components/AppButton.vue';
     <InfoHeader />
 
     <div class="buttons-row">
-        <AppButton class="bg-primary">
-            <Icon icon="material-symbols:upload" />
-            Upload project
-        </AppButton>
-        <AppButton class="bg-primary">
-            <Icon icon="material-symbols:explore" />
-            Explore catalog
-        </AppButton>
+        <RouterLink to="/upload">
+            <AppButton class="bg-primary">
+                <Icon icon="material-symbols:upload" />
+                Upload project
+            </AppButton>
+        </RouterLink>
+
+        <RouterLink to="/catalog">
+            <AppButton class="bg-primary">
+                <Icon icon="material-symbols:explore" />
+                Explore catalog
+            </AppButton>
+        </RouterLink>
     </div>
 </template>
 
