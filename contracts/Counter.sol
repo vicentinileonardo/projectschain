@@ -6,11 +6,11 @@ contract Counter {
     uint256 private count;
 
     function incrementCounter() public {
-        count = count + 1;
+        count = count + 5;
     }
 
     function decrementCounter() public {
-        count = count - 1;
+        count = count - 5;
     }
     
     function getCount() public view returns (uint256) {
