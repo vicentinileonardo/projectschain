@@ -1,0 +1,14 @@
+:root {
+    --primary: #3042ff;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(45deg, #b8d7ff, #fcfbc5) fixed;
+}
+
+.bg-primary {
+    background-color: var(--primary);
+    color: white;
+}
