@@ -27,6 +27,7 @@
     "web3-utils": "^1.10.0"
   },
   "devDependencies": {
+    "@iconify/vue": "^4.1.1",
     "@rushstack/eslint-patch": "^1.2.0",
     "@tsconfig/node18": "^2.0.1",
     "@types/node": "^18.16.8",
