@@ -14,9 +14,19 @@ const port = 3000;
 app.use(express.json());
 app.use(cors());
 
-app.get('/api', (req, res) => {
-    res.json({ msg: 'hello!' });
-})
+//root route is /api
+app.get('/api/v1', (req, res) => {
+    res.json({ msg: 'API service working!' });
+});
+
+//routes
+require('./routes/owners.js')(app);
+require('./routes/nfts.js')(app);
+
+
+
+
+
 
 
 Moralis.start({

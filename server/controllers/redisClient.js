@@ -1,8 +1,8 @@
 // Redis client to store key-value pairs of owners and respective NFTs
 
-import { createClient } from 'redis';
-
 module.exports = async redisClient => {
+
+    const { createClient } = require('redis');
 
     const client = createClient();
 
