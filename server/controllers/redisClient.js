@@ -40,6 +40,7 @@ class RedisClient {
         }
     }
 
+    //an owner is created only when an NFT is associated with it
     async setNftToOwner(owner, nft) {
         try {
             let key = "owners:" + owner;
@@ -66,18 +67,25 @@ class RedisClient {
         }
     }
     
-    async getNftsByOwner(owner) {
+    //NFTs related functions
+
+    //get all nfts, not just the ids
+    async getAllNfts() {
         try {
-            let key = "owners:" + owner;
-            const nfts = await this.client.sMembers(key);
-            console.log(`NFT addresses for wallet ${owner}: ${nfts}`);
-            return nfts;
+            const nfts = await this.getAllNftsIds();
+            let nftsArray = [];
+            for (const nft of nfts) {
+                let nftObj = await this.client.get(nft);
+                nftsArray.push(JSON.parse(nftObj));
+            }
+            return nftsArray;
         } catch (err) {
             console.error(err);
             return [];
         }
     }
 
+    //get all nfts ids
     async getAllNftsIds() { 
         try {
             const nfts = await this.client.keys('nfts:*');
@@ -88,6 +96,32 @@ class RedisClient {
         }
     }
 
+    //get nft by its id
+    async getNftById(id) {
+        try {
+            let key = "nfts:" + id;
+            let nft = await this.client.get(key);
+            return JSON.parse(nft);
+        } catch (err) {
+            console.error(err);
+            return {};
+        }
+    }
+
+    //get all nfts for a specific owner
+    async getNftsByOwner(owner) {
+        try {
+            let key = "owners:" + owner;
+            const nfts = await this.client.sMembers(key);
+            //console.log(`NFT addresses for wallet ${owner}: ${nfts}`);
+            return nfts;
+        } catch (err) {
+            console.error(err);
+            return [];
+        }
+    }
+
+    //create nft
     async createNft(nft) {
         try {
             let key = "nfts:" + nft.tokenId;
@@ -100,9 +134,21 @@ class RedisClient {
         }
     }
 
+    //delete all is stored in the redis client
+    async deleteAllNfts() {
+        try {
+            const nfts = await this.getAllNftsIds();
+            for (const nft of nfts) {
+                await this.client.del(nft);
+            }
+            //console.log(`Deleted all nfts`);
+            return true;
+        } catch (err) {
+            console.error(err);
+            return false;
+        }
+    }
 
-
-    
     
 }
 

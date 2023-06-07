@@ -24,11 +24,6 @@ module.exports = (app, redisClient) => {
         res.json({ response });
     });
 
-    router.delete('/owners', async (req, res) => {
-        const response = await redisClient.deleteAllOwners();
-        res.json({ response });
-    });
-
     router.get('/owners/:owner/nfts', async (req, res) => {
         const owner = req.params.owner;
         if (!owner) {
@@ -38,6 +33,13 @@ module.exports = (app, redisClient) => {
         const nfts = await redisClient.getNftsByOwner(owner);
         res.json({ nfts });
     });   
+
+    router.delete('/owners', async (req, res) => {
+        const response = await redisClient.deleteAllOwners();
+        if (response) {
+            res.json({ message: 'All NFTs deleted' });
+        }
+    });
 
     app.use("/api/v1", router);
 }
