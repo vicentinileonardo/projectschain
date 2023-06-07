@@ -1,7 +1,7 @@
-//Exposing a key-value table of owners and respective NFTs
-module.exports = app => {
+const RedisClient = require('../controllers/redisClient');
 
-    const redisClient = require('../controllers/redisClient');
+//Exposing a key-value table of owners and respective NFTs
+module.exports = (app, redisClient) => {
 
     const router = require('express').Router();
 

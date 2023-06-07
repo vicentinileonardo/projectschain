@@ -19,16 +19,14 @@ app.get('/api/v1', (req, res) => {
     res.json({ msg: 'API service working!' });
 });
 
+const redisClient = createRedisClient();
+redisClient.connect();
+
 //routes
-require('./routes/owners.js')(app);
-require('./routes/nfts.js')(app);
+require('./routes/owners.js')(app, redisClient);
+require('./routes/nfts.js')(app, redisClient);
 
-
-
-
-
-
-
+// Moralis gateway
 Moralis.start({
     apiKey: process.env.MORALIS_KEY
 })
@@ -76,3 +74,18 @@ app.listen(port, () => {
  * etc
  * 
  */
+
+// Factory function to create a Redis client
+function createRedisClient() {
+    
+    const RedisClient = require('./controllers/redisClient');
+
+    const redisConfig = {
+        // Redis server connection settings, if needed
+    };
+    
+    const redisClient = new RedisClient(redisConfig);
+    return redisClient;
+   
+}
+

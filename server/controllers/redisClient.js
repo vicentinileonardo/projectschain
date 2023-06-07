@@ -1,12 +1,58 @@
 // Redis client to store key-value pairs of owners and respective NFTs
 
-module.exports = async redisClient => {
+const { createClient } = require('redis');
 
-    const { createClient } = require('redis');
+class RedisClient {
+    constructor() {
+        this.client = createClient();
+        this.client.on('error', (err) => {
+            console.log('Redis error, probably failed to connect to Redis');
+            console.error(err);
+        });
+    }
 
-    const client = createClient();
+    async ping() {
+        await this.client.ping();
+    }
 
-    client.on('error', err => console.log('Redis Client Error', err));
+    async connect() {
+        try {            
+            await this.client.connect();
+            console.log('Connected to Redis');
+        } catch (err) {
+            console.error(err);
+        }
+    }
 
-    await client.connect();
+    async disconnect() {
+        await this.client.disconnect();
+    }
+
+    async setNftToOwner(owner, nft) {
+        try {
+            await this.client.sAdd(owner, nft);
+            console.log(`Added ${nft} NFT addresses to wallet ${owner}`);
+            return true;
+        } catch (err) {
+            console.error(err);
+            return false;
+        }
+    }
+
+    async getAllOwners() {
+        // TODO: Implement this function
+    }
+
+    async getNftsByOwner(owner) {
+        try {
+            const nfts = await this.client.sMembers(owner);
+            console.log(`NFT addresses for wallet ${owner}: ${nfts}`);
+            return nfts;
+        } catch (err) {
+            console.error(err);
+            return [];
+        }
+    }
 }
+
+module.exports = RedisClient;
