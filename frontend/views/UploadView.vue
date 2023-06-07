@@ -11,7 +11,14 @@
                 body: formData,
             })
             .then(res => res.json())
-            .then(data => document.getElementById("responseDiv").innerHTML=data.result[0].path)
+            .then(data => {
+                const dataParsed = JSON.parse(data);
+                if(dataParsed.status=="FAIL"){
+                    alert(dataParsed.message);
+                }else{
+                    document.getElementById("responseDiv").innerHTML="The file will be available soon here: "+dataParsed.url}
+                }
+            )
         }
     }
 </script>
@@ -21,7 +28,7 @@
     <h2>Upload a project</h2>
     <p>🔒 Secure the intellectual property of your project on the blockchain</p>
     <input type="file" id="fileToUpload">
-    <button type="button" onclick="uploadToIPFS()">Upload</button>
+    <button type="button" onclick="uploadToIPFS()">Upload JSON</button>
     <br>
     <div id="responseDiv"></div>
 </template>

@@ -1,5 +1,7 @@
 const express = require('express');
 const app = express();
+const Hash = require('ipfs-only-hash');
+const fetch = require('node-fetch');
 const Moralis = require('moralis').default;
 const multer = require('multer');
 const fs = require('fs');
@@ -35,29 +37,78 @@ const storage = multer.diskStorage({
         callback(null, __dirname + "/temp");
     },
     filename: function(req, file, callback){
-        callback(null, "upload.png");
+        callback(null, "upload.txt");
     }
     
 });
 const uploads = multer({storage:storage});
-app.post('/api/uploadIPFS', uploads.array("file"), (req, res) => {
+app.post('/api/uploadIPFS', uploads.array("file"), async (req, res) => {
     const fileUploads = [
         {
-            path: "upload.png",
-            content: fs.readFileSync("./server/temp/upload.png", {encoding:"base64"})
+            path: "upload.txt",
+            content: fs.readFileSync("./server/temp/upload.txt", {encoding:"base64"})
         }
     ]
 
+    const data = fs.readFileSync('./server/temp/upload.txt');
+    const hash = await Hash.of(data);
+    const url = "https://ipfs.io/ipfs/" + hash;
+    //console.log(hash) 
+
+    async function checkIfExistsIpfs(){ 
+        
+        const promiseTimeout = new Promise((resolve, reject) => {
+            setTimeout(resolve, 5000, true); //we assume that the file was never uploaded on IPFS
+        });
+        
+        const promiseIPFS = new Promise((resolve, reject) => {
+            fetch(url)
+                .then(response => {
+                    if (response.ok) {
+                        return false; //the file is not original
+                        //return response.json();
+                    }
+                    throw new Error('Network response was not ok.');
+                })
+                .then(data => resolve(data))
+                .catch(error => reject(error));
+        });
+        
+        return Promise.race([promiseTimeout, promiseIPFS]).then((value) => {
+            //console.log(value);
+            return value;
+        });
+    }
+  
     async function uploadToIpfs(){ 
         const resIpfs = await Moralis.EvmApi.ipfs.uploadFolder({
             abi: fileUploads
         })
 
-        console.log(resIpfs.result);
-        return res.json({ result: resIpfs.result });
+        //console.log(resIpfs.result);
+        let response=`{
+            "status": "SUCCESS",
+            "url": "`+url+`"
+        }`;
+
+        console.log(response);
+        return res.json(response);
     }
 
-    uploadToIpfs();
+    const fileToBeUploaded = await checkIfExistsIpfs();
+
+    if(fileToBeUploaded){
+        uploadToIpfs();
+    }else{
+        let response=`{
+            "status": "FAIL",
+            "message": "The file is not original"
+        }`;
+        
+        console.log(response);
+        return res.json(response); 
+    }
+    
 })
 
 
