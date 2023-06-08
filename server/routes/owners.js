@@ -5,40 +5,114 @@ module.exports = (app, redisClient) => {
     const router = require('express').Router();
 
     router.get('/owners', async (req, res) => {
-        const owners = await redisClient.getAllOwners();
-        res.json({ owners });
-    });
+        const clientResponse = await redisClient.getAllOwners();
+        if (clientResponse.status === 'error') {
+            let response = {};
+            response['status'] = 'error';
+            response['message'] = clientResponse.message;
+            res.status(500).send(response);
+            return;
+        }
+        
+        let owners = clientResponse.data;
+        //trimming the prefix 'owners:' from the keys
+        for (let i = 0; i < owners.length; i++) {
+            owners[i] = owners[i].substring(7);
+        }
+        let data = {owners: owners};
 
-    router.post('/owners', async (req, res) => {
-        const owner = req.body.owner;
-        const nft = req.body.nft;
-        if (!owner) {
-            res.status(400).json({ error: 'Missing required parameter: owner' });
-            return;
-        }
-        if (!nft) {
-            res.status(400).json({ error: 'Missing required parameter: nft' });
-            return;
-        }
-        const response = await redisClient.setNftToOwner(owner, nft);
-        res.json({ response });
+        let response = {}
+        response['status'] = 'success';
+        response['message'] = clientResponse.message;
+        response['data'] = data;
+
+        res.status(200).send(response);
+        return;
     });
 
     router.get('/owners/:owner/nfts', async (req, res) => {
         const owner = req.params.owner;
         if (!owner) {
-            res.status(400).json({ error: 'Missing required parameter: owner' });
+            let response = {};
+            response['status'] = 'error';
+            response['message'] = 'Missing required parameter: owner';
+            res.status(400).send(response);
             return;
         }
-        const nfts = await redisClient.getNftsByOwner(owner);
-        res.json({ nfts });
-    });   
+        const clientResponse = await redisClient.getNftsByOwner(owner);
+        if (clientResponse.status === 'error') {
+            let response = {};
+            response['status'] = 'error';
+            response['message'] = clientResponse.message;
+            res.status(500).send(response);
+            return;
+        }
+
+        let nfts = clientResponse.data;
+        
+        //response have the format: { owner: owner, nfts: [nft1, nft2, ...] }
+        let data = { owner: owner, nfts: [] };
+        for (let i = 0; i < nfts.length; i++) {
+            data.nfts.push(nfts[i]);
+        }
+
+        let response = {};
+        response['status'] = 'success';
+        response['message'] = clientResponse.message;
+        response['data'] = data;
+
+        res.status(200).send(response);
+        return;
+    });
+
+    router.post('/owners', async (req, res) => {
+        const owner = req.body.owner;
+        const nft = req.body.nft;
+
+        if (!owner) {
+            let response = {};
+            response['status'] = 'error';
+            response['message'] = 'Missing required parameter: owner';
+            res.status(400).send(response);
+            return;
+        }
+        if (!nft) {
+            let response = {};
+            response['status'] = 'error';
+            response['message'] = 'Missing required parameter: nft';
+            res.status(400).send(response);
+            return;
+        }
+
+        const clientResponse = await redisClient.setNftToOwner(owner, nft);
+        if (clientResponse.status === 'error') {
+            let response = {};
+            response['status'] = 'error';
+            response['message'] = clientResponse.message;
+            res.status(500).send(response);
+            return;
+        }
+
+        let response = {};
+        response['status'] = 'success';
+        response['message'] = clientResponse.message;
+        res.status(200).send(response);
+    });
 
     router.delete('/owners', async (req, res) => {
-        const response = await redisClient.deleteAllOwners();
-        if (response) {
-            res.json({ message: 'All NFTs deleted' });
+        const clientResponse = await redisClient.deleteAllOwners();
+        if (clientResponse.status === 'error') {
+            let response = {};
+            response['status'] = 'error';
+            response['message'] = clientResponse.message;
+            res.status(500).send(response);
+            return;
         }
+
+        let response = {};
+        response['status'] = 'success';
+        response['message'] = clientResponse.message;
+        res.status(200).send(response);
     });
 
     app.use("/api/v1", router);

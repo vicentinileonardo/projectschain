@@ -32,6 +32,12 @@ Start Ganache with database to save accounts and blockchain state:
 ganache --database.dbPath ./ganache-data/
 ```
 
+Start Redis server:
+
+```sh
+redis-server
+```
+
 To start backend (hot reload)
 ```sh
 npm run server-dev

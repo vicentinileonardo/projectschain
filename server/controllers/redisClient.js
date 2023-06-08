@@ -28,49 +28,89 @@ class RedisClient {
         await this.client.disconnect();
     }
 
+    //######### Owners related functions #########
 
     async getAllOwners() {
+        let clientResponse = {};
         try {
             const owners = await this.client.keys('owners:*');
-            //console.log(`Owners: ${owners}`);
-            return owners;
+            clientResponse['status'] = 'success'
+            clientResponse['message'] = 'Owners retrieved successfully';
+            clientResponse['data'] = owners;
+            return clientResponse;
         } catch (err) {
-            console.error(err);
-            return [];
+            clientResponse['status'] = 'error'
+            clientResponse['message'] = 'Failed to retrieve owners';
+            clientResponse['data'] = [];
+            return clientResponse;
         }
     }
 
+    //get specific owner
+    async getOwner(owner) {
+        let clientResponse = {};
+        try {
+            const key = "owners:" + owner;
+            const nfts = await this.client.sMembers(key);
+            clientResponse['status'] = 'success'
+            clientResponse['message'] = 'Owner retrieved successfully';
+            clientResponse['data'] = nfts;
+            return clientResponse;
+        } catch (err) {
+            clientResponse['status'] = 'error'
+            clientResponse['message'] = 'Failed to retrieve owner';
+            clientResponse['data'] = [];
+            return clientResponse;
+        }
+    }
+    
+
     //an owner is created only when an NFT is associated with it
     async setNftToOwner(owner, nft) {
+        let clientResponse = {};
         try {
             let key = "owners:" + owner;
             await this.client.sAdd(key, nft);
-            console.log(`Added ${nft} NFT addresses to wallet ${owner}`);
-            return true;
+
+            clientResponse['status'] = 'success';
+            clientResponse['message'] = `Added ${nft} NFT addresses to wallet ${owner}`;
+            return clientResponse;
         } catch (err) {
-            console.error(err);
-            return false;
+            clientResponse['status'] = 'error';
+            clientResponse['message'] = 'Failed to add NFT to wallet';
+            return clientResponse;
         }
     }
 
     async deleteAllOwners() {
+        let clientResponse = {};
         try {
-            const owners = await this.getAllOwners();
+            const internalClientCall = await this.getAllOwners();
+            if (internalClientCall.status === 'error') {
+                clientResponse['status'] = 'error';
+                clientResponse['message'] = 'Failed to delete all NFTs';
+                return clientResponse;
+            }
+
+            const owners = internalClientCall.data;
             for (const owner of owners) {
                 await this.client.del(owner);
             }
-            console.log(`Deleted all owners`);
-            return true;
+            clientResponse['status'] = 'success';
+            clientResponse['message'] = 'All NFTs deleted';
+            return clientResponse;
         } catch (err) {
-            console.error(err);
-            return false;
+            clientResponse['status'] = 'error';
+            clientResponse['message'] = 'Failed to delete all NFTs';
+            return clientResponse;
         }
     }
     
-    //NFTs related functions
+    //######### NFTs related functions ######### 
 
     //get all nfts, not just the ids
     async getAllNfts() {
+        let clientResponse = {};
         try {
             const nfts = await this.getAllNftsIds();
             let nftsArray = [];
@@ -78,78 +118,108 @@ class RedisClient {
                 let nftObj = await this.client.get(nft);
                 nftsArray.push(JSON.parse(nftObj));
             }
-            return nftsArray;
+            clientResponse['status'] = 'success'
+            clientResponse['message'] = 'NFTs retrieved successfully';
+            clientResponse['data'] = nftsArray;
+            return clientResponse;
         } catch (err) {
-            console.error(err);
-            return [];
+            clientResponse['status'] = 'error'
+            clientResponse['message'] = 'Failed to retrieve NFTs';
+            clientResponse['data'] = [];
+            return clientResponse;
         }
     }
 
     //get all nfts ids
     async getAllNftsIds() { 
+        let clientResponse = {};
         try {
             const nfts = await this.client.keys('nfts:*');
-            return nfts;
+            clientResponse['status'] = 'success'
+            clientResponse['message'] = 'NFTs retrieved successfully';
+            clientResponse['data'] = nfts;
+            return clientResponse;
         } catch (err) {
-            console.error(err);
-            return [];
+            clientResponse['status'] = 'error'
+            clientResponse['message'] = 'Failed to retrieve NFTs';
+            clientResponse['data'] = [];
+            return clientResponse;
         }
     }
 
     //get nft by its id
     async getNftById(id) {
+        let clientResponse = {};
         try {
             let key = "nfts:" + id;
             let nft = await this.client.get(key);
-            return JSON.parse(nft);
+            nft = JSON.parse(nft);
+            clientResponse['status'] = 'success'
+            clientResponse['message'] = 'NFT retrieved successfully';
+            clientResponse['data'] = nft;
+            return clientResponse;
         } catch (err) {
-            console.error(err);
-            return {};
+            clientResponse['status'] = 'error'
+            clientResponse['message'] = 'Failed to retrieve NFT';
+            clientResponse['data'] = {};
+            return clientResponse;
         }
     }
 
     //get all nfts for a specific owner
     async getNftsByOwner(owner) {
+        let clientResponse = {};
         try {
             let key = "owners:" + owner;
             const nfts = await this.client.sMembers(key);
-            //console.log(`NFT addresses for wallet ${owner}: ${nfts}`);
-            return nfts;
+            clientResponse['status'] = 'success'
+            clientResponse['message'] = 'NFTs retrieved successfully';
+            clientResponse['data'] = nfts;
+            return clientResponse;
         } catch (err) {
-            console.error(err);
-            return [];
+            clientResponse['status'] = 'error'
+            clientResponse['message'] = 'Failed to retrieve NFTs';
+            clientResponse['data'] = [];
+            return clientResponse;
         }
     }
 
     //create nft
     async createNft(nft) {
+        let clientResponse = {};
         try {
             let key = "nfts:" + nft.tokenId;
             let value = JSON.stringify(nft);
             await this.client.set(key, value);
-            return true;
+            clientResponse['status'] = 'success'
+            clientResponse['message'] = 'NFT created successfully';
+            clientResponse['data'] = nft;
+            return clientResponse;
         } catch (err) {
-            console.error(err);
-            return false;
+            clientResponse['status'] = 'error'
+            clientResponse['message'] = 'Failed to create NFT';
+            clientResponse['data'] = {};
+            return clientResponse;
         }
     }
 
     //delete all is stored in the redis client
     async deleteAllNfts() {
+        let clientResponse = {};
         try {
             const nfts = await this.getAllNftsIds();
             for (const nft of nfts) {
                 await this.client.del(nft);
             }
-            //console.log(`Deleted all nfts`);
-            return true;
+            clientResponse['status'] = 'success';
+            clientResponse['message'] = 'All NFTs deleted';
+            return clientResponse;
         } catch (err) {
-            console.error(err);
-            return false;
+            clientResponse['status'] = 'error';
+            clientResponse['message'] = 'Failed to delete all NFTs';
+            return clientResponse;
         }
-    }
-
-    
+    }   
 }
 
 module.exports = RedisClient;
