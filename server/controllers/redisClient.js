@@ -32,7 +32,7 @@ class RedisClient {
     async getAllOwners() {
         try {
             const owners = await this.client.keys('owners:*');
-            console.log(`Owners: ${owners}`);
+            //console.log(`Owners: ${owners}`);
             return owners;
         } catch (err) {
             console.error(err);
