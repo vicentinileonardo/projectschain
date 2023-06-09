@@ -7,6 +7,7 @@ contract DesignerNFT is BaseNFT {
     uint256 public tokenCounter;
     
     mapping(string => uint256) private tokenURIToTokenId;
+    mapping(uint256 => uint256) private tokenIdToPrice;
 
     constructor () ERC721 ("DesignerNFT", "DNFT"){
         tokenCounter = 0;
@@ -25,5 +26,9 @@ contract DesignerNFT is BaseNFT {
 
         return newItemId;
     }
-}
 
+    function getTokenPrice(uint256 tokenId) public view returns (uint256) {
+        return tokenIdToPrice[tokenId];
+    }
+
+}
