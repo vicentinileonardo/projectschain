@@ -1,3 +1,4 @@
+const { error } = require('console');
 const RedisClient = require('../controllers/redisClient');
 
 //Exposing a key-value table of owners and respective NFTs
@@ -6,61 +7,162 @@ module.exports = (app, redisClient) => {
     const router = require('express').Router();
 
     router.get('/nfts', async (req, res) => {
-        if(req.query.id == "true") {
-            const nfts = await redisClient.getAllNftsIds();
-            
+        let clientResponse;
+        if(req.query.fields && req.query.fields === 'id') {
+            clientResponse = await redisClient.getAllNftsIds(); //more efficient
+        } else {
+            clientResponse = await redisClient.getAllNfts();
+        }
+        
+        if (clientResponse.status === 'error') {
+            let response = {};
+            response['status'] = 'error';
+            response['message'] = clientResponse.message;
+            res.status(500).send(response);
+            return;
+        }
+
+        let nfts = clientResponse.data;
+        if(req.query.fields && req.query.fields === 'id') {
             //trimming the prefix 'nfts:' from the keys
             for (let i = 0; i < nfts.length; i++) {
                 nfts[i] = nfts[i].substring(5);
             }
-            res.json({ nfts });
-        } else {
-            const nfts = await redisClient.getAllNfts();
-            res.json({ nfts });
         }
+        let data = {nfts: nfts};
+
+        let response = {}
+        response['status'] = 'success';
+        response['message'] = clientResponse.message;
+        response['data'] = data;
+
+        res.status(200).send(response);
+        return;
+        
     });
 
-    router.get('/nfts/:nftId', async (req, res) => {
-        let nftId = req.params.nftId;
-        if (!nftId) {
-            res.status(400).json({ error: 'Missing required parameter: nft' });
+    router.get('/nfts/:tokenId', async (req, res) => {
+        let tokenId = req.params.tokenId;
+        if (!tokenId) {
+            let response = {};
+            response['status'] = 'error';
+            response['message'] = 'Missing required parameter: tokenId';
+            res.status(400).send(response);
             return;
         }
-        const nft = await redisClient.getNftById(nftId);
-        res.json({ nft });
+        const clientResponse = await redisClient.getNftById(tokenId);
+        if (clientResponse.status === 'error') {
+            let response = {};
+            response['status'] = 'error';
+            response['message'] = clientResponse.message;
+            if (clientResponse.message === 'NFT not found') { //handle status code 404
+                res.status(404).send(response);
+                return;
+            }
+            res.status(500).send(response);
+            return;
+        }
+
+        let nft = clientResponse.data;
+        let data = { nft: nft };
+
+        let response = {};
+        response['status'] = 'success';
+        response['message'] = clientResponse.message;
+        response['data'] = data;
+
+        res.status(200).send(response);
+        return;
     });
 
     router.post('/nfts', async (req, res) => {
-        let nft = req.body
-        if (!nft) {
-            res.status(400).json({ error: 'Missing required parameter: nft' });
+        let nft_body = req.body
+        if (!nft_body || Object.keys(nft_body).length === 0) {
+            let response = validationErrorResponse('nft_body');
+            res.status(400).send(response);
             return;
         }
-        //TODO: add other checks on the NFT body
-        if (!nft.tokenId) {
-            res.status(400).json({ error: 'Missing required parameter in NFT: tokenId' });
+        
+        //validate nft_body, with specific error messages
+        if (!nft_body.tokenId) {
+            console.log('Missing required parameter: tokenId');
+            let response = validationErrorResponse('tokenId');
+            res.status(400).send(response);
+            return;
+        }
+        if (!nft_body.name) {
+            let response = validationErrorResponse('name');
+            res.status(400).send(response);
+            return;
+        }
+        if (!nft_body.project) {
+            let response = validationErrorResponse('project');
+            res.status(400).send(response);
+            return;
+        }
+        if (!nft_body.owner) {
+            let response = validationErrorResponse('owner');
+            res.status(400).send(response);
             return;
         }
 
-        nft = {
-            tokenId: nft.tokenId,
-            owner: nft.owner,
-            name: nft.name,
-            components: nft.components,
-            project_url: nft.project_url,
-            image_url: nft.image_url,
+        //TODO: validate components in some way
+        //TODO: validate IPFS link in some way
+        
+        let nft = {
+            tokenId: nft_body.tokenId,
+            name: nft_body.name,
+            description: nft_body.description,
+            image: nft_body.image,
+            project: nft_body.project,
+            components: nft_body.components,
+            owner: nft_body.owner   
         }
 
-        const response = await redisClient.createNft(nft);
-        res.json({ response });
+        const clientResponse = await redisClient.createNft(nft);
+        if (clientResponse.status === 'error') {
+            let response = {};
+            response['status'] = 'error';
+            response['message'] = clientResponse.message;
+            res.status(500).send(response);
+            return;
+        }
+
+        let data = { nft: nft };
+
+        let response = {};
+        response['status'] = 'success';
+        response['message'] = clientResponse.message;
+        response['data'] = data;
+
+        res.status(201).send(response);
+        return;
     });
 
     router.delete('/nfts', async (req, res) => {
-        const response = await redisClient.deleteAllNfts();
-        if (response) {
-            res.json({ message: 'All NFTs deleted' });
+        const clientResponse = await redisClient.deleteAllNfts();
+        if (clientResponse.status === 'error') {
+            let response = {};
+            response['status'] = 'error';
+            response['message'] = clientResponse.message;
+            res.status(500).send(response);
+            return;
         }
+
+        let response = {};
+        response['status'] = 'success';
+        response['message'] = clientResponse.message;
+
+        res.status(200).send(response);
+        return;
     });
 
     app.use("/api/v1", router);
+}
+
+function validationErrorResponse(parameter) {
+    let response = {};
+    response['status'] = 'error';
+    response['message'] =  'Missing required parameter: ' + parameter;
+    return response;
 }
