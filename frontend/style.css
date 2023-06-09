@@ -12,12 +12,21 @@ a {
     text-decoration: none;
 }
 
+.my2 {
+    margin: 2em 0;
+}
+
+.centered {
+    margin-left: auto;
+    margin-right: auto;
+}
+
 .bg-primary {
     background-color: var(--primary);
     color: white;
 }
 
 .bg-danger {
-    background-color: red;
+    background-color: #e52a2a;
     color: white;
 }

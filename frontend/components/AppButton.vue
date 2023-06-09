@@ -1,8 +1,11 @@
 <script setup lang="ts">
+const props = defineProps<{
+  round?: boolean;
+}>()
 </script>
 
 <template>
-    <button class="button">
+    <button class="button" :class="{'rounded': props.round}">
         <slot>
 
         </slot>
@@ -21,5 +24,10 @@
 
 .button:hover {
     background-image: linear-gradient(rgb(0 0 0/20%) 0 0);
+}
+
+.rounded {
+  padding: 0.1em;
+  border-radius: 100%;
 }
 </style>
