@@ -98,6 +98,8 @@ app.post('/api/uploadIPFS', uploads.array("file"), async (req, res) => {
     const fileToBeUploaded = await checkIfExistsIpfs();
 
     if(fileToBeUploaded){
+        //POST NFT su server
+        //POST: http://localhost:3000/api/v1/nfts
         uploadToIpfs();
     }else{
         let response=`{

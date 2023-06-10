@@ -10,25 +10,33 @@ contract DesignerNFT is BaseNFT {
     mapping(uint256 => uint256) private tokenIdToPrice;
 
     constructor () ERC721 ("DesignerNFT", "DNFT"){
-        tokenCounter = 0;
+        tokenCounter = 1;
     }
 
-    function mintToken(string memory uri) public returns (uint256) {
-        require(tokenURIToTokenId[uri] == 0); //the token URI is new, so the NFT about the same project wasn't already minted
+    function mintToken(address sender, string memory uri, uint256 price) public returns (uint256) {
+        //require that the token URI hasn't been used before
+        require(tokenURIToTokenId[uri] == 0, "Token URI already used");
 
         uint256 newItemId = tokenCounter;
 
-        _mint(msg.sender, newItemId);
+        _mint(sender, newItemId);
         _setTokenURI(newItemId, uri);
 
         tokenCounter = tokenCounter + 1;
         tokenURIToTokenId[uri] = newItemId;
 
+        setTokenPrice(newItemId, price);
+
         return newItemId;
+
     }
 
     function getTokenPrice(uint256 tokenId) public view returns (uint256) {
         return tokenIdToPrice[tokenId];
     }
 
+    function setTokenPrice(uint256 tokenId, uint256 price) public {
+        require(_isApprovedOrOwner(msg.sender, tokenId), "Caller is not owner nor approved");
+        tokenIdToPrice[tokenId] = price;
+    }
 }

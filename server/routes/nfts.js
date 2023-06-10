@@ -106,6 +106,7 @@ module.exports = (app, redisClient) => {
             return;
         }
 
+        //TODO: validate against existing nfts
         //TODO: validate components in some way
         //TODO: validate IPFS link in some way
         
