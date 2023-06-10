@@ -5,7 +5,10 @@
     "frontend/**/*", 
     "frontend/**/*.vue", 
     // Need to include compiled contracts ABIs
-    "build/contracts/Counter.json"
+    "build/contracts/Counter.json",
+    "build/contracts/Master.json",
+    "build/contracts/DesignerNFT.json",
+
   ],
   "exclude": ["frontend/**/__tests__/*"],
   "compilerOptions": {

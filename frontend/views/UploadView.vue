@@ -3,6 +3,15 @@ import {ref} from "vue";
 import { Icon } from '@iconify/vue';
 import AppButton from "@/components/AppButton.vue";
 import LoadingSpinner from "@/components/LoadingSpinner.vue";
+import {onMounted} from "vue";
+import {useMasterContract} from "@/stores/master-contract.store";
+
+const masterContract = useMasterContract();
+
+onMounted(async () => {
+  await masterContract.setUp();
+});
+
 
 const fileToUpload = ref<File | null>(null);
 const uploadedPath = ref('');
@@ -41,6 +50,7 @@ async function uploadToIPFS() {
       }else{
           uploadedPath.value = res.url;
           uploaded.value = true;
+          masterContract.mintToken(res.url);
       }
       
   }

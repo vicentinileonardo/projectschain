@@ -31,6 +31,10 @@ contract DesignerNFT is BaseNFT {
 
     }
 
+    function getTokenCounter() public view returns (uint256) {
+        return tokenCounter;
+    }
+
     function getTokenPrice(uint256 tokenId) public view returns (uint256) {
         return tokenIdToPrice[tokenId];
     }
