@@ -8,7 +8,7 @@ module.exports = (app, redisClient) => {
 
     router.get('/nfts', async (req, res) => {
         let clientResponse;
-        if(req.query.fields && req.query.fields === 'id') {
+        if(req.query.fields && req.query.fields === 'tokenId') {
             clientResponse = await redisClient.getAllNftsIds(); //more efficient
         } else {
             clientResponse = await redisClient.getAllNfts();
@@ -23,12 +23,16 @@ module.exports = (app, redisClient) => {
         }
 
         let nfts = clientResponse.data;
-        if(req.query.fields && req.query.fields === 'id') {
+        if(req.query.fields && req.query.fields === 'tokenId') {
             //trimming the prefix 'nfts:' from the keys
             for (let i = 0; i < nfts.length; i++) {
                 nfts[i] = nfts[i].substring(5);
             }
         }
+
+        //handling fields query parameter in general, so returning only the requested fields
+        handleFields(nfts, req.query.fields);
+
         let data = {nfts: nfts};
 
         let response = {}
@@ -78,44 +82,55 @@ module.exports = (app, redisClient) => {
     router.post('/nfts', async (req, res) => {
         let nft_body = req.body
         if (!nft_body || Object.keys(nft_body).length === 0) {
-            let response = validationErrorResponse('nft_body');
+            let response = bodyValidationErrorResponse('nft_body');
             res.status(400).send(response);
             return;
         }
         
         //validate nft_body, with specific error messages
         if (!nft_body.tokenId) {
-            console.log('Missing required parameter: tokenId');
-            let response = validationErrorResponse('tokenId');
+            let response = bodyValidationErrorResponse('tokenId');
             res.status(400).send(response);
             return;
         }
         if (!nft_body.name) {
-            let response = validationErrorResponse('name');
+            let response = bodyValidationErrorResponse('name');
             res.status(400).send(response);
             return;
         }
         if (!nft_body.project) {
-            let response = validationErrorResponse('project');
+            let response = bodyValidationErrorResponse('project');
             res.status(400).send(response);
             return;
         }
         if (!nft_body.owner) {
-            let response = validationErrorResponse('owner');
+            let response = bodyValidationErrorResponse('owner');
+            res.status(400).send(response);
+            return;
+        }
+        if (!nft_body.hash) {
+            let response = bodyValidationErrorResponse('hash');
             res.status(400).send(response);
             return;
         }
 
-        //TODO: validate against existing nfts
-        //TODO: validate components in some way
-        //TODO: validate IPFS link in some way
-        
+        // validate against existing nfts
+        let validationResponse = await validateNft(redisClient, nft_body);
+        if (validationResponse.status === 'error') {
+            let response = {};
+            response['status'] = 'error';
+            response['message'] = validationResponse.message;
+            res.status(400).send(response);
+            return;
+        }
+
         let nft = {
             tokenId: nft_body.tokenId,
             name: nft_body.name,
             description: nft_body.description,
-            image: nft_body.image,
+            hash: nft_body.hash,
             project: nft_body.project,
+            image: nft_body.image,
             components: nft_body.components,
             owner: nft_body.owner   
         }
@@ -161,9 +176,85 @@ module.exports = (app, redisClient) => {
     app.use("/api/v1", router);
 }
 
-function validationErrorResponse(parameter) {
+function bodyValidationErrorResponse(parameter) {
     let response = {};
     response['status'] = 'error';
     response['message'] =  'Missing required parameter: ' + parameter;
+    return response;
+}
+
+function handleFields(nfts, query_fields){
+    if(query_fields && query_fields !== 'tokenId') {
+        let fields = query_fields.split(',');
+        for (let i = 0; i < nfts.length; i++) {
+            let nft = nfts[i];
+            let nftKeys = Object.keys(nft);
+            for (let j = 0; j < nftKeys.length; j++) {
+                let key = nftKeys[j];
+                if (!fields.includes(key)) {
+                    delete nft[key];
+                }
+            }
+        }
+    }
+}
+
+async function validateNft(redisClient, nft_body) {
+
+    //TODO: validate IPFS link in some way
+    
+    //retrieve all nfts to check if hash is already in use
+    let clientResponse = await redisClient.getAllNfts();
+    
+    if (clientResponse.status === 'error') {
+        let response = {};
+        response['status'] = 'error';
+        response['message'] = clientResponse.message;
+        return response;
+    }
+
+    //get all NFTs hashes
+    let nfts = clientResponse.data;
+
+    let hashes = [];
+    for (let i = 0; i < nfts.length; i++) {
+        hashes.push(nfts[i].hash);
+    }
+
+    //check if hash is already in use
+    let hash = nft_body.hash;
+    if(hashes.includes(hash)) {
+        let response = {};
+        response['status'] = 'error';
+        response['message'] = 'Hash already in use';
+        return response;
+    }
+
+    //check if components are valid (if the tokenIds exist), maybe to be changed to a different validation
+    if (nft_body.components) {
+        let components = nft_body.components;
+        let unknownComponents = [];
+        let tokenIds = [];
+        for (let i = 0; i < nfts.length; i++) {
+            tokenIds.push(nfts[i].tokenId);
+        }
+        for (let i = 0; i < components.length; i++) {
+            let component = components[i];
+            if (!tokenIds.includes(component)) {
+                unknownComponents.push(component);
+            }
+        }
+
+        if (unknownComponents.length > 0) {
+            let response = {};
+            response['status'] = 'error';
+            response['message'] = 'Unknown components: ' + unknownComponents + '. Please check the tokenIds.';
+            return response;
+        }
+    }
+    
+    let response = {}
+    response['status'] = 'success';
+    response['message'] = 'NFT validated successfully';
     return response;
 }

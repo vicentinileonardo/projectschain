@@ -10,8 +10,9 @@ Resources and Endpoints:
     "tokenId": "1", //incremental identifier
     "name": "NFT name",
     "description": "NFT description",
-    "image": link to IPFS,
+    "hash": "hash of the NFT",
     "project": another link to IPFS,
+    "image": link to IPFS,
     "components": [1,34,5] //list of tokenIds of the components,
     "owner": "wallet address"
 }
