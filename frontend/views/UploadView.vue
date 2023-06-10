@@ -33,10 +33,18 @@ async function uploadToIPFS() {
           body: formData,
       });
       res = await res.json();
-      uploadedPath.value = res.result[0].path;
+      res = JSON.parse(res)
+      //console.log(res);
+      if(res.status=="FAIL"){
+          alert(res.message);
+          onResetUpload();
+      }else{
+          uploadedPath.value = res.url;
+          uploaded.value = true;
+      }
+      
   }
   loading.value = false;
-  uploaded.value = true;
 }
 
 function onResetUpload() {
@@ -54,9 +62,9 @@ function onResetUpload() {
 
   <div class="my2" v-if="!loading && !uploaded">
     <label class="file-uploader bg-primary">
-      <input type="file" @change="onFileUpload"/>
+      <input type="file" accept=".json" @change="onFileUpload"/>
       <Icon icon="material-symbols:upload" />
-      <span>Select file</span>
+      <span>Select JSON</span>
     </label>
     <div v-if="fileToUpload" class="uploaded-file">
       <Icon icon="mdi:file" />
