@@ -17,6 +17,10 @@ contract Master {
         (bool success, bytes memory result) = DesignerNFTAddress.call(abi.encodeWithSignature("mintToken(address,string, uint256)", msg.sender, uri, price));
         require(success, "Failed to call mintToken on DesignerNFT");
         //address sender = abi.decode(result, (address));
+
+        //call PUT endpoint to add tokenID to the NFT metadata
+        //require(success, "Failed to update NFT metadata on server");
+
         return success;
     }
 
