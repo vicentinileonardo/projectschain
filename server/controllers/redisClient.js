@@ -156,11 +156,11 @@ class RedisClient {
         }
     }
 
-    //get nft by its id
-    async getNftById(id) {
+    //get nft by its hash
+    async getNftById(hash) {
         let clientResponse = {};
         try {
-            let key = "nfts:" + id;
+            let key = "nfts:" + hash;
             let nft = await this.client.get(key);
             nft = JSON.parse(nft);
             if(!nft) {
@@ -202,7 +202,7 @@ class RedisClient {
     async createNft(nft) {
         let clientResponse = {};
         try {
-            let key = "nfts:" + nft.tokenId;
+            let key = "nfts:" + nft.hash;
             let value = JSON.stringify(nft);
             await this.client.set(key, value);
             clientResponse['status'] = 'success'
@@ -242,6 +242,62 @@ class RedisClient {
             return clientResponse;
         }
     }   
+
+    //TODO
+    async deleteNftById(hash) {
+        let clientResponse = {};
+        try {
+            let key = "nfts:" + hash;
+            await this.client.del(key);
+            clientResponse['status'] = 'success';
+            clientResponse['message'] = 'NFT deleted';
+            return clientResponse;
+        } catch (err) {
+            clientResponse['status'] = 'error';
+            clientResponse['message'] = 'Failed to delete NFT';
+            return clientResponse;
+        }
+    }
+
+    // debug only
+    async getAllData() {
+        let clientResponse = {};
+        try {
+            const keys = await this.client.keys('*');
+            let data = [];
+            for (const key of keys) {
+                let value = await this.client.get(key);
+                data.push({key: key, value: value});
+            }
+            clientResponse['status'] = 'success';
+            clientResponse['message'] = 'All data retrieved';
+            clientResponse['data'] = data;
+            return clientResponse;
+        } catch (err) {
+            clientResponse['status'] = 'error';
+            clientResponse['message'] = 'Failed to retrieve all data';
+            clientResponse['data'] = [];
+            return clientResponse;
+        }
+    }
+
+    //delete all data stored in the redis client
+    async deleteAllData() {
+        let clientResponse = {};
+        try {
+            const keys = await this.client.keys('*');
+            for (const key of keys) {
+                await this.client.del(key);
+            }
+            clientResponse['status'] = 'success';
+            clientResponse['message'] = 'All data deleted';
+            return clientResponse;
+        } catch (err) {
+            clientResponse['status'] = 'error';
+            clientResponse['message'] = 'Failed to delete all data';
+            return clientResponse;
+        }
+    }
 }
 
 module.exports = RedisClient;

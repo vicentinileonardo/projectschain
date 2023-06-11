@@ -26,12 +26,14 @@ https://docs.google.com/document/d/1N4C0VYREDxl1NqOsBbevRbWa5_r74DFTg6tUAF2v8X4/
     5. quindi deadlock
 
     Possible solution
-    1. The user sends a POST request to the centralized server with the metadata for the NFT.
-    2. The server stores the metadata and generates a unique tokenURI for the NFT. The server returns the tokenURI to the frontend.
-    3. The frontend then interacts with Master smart contract to mint the NFT. It passes the tokenURI to the smart contract's minting function.
-    4. The smart contract's minting function creates a new NFT with a unique token ID and associates it with the provided tokenURI. The function then returns the token ID to the Master smart contract minting function.
-    5. As the final step of the minting function, the Master smart contract sends a PUT request to the centralized server to update the NFT metadata with the assigned token ID.
+    use hash as id on server
+
     
+    
+
+
+
+    Mixed approach:
     This approach combines the benefits of centralized metadata storage with the decentralization and security provided by a smart contract. The metadata is stored on a centralized server, which can be more easily updated and managed, while the NFT creation process is handled by a smart contract, which ensures that the token ID is assigned in a predictable and secure manner.
 
 
