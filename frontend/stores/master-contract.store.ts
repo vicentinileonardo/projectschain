@@ -19,7 +19,17 @@ export const useMasterContract = defineStore('master-contract', () => {
             contractAddress.value = (contractABI.networks as any)[lastDeploy].address;
         } */
 
-        contractAddress.value = "0x865E9DF4852370F99Bb6FC0355aBd2998e8aF0Af";
+        var response = await fetch('frontend/stores/contractAddresses.txt')
+        var data = await response.text()
+        const lines = data.split('\n');
+        const obj = {};
+    
+        lines.forEach(line => {
+            const [key, value] = line.split('=');
+            obj[key] = value;
+        });
+        //console.log(obj["COUNTER_CONTRACT_ADDRESS"]);
+        contractAddress.value = obj["MASTER_CONTRACT_ADDRESS"];
 
         if (contractAddress.value) {
             try {

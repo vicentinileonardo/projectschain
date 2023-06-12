@@ -13,12 +13,17 @@ export const useCounterContract = defineStore('counter-contract', () => {
     const counterContract = ref<any | null>(null);
 
     async function setUp() {
-        // Get contract address: read last network deployment
-        const lastDeploy = Object.keys(contractABI.networks).pop();
-        if (lastDeploy) {
-            contractAddress.value = (contractABI.networks as any)[lastDeploy].address;
-        }
-
+        var response = await fetch('frontend/stores/contractAddresses.txt')
+        var data = await response.text()
+        const lines = data.split('\n');
+        const obj = {};
+    
+        lines.forEach(line => {
+            const [key, value] = line.split('=');
+            obj[key] = value;
+        });
+        //console.log(obj["COUNTER_CONTRACT_ADDRESS"]);
+        contractAddress.value = obj["COUNTER_CONTRACT_ADDRESS"];
         if (contractAddress.value) {
             try {
                 // Get web3 instance from browser: connect to MetaMask
