@@ -1,7 +1,7 @@
 const fs = require('fs');
 const os = require('os');
 
-function setEnvValue(key, value) {
+function storeAddress(key, value) {
 
     const ADR_VARS = fs.readFileSync("./frontend/stores/contractAddresses.txt", "utf8").split(os.EOL);
 
@@ -16,5 +16,5 @@ function setEnvValue(key, value) {
 }
 
 module.exports = {
-    setEnvValue
+    storeAddress
   };
