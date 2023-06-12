@@ -15,9 +15,22 @@ onMounted(async () => {
 
 const fileToUpload = ref<File | null>(null);
 const uploadedPath = ref('');
+const priceInput = ref<HTMLInputElement | null>(null);
+var priceValue:number=-1;
 
 const uploaded = ref(false);
 const loading = ref(false);
+
+function setPrice() {
+  const price:any = priceInput.value?.value;
+  if (price == undefined) {
+    priceValue=-1;
+  }else{
+    priceValue=parseFloat(price);
+  }
+  console.log(priceValue);
+}
+
 
 function onFileUpload(e: Event) {
   const target = e.target as HTMLInputElement;
@@ -50,7 +63,7 @@ async function uploadToIPFS() {
       }else{
           uploadedPath.value = res.url;
           uploaded.value = true;
-          masterContract.mintToken(res.url);
+          masterContract.mintToken(res.url, priceValue);
       }
       
   }
@@ -83,6 +96,12 @@ function onResetUpload() {
         <Icon icon="material-symbols:close" />
       </AppButton>
     </div>
+    <br>
+    <div v-if="fileToUpload" style="text-align: center;" >
+      <label for="price">Price for buyers: </label>
+      <input type="number" id="price" size="5" ref="priceInput" @change="setPrice()">
+    </div>
+
   </div>
 
   <AppButton @click="uploadToIPFS()" v-if="fileToUpload && !loading && !uploaded" class="bg-primary centered">

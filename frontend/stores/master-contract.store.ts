@@ -41,9 +41,9 @@ export const useMasterContract = defineStore('master-contract', () => {
         }
     }
 
-    async function mintToken(uri: string) {
+    async function mintToken(uri: string, price:number) {
         // Use send for methods that require to pay
-        await masterContract.value.methods.mintToken(uri,0).send({ from: account.value });
+        await masterContract.value.methods.mintToken(uri,price).send({ from: account.value });
         
         // Use call for methods that do not require to pay
         const result = await masterContract.value.methods.getTokenCounter().call({from: account.value});
