@@ -28,83 +28,6 @@ class RedisClient {
         await this.client.disconnect();
     }
 
-    //######### Owners related functions #########
-
-    async getAllOwners() {
-        let clientResponse = {};
-        try {
-            const owners = await this.client.keys('owners:*');
-            clientResponse['status'] = 'success'
-            clientResponse['message'] = 'Owners retrieved successfully';
-            clientResponse['data'] = owners;
-            return clientResponse;
-        } catch (err) {
-            clientResponse['status'] = 'error'
-            clientResponse['message'] = 'Failed to retrieve owners';
-            clientResponse['data'] = [];
-            return clientResponse;
-        }
-    }
-
-    //get specific owner
-    async getOwner(owner) {
-        let clientResponse = {};
-        try {
-            const key = "owners:" + owner;
-            const nfts = await this.client.sMembers(key);
-            clientResponse['status'] = 'success'
-            clientResponse['message'] = 'Owner retrieved successfully';
-            clientResponse['data'] = nfts;
-            return clientResponse;
-        } catch (err) {
-            clientResponse['status'] = 'error'
-            clientResponse['message'] = 'Failed to retrieve owner';
-            clientResponse['data'] = [];
-            return clientResponse;
-        }
-    }
-    
-    //an owner is created only when an NFT is associated with it
-    async setNftToOwner(owner, nft) {
-        let clientResponse = {};
-        try {
-            let key = "owners:" + owner;
-            await this.client.sAdd(key, nft);
-
-            clientResponse['status'] = 'success';
-            clientResponse['message'] = `Added ${nft} NFT addresses to wallet ${owner}`;
-            return clientResponse;
-        } catch (err) {
-            clientResponse['status'] = 'error';
-            clientResponse['message'] = 'Failed to add NFT to wallet';
-            return clientResponse;
-        }
-    }
-
-    async deleteAllOwners() {
-        let clientResponse = {};
-        try {
-            const internalClientCall = await this.getAllOwners();
-            if (internalClientCall.status === 'error') {
-                clientResponse['status'] = 'error';
-                clientResponse['message'] = 'Failed to delete all NFTs';
-                return clientResponse;
-            }
-
-            const owners = internalClientCall.data;
-            for (const owner of owners) {
-                await this.client.del(owner);
-            }
-            clientResponse['status'] = 'success';
-            clientResponse['message'] = 'All NFTs deleted';
-            return clientResponse;
-        } catch (err) {
-            clientResponse['status'] = 'error';
-            clientResponse['message'] = 'Failed to delete all NFTs';
-            return clientResponse;
-        }
-    }
-    
     //######### NFTs related functions ######### 
 
     //get all nfts, not just the ids
@@ -115,7 +38,6 @@ class RedisClient {
             if (internalClientCall.status === 'error') {
                 clientResponse['status'] = 'error';
                 clientResponse['message'] = 'Failed to retrieve NFTs';
-                clientResponse['data'] = [];
                 return clientResponse;
             }
 
@@ -255,6 +177,83 @@ class RedisClient {
         } catch (err) {
             clientResponse['status'] = 'error';
             clientResponse['message'] = 'Failed to delete NFT';
+            return clientResponse;
+        }
+    }
+
+    //######### Owners related functions #########
+
+    async getAllOwners() {
+        let clientResponse = {};
+        try {
+            const owners = await this.client.keys('owners:*');
+            clientResponse['status'] = 'success'
+            clientResponse['message'] = 'Owners retrieved successfully';
+            clientResponse['data'] = owners;
+            return clientResponse;
+        } catch (err) {
+            clientResponse['status'] = 'error'
+            clientResponse['message'] = 'Failed to retrieve owners';
+            clientResponse['data'] = [];
+            return clientResponse;
+        }
+    }
+
+    //get specific owner
+    async getOwner(owner) {
+        let clientResponse = {};
+        try {
+            const key = "owners:" + owner;
+            const nfts = await this.client.sMembers(key);
+            clientResponse['status'] = 'success'
+            clientResponse['message'] = 'Owner retrieved successfully';
+            clientResponse['data'] = nfts;
+            return clientResponse;
+        } catch (err) {
+            clientResponse['status'] = 'error'
+            clientResponse['message'] = 'Failed to retrieve owner';
+            clientResponse['data'] = [];
+            return clientResponse;
+        }
+    }
+    
+    //an owner is created only when an NFT is associated with it
+    async setNftToOwner(owner, nft) {
+        let clientResponse = {};
+        try {
+            let key = "owners:" + owner;
+            await this.client.sAdd(key, nft);
+
+            clientResponse['status'] = 'success';
+            clientResponse['message'] = `Added ${nft} NFT addresses to wallet ${owner}`;
+            return clientResponse;
+        } catch (err) {
+            clientResponse['status'] = 'error';
+            clientResponse['message'] = 'Failed to add NFT to wallet';
+            return clientResponse;
+        }
+    }
+
+    async deleteAllOwners() {
+        let clientResponse = {};
+        try {
+            const internalClientCall = await this.getAllOwners();
+            if (internalClientCall.status === 'error') {
+                clientResponse['status'] = 'error';
+                clientResponse['message'] = 'Failed to delete all NFTs';
+                return clientResponse;
+            }
+
+            const owners = internalClientCall.data;
+            for (const owner of owners) {
+                await this.client.del(owner);
+            }
+            clientResponse['status'] = 'success';
+            clientResponse['message'] = 'All NFTs deleted';
+            return clientResponse;
+        } catch (err) {
+            clientResponse['status'] = 'error';
+            clientResponse['message'] = 'Failed to delete all NFTs';
             return clientResponse;
         }
     }

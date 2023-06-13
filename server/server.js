@@ -18,7 +18,12 @@ app.use(cors());
 
 //root route is /api
 app.get('/api/v1', (req, res) => {
-    res.json({ msg: 'API service working!' });
+
+    let response = {
+        "status": "success",
+        "message": "API service working!"
+    };
+    res.status(200).json(response);
 });
 
 const redisClient = createRedisClient();
@@ -32,6 +37,7 @@ require('./routes/nfts.js')(app, redisClient);
 Moralis.start({
     apiKey: process.env.MORALIS_KEY
 })
+
 const storage = multer.diskStorage({
     destination: function(req, file, callback){
         callback(null, __dirname + "/temp");
@@ -39,10 +45,10 @@ const storage = multer.diskStorage({
     filename: function(req, file, callback){
         callback(null, "upload.txt");
     }
-    
 });
+
 const uploads = multer({storage:storage});
-app.post('/api/uploadIPFS', uploads.array("file"), async (req, res) => {
+app.post('/api/uploadIPFS', uploads.array("file"), async (req, res) => { //TO BE CHANGED
     const fileUploads = [
         {
             path: "upload.txt",
@@ -86,13 +92,13 @@ app.post('/api/uploadIPFS', uploads.array("file"), async (req, res) => {
         })
 
         //console.log(resIpfs.result);
-        let response=`{
-            "status": "SUCCESS",
-            "url": "`+url+`"
-        }`;
+        let response= {
+            "status": "success",
+            "url": url
+        };
 
         console.log(response);
-        return res.json(response);
+        return res.status(200).json(response);
     }
 
     const fileToBeUploaded = await checkIfExistsIpfs();
@@ -102,13 +108,14 @@ app.post('/api/uploadIPFS', uploads.array("file"), async (req, res) => {
         //POST: http://localhost:3000/api/v1/nfts
         uploadToIpfs();
     }else{
-        let response=`{
-            "status": "FAIL",
+
+        let response= {
+            "status": "fail",
             "message": "The file is not original"
-        }`;
+        };
         
         console.log(response);
-        return res.json(response); 
+        return res.status(400).json(response); 
     }
     
 })
@@ -120,13 +127,6 @@ app.listen(port, () => {
 });
 
 
-/**
- * 
- * token id
- * indirizzo ipfs
- * etc
- * 
- */
 
 // Factory function to create a Redis client
 function createRedisClient() {
@@ -141,4 +141,3 @@ function createRedisClient() {
     return redisClient;
    
 }
-
