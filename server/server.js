@@ -113,6 +113,48 @@ app.post('/api/uploadIPFS', uploads.array("file"), async (req, res) => {
     
 })
 
+const uploadsProjects = multer({ dest: 'temp/' });
+app.post('/api/compareProjects', uploadsProjects.array('files'), async (req, res) => {
+    const fileData = req.files.map((file) => {
+      const jsonData = fs.readFileSync(file.path, 'utf8');
+      const data = JSON.parse(jsonData);
+      return data;
+    });
+
+    var subcomponentsCopied = [];
+    var subcomponentsUploaded = [];
+
+      
+    for(i in fileData[1]["model"]){
+        subcomponentsCopied.push(JSON.stringify(fileData[1]["model"][i][Object.keys(fileData[1].model[i])]));
+    }
+
+    for(i in fileData[0]["model"]){
+        subcomponentsUploaded.push(JSON.stringify(fileData[0]["model"][i][Object.keys(fileData[0].model[i])]));
+    }
+
+    var commonComponents = subcomponentsUploaded.filter(value => subcomponentsCopied.includes(value));
+    if(commonComponents.length == subcomponentsCopied.length){
+        let response=`{
+            "status": "FAIL",
+            "message": "The file is NOT original"
+        }`;
+        
+        console.log(response);
+        return res.json(response); 
+    }else{
+        let response=`{
+            "status": "SUCCESS",
+            "message": "The file IS original"
+        }`;
+
+        return res.json(response); 
+    }
+
+    
+  });
+  
+
 
 // start the server
 app.listen(port, () => {

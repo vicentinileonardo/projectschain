@@ -23,6 +23,11 @@ const router = createRouter({
       name: 'test',
       component: () => import('../views/TestCounterView.vue')
     },
+    {
+      path: '/cad',
+      name: 'cad',
+      component: () => import('../views/CompareCad.vue')
+    },
   ]
 })
 
