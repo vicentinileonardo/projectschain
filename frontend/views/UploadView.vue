@@ -28,7 +28,6 @@ function setPrice() {
   }else{
     priceValue=parseFloat(price);
   }
-  console.log(priceValue);
 }
 
 

@@ -41,8 +41,8 @@ const storage = multer.diskStorage({
     }
     
 });
-const uploads = multer({storage:storage});
-app.post('/api/uploadIPFS', uploads.array("file"), async (req, res) => {
+const uploadForIPFS = multer({storage:storage});
+app.post('/api/uploadIPFS', uploadForIPFS.array("file"), async (req, res) => {
     const fileUploads = [
         {
             path: "upload.txt",
@@ -51,10 +51,13 @@ app.post('/api/uploadIPFS', uploads.array("file"), async (req, res) => {
     ]
 
     const data = fs.readFileSync('./server/temp/upload.txt');
+
+    //Predicts ipfs address in order to check conflict
     const hash = await Hash.of(data);
     const url = "https://ipfs.io/ipfs/" + hash;
     //console.log(hash) 
 
+    //checks if the same file was already uploaded on IPFS, a 5sec timeout is set for this operation
     async function checkIfExistsIpfs(){ 
         
         const promiseTimeout = new Promise((resolve, reject) => {
@@ -92,7 +95,7 @@ app.post('/api/uploadIPFS', uploads.array("file"), async (req, res) => {
         }`;
 
         console.log(response);
-        return res.json(response);
+        res.json(response);
     }
 
     const fileToBeUploaded = await checkIfExistsIpfs();
@@ -108,27 +111,32 @@ app.post('/api/uploadIPFS', uploads.array("file"), async (req, res) => {
         }`;
         
         console.log(response);
-        return res.json(response); 
+        res.json(response); 
     }
-    
+    //remove temp files
+    fs.unlinkSync("./server/temp/upload.txt");
+
 })
 
-const uploadsProjects = multer({ dest: './temp/' });
-app.post('/api/compareProjects', uploadsProjects.array('files'), async (req, res) => {
+const uploadFindSubcomponents = multer({ dest: './temp/' });
+app.post('/api/compareProjects', uploadFindSubcomponents.array('files'), async (req, res) => {
+
+    //Iterate through the json and store their content
     const fileData = req.files.map((file) => {
       const jsonData = fs.readFileSync(file.path, 'utf8');
       const data = JSON.parse(jsonData);
       return data;
     });
 
+    //remove temp files
     req.files.forEach((file) => {
         fs.unlinkSync(file.path);
     });
     
+    //store single components (lines) of a both the projects
     var subcomponentsCopied = [];
     var subcomponentsUploaded = [];
 
-      
     for(i in fileData[1]["model"]){
         subcomponentsCopied.push(JSON.stringify(fileData[1]["model"][i][Object.keys(fileData[1].model[i])]));
     }
@@ -137,11 +145,12 @@ app.post('/api/compareProjects', uploadsProjects.array('files'), async (req, res
         subcomponentsUploaded.push(JSON.stringify(fileData[0]["model"][i][Object.keys(fileData[0].model[i])]));
     }
 
+    //perform intersection between two projects, in order to understand if one is the subset of the other one
     var commonComponents = subcomponentsUploaded.filter(value => subcomponentsCopied.includes(value));
     if(commonComponents.length == subcomponentsCopied.length){
         let response=`{
             "status": "FAIL",
-            "message": "The file is NOT original"
+            "message": "The file IS NOT original"
         }`;
         
         console.log(response);
