@@ -113,7 +113,7 @@ app.post('/api/uploadIPFS', uploads.array("file"), async (req, res) => {
     
 })
 
-const uploadsProjects = multer({ dest: 'temp/' });
+const uploadsProjects = multer({ dest: './temp/' });
 app.post('/api/compareProjects', uploadsProjects.array('files'), async (req, res) => {
     const fileData = req.files.map((file) => {
       const jsonData = fs.readFileSync(file.path, 'utf8');
@@ -121,6 +121,10 @@ app.post('/api/compareProjects', uploadsProjects.array('files'), async (req, res
       return data;
     });
 
+    req.files.forEach((file) => {
+        fs.unlinkSync(file.path);
+    });
+    
     var subcomponentsCopied = [];
     var subcomponentsUploaded = [];
 
@@ -150,8 +154,6 @@ app.post('/api/compareProjects', uploadsProjects.array('files'), async (req, res
 
         return res.json(response); 
     }
-
-    
   });
   
 
