@@ -29,14 +29,15 @@ app.get('/api/v1', (req, res) => {
 const redisClient = createRedisClient();
 redisClient.connect();
 
-//routes
-require('./routes/owners.js')(app, redisClient);
-require('./routes/nfts.js')(app, redisClient);
-
 // Moralis gateway
 Moralis.start({
     apiKey: process.env.MORALIS_KEY
 })
+
+//routes
+require('./routes/owners.js')(app, redisClient);
+require('./routes/nfts.js')(app, redisClient, Moralis);
+
 
 const storage = multer.diskStorage({
     destination: function(req, file, callback){

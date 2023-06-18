@@ -1,14 +1,19 @@
 const { error } = require('console');
 const RedisClient = require('../controllers/redisClient');
+const fetch = require('node-fetch');
+const Hash = require('ipfs-only-hash');
+const Moralis = require('moralis').default;
+const fs = require('fs').promises;
+const util = require('util');
 
 //Exposing a key-value table of owners and respective NFTs
-module.exports = (app, redisClient) => {
+module.exports = (app, redisClient, Moralis) => {
 
     const router = require('express').Router();
 
     router.get('/nfts', async (req, res) => {
         let clientResponse;
-        if(req.query.fields && req.query.fields === 'hash') {
+        if(req.query.fields && req.query.fields === 'tokenId') {
             clientResponse = await redisClient.getAllNftsIds(); //more efficient
         } else {
             clientResponse = await redisClient.getAllNfts();
@@ -24,7 +29,7 @@ module.exports = (app, redisClient) => {
 
         let nfts = clientResponse.data;
 
-        if(req.query.fields && req.query.fields === 'hash') {
+        if(req.query.fields && req.query.fields === 'tokenId') {
             //trimming the prefix 'nfts:' from the keys
             for (let i = 0; i < nfts.length; i++) {
                 nfts[i] = {hash: nfts[i].substring(5)};
@@ -46,16 +51,16 @@ module.exports = (app, redisClient) => {
         
     });
 
-    router.get('/nfts/:hash', async (req, res) => {
-        let hash = req.params.hash;
-        if (!hash) {
+    router.get('/nfts/:tokenId', async (req, res) => {
+        let tokenId = req.params.tokenId;
+        if (!tokenId) {
             let response = {};
             response['status'] = 'error';
-            response['message'] = 'Missing required parameter: hash';
+            response['message'] = 'Missing required parameter: tokenId';
             res.status(400).send(response);
             return;
         }
-        const clientResponse = await redisClient.getNftById(hash);
+        const clientResponse = await redisClient.getNftById(tokenId);
         if (clientResponse.status === 'error') {
             let response = {};
             response['status'] = 'error';
@@ -89,23 +94,28 @@ module.exports = (app, redisClient) => {
         }
         
         //validate nft_body, with specific error messages
-        if (!nft_body.hash) {
-            let response = bodyValidationErrorResponse('hash');
-            res.status(400).send(response);
-            return;
-        }
         if (!nft_body.name) {
             let response = bodyValidationErrorResponse('name');
             res.status(400).send(response);
             return;
         }
-        if (!nft_body.project) {
-            let response = bodyValidationErrorResponse('project');
+        if (!nft_body.price) {
+            let response = bodyValidationErrorResponse('price');
+            res.status(400).send(response);
+            return;
+        }
+        if (!nft_body.royalties) {
+            let response = bodyValidationErrorResponse('royalties');
             res.status(400).send(response);
             return;
         }
         if (!nft_body.owner) {
             let response = bodyValidationErrorResponse('owner');
+            res.status(400).send(response);
+            return;
+        }
+        if (!nft_body.projectJSON) {
+            let response = bodyValidationErrorResponse('projectJSON');
             res.status(400).send(response);
             return;
         }
@@ -120,6 +130,104 @@ module.exports = (app, redisClient) => {
             return;
         }
 
+        //create hash using the same hash function of IPFS
+        let projectJSON = JSON.stringify(nft_body.projectJSON);
+        console.log(projectJSON);
+
+        // Create a Buffer from the projectJSON string
+        const projectJSONBuffer = Buffer.from(projectJSON);
+        console.log("projectJSONBuffer: ", projectJSONBuffer);
+
+        // Prepare the content for hashing
+        const contentForHashing = [
+            {
+                path: "project.json",
+                content: projectJSONBuffer
+            }
+        ];
+
+        // Create a CarReader from the content
+        const { CarReader } = require('@ipld/car');
+        const reader = await CarReader.fromIterable(contentForHashing);
+
+        // Get the root CID (the hash we want to predict)
+        const [rootCid] = await reader.getRoots();
+        const hash = rootCid.toString();
+        console.log("hash: ", hash);
+
+        const abi = [
+            {
+                path: "project.json",
+                content: projectJSONBuffer
+            }
+        ];
+        
+        let resIpfs = await Moralis.EvmApi.ipfs.uploadFolder({ abi: abi });
+        console.log("resIpfs: ", resIpfs);
+
+
+        /*
+
+        const hash = await Hash.of(projectJSON);
+        console.log("hash: ", hash) 
+
+        const url = "https://ipfs.io/ipfs/" + hash;
+        console.log("url: ", url);
+        
+        //call to IPFS to check if hash already exists, the request should last 7 seconds max
+        try{
+            const ipfsResponse = await fetch(url, {method: 'HEAD', timeout: 7000});
+            //console.log("ipfsResponse: ", ipfsResponse);
+            if (ipfsResponse.status === 200) {
+                let response = {};
+                response['status'] = 'error';
+                response['message'] = 'NFT already exists';
+                res.status(400).send(response);
+                return;
+            }
+        } catch (error) {
+            //network error, hash does not exist
+        }
+
+        //call to master contract to mint NFT, passing hash, price, royalties, components, owner
+        //TODO!
+
+        //if successful, store save projectJSON to IPFS
+        const abi = [
+            {
+                path: "project.json",
+                content: {projectJSON}
+            }
+        ];
+        
+
+        let resIpfs = await Moralis.EvmApi.ipfs.uploadFolder({ abi:abi });
+        resIpfs = resIpfs.toJSON();
+        console.log("resIpfs: ", resIpfs);
+        
+        //check if IPFS upload was successful
+        //if(!resIpfs[0]['path']){
+        //    let response = {};
+        //    response['status'] = 'error';
+        //    response['message'] = 'IPFS upload failed';
+        //    res.status(500).send(response);
+        //    return;
+        //}
+
+        */
+        
+
+
+
+
+
+
+
+
+        
+    
+        //if successful, store NFT in Redis
+        /*
         let nft = {
             hash: nft_body.hash,
             name: nft_body.name,
@@ -139,14 +247,16 @@ module.exports = (app, redisClient) => {
             return;
         }
 
-        let data = { nft: nft };
+        let data = { nft: clientResponse.data };
 
         let response = {};
         response['status'] = 'success';
         response['message'] = clientResponse.message;
         response['data'] = data;
+        */
+        let resp = {};
 
-        res.status(201).send(response);
+        res.status(201).send(resp);
         return;
     });
 
@@ -311,7 +421,8 @@ async function validateNft(redisClient, nft_body) {
         return response;
     }
 
-    //check if components are valid (if the hashes exist), maybe to be changed to a different validation
+    //check if components are valid (if the tokenId exist), maybe to be changed to a different validation
+    /*
     if (nft_body.components) {
         let components = nft_body.components;
         let unknownComponents = [];
@@ -333,6 +444,8 @@ async function validateNft(redisClient, nft_body) {
             return response;
         }
     }
+    */
+
     
     let response = {}
     response['status'] = 'success';

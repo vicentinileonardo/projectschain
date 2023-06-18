@@ -58,6 +58,13 @@ https://docs.google.com/document/d/1N4C0VYREDxl1NqOsBbevRbWa5_r74DFTg6tUAF2v8X4/
     - nella mint token di designerNFT, controllare che il tokenURI sia gia' presente sul server
     - aggiungere test
 
++ Report
+    - spiegare l'ownership ha senso solo per cose hanno valore "intellettuale". non avrebbe sensore fare nft per un progetto con all'interno una semplice sfera o cubo.
+
+    - why storing nft metadata on our server and not entirely on IPFS?: 
+        * easier to manage a dapp with a catalog of nft
+        * easier to grant to manufacter the access to the nft metadata via auth
+
 
 Flow per ora:
 1. [FRONTEND]: POST su server con JSON, il json contiene tutti i dati del NFT e le geometrie. 

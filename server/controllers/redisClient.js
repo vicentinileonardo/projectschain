@@ -78,11 +78,11 @@ class RedisClient {
         }
     }
 
-    //get nft by its hash
-    async getNftById(hash) {
+    //get nft by its tokenId
+    async getNftById(tokenId) {
         let clientResponse = {};
         try {
-            let key = "nfts:" + hash;
+            let key = "nfts:" + tokenId;
             let nft = await this.client.get(key);
             nft = JSON.parse(nft);
             if(!nft) {
@@ -124,7 +124,7 @@ class RedisClient {
     async createNft(nft) {
         let clientResponse = {};
         try {
-            let key = "nfts:" + nft.hash;
+            let key = "nfts:" + nft.tokenId;
             let value = JSON.stringify(nft);
             await this.client.set(key, value);
             clientResponse['status'] = 'success'
@@ -165,11 +165,10 @@ class RedisClient {
         }
     }   
 
-    //TODO
-    async deleteNftById(hash) {
+    async deleteNftById(tokenId) {
         let clientResponse = {};
         try {
-            let key = "nfts:" + hash;
+            let key = "nfts:" + tokenId;
             await this.client.del(key);
             clientResponse['status'] = 'success';
             clientResponse['message'] = 'NFT deleted';
