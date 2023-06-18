@@ -36,4 +36,10 @@ https://docs.google.com/document/d/1N4C0VYREDxl1NqOsBbevRbWa5_r74DFTg6tUAF2v8X4/
     Mixed approach:
     This approach combines the benefits of centralized metadata storage with the decentralization and security provided by a smart contract. The metadata is stored on a centralized server, which can be more easily updated and managed, while the NFT creation process is handled by a smart contract, which ensures that the token ID is assigned in a predictable and secure manner.
 
-
++ Frontend
+    - Creare store per interagire con Metamask: ottenere address utente (andrà passato con tutte le chiamate al server -> auth)
+    - Creare store per API del server per interagire col backend (che interagisce coi contratti) -> spostare logica dal frontend al backend
+    - Creare pagine:
+        - Catalogo
+        - Wallet (vedere i miei progetti / quelli che ho comprato)
+        - Upload di progetti
