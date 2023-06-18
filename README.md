@@ -28,18 +28,45 @@ https://docs.google.com/document/d/1N4C0VYREDxl1NqOsBbevRbWa5_r74DFTg6tUAF2v8X4/
     Possible solution
     use hash as id on server
 
-    
-    
-
-
 
     Mixed approach:
     This approach combines the benefits of centralized metadata storage with the decentralization and security provided by a smart contract. The metadata is stored on a centralized server, which can be more easily updated and managed, while the NFT creation process is handled by a smart contract, which ensures that the token ID is assigned in a predictable and secure manner.
+
 
 + Frontend
     - Creare store per interagire con Metamask: ottenere address utente (andrà passato con tutte le chiamate al server -> auth)
     - Creare store per API del server per interagire col backend (che interagisce coi contratti) -> spostare logica dal frontend al backend
     - Creare pagine:
-        - Catalogo
+        - Catalogo (con possibilita' di acquisto)
         - Wallet (vedere i miei progetti / quelli che ho comprato)
         - Upload di progetti
+    - 
++ Backend
+    - Upload su IPFS gia' implementato (va messo alla fine del minting)
+    - Sistemare alcune API
+    - aggiungere logica di accesso con JWT o altro 
+    - POST su server, quando ho ottenuto succes, tokenID da dal master contarct, in questo modo posso assegnare come id sul server il tokenID
+
+
++ On-chain
+    - togliere eredarita' da baseNFT e lasciare solo designerNFT
+    - capire perche' chaiamata a mint token da master non funziona
+    - implemtare logica componenti
+        * si riceve array, si controlla che esistano tutti i token id
+        * impostare royalties
+    - logica access smart contract
+    - nella mint token di designerNFT, controllare che il tokenURI sia gia' presente sul server
+    - aggiungere test
+
+
+Flow per ora:
+1. [FRONTEND]: POST su server con JSON, il json contiene tutti i dati del NFT e le geometrie. 
+Assumption: questo JSON ha gia' un array to tokenId che rappresenta i componenti del NFT, se presenti. E' compito del software cad stabilre quali sono i componenti presenti
+2. [BACKEND]: Arriva una risorsa NFT "parziale", mancano tokenid, link a ipfs
+3. [BACKEND]: Genera hash del JSON geometrico
+4. [BACKEND]: Chiama mintToken su master contract, passando hash, price, royalties
+5. [BLOCKCHAIN]: Controlli vari, minta token, genera tokenID
+6. [BACKEND]: Upload su IPFS il JSON geometrico
+7. [BACKEND]: Salva su Redis 
+8. [BACKEND]: Ritorna risorsa completa al frontend
+

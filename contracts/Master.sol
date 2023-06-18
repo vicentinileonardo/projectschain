@@ -11,15 +11,12 @@ contract Master {
     }
 
     //from the address of the contract A, we can call the function mintToken
-    function mintToken(string memory uri, uint256 price) public returns (bool){
+    function mintToken(string memory uri, uint256 price) public returns (bool){ //aggiungere hash
         //TODO: check if the caller is authorized
         
         (bool success, bytes memory result) = DesignerNFTAddress.call(abi.encodeWithSignature("mintToken(address,string, uint256)", msg.sender, uri, price));
         require(success, "Failed to call mintToken on DesignerNFT");
         //address sender = abi.decode(result, (address));
-
-        //call PUT endpoint to add tokenID to the NFT metadata
-        //require(success, "Failed to update NFT metadata on server");
 
         return success;
     }

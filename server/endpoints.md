@@ -7,15 +7,18 @@ Resources and Endpoints:
 **Key on Redis**: "nft:{tokenId}"
 **Value on Redis**: NFT resource in JSON format
 {
-    "tokenId": "1", //incremental identifier
+    //"tokenId": "1", //incremental identifier
     "name": "NFT name",
     "description": "NFT description",
+    "price": 0.1,
     "hash": "hash of the NFT",
     "project": another link to IPFS,
     "image": link to IPFS,
     "components": [1,34,5] //list of tokenIds of the components,
     "owner": "wallet address"
 }
+
+
 
 GET /nfts
 GET /nfts/{id}

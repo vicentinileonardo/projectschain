@@ -6,24 +6,25 @@ import "./BaseNFT.sol";
 contract DesignerNFT is BaseNFT {
     uint256 public tokenCounter;
     
-    mapping(string => uint256) private tokenURIToTokenId;
     mapping(uint256 => uint256) private tokenIdToPrice;
+    mapping(string => uint256) private tokenIdtoHash; // change data type
 
     constructor () ERC721 ("DesignerNFT", "DNFT"){
         tokenCounter = 1;
     }
 
     function mintToken(address sender, string memory uri, uint256 price) public returns (uint256) {
-        //require that the token URI hasn't been used before
-        require(tokenURIToTokenId[uri] == 0, "Token URI already used");
+
+        //base_uri
 
         uint256 newItemId = tokenCounter;
 
         _mint(sender, newItemId);
+
+        //uri = base_uri + newItemId
         _setTokenURI(newItemId, uri);
 
         tokenCounter = tokenCounter + 1;
-        tokenURIToTokenId[uri] = newItemId;
 
         setTokenPrice(newItemId, price);
 
