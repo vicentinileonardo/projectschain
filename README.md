@@ -34,8 +34,8 @@ https://docs.google.com/document/d/1N4C0VYREDxl1NqOsBbevRbWa5_r74DFTg6tUAF2v8X4/
 
 
 + Frontend
-    - Creare store per interagire con Metamask: ottenere address utente (andrà passato con tutte le chiamate al server -> auth)
-    - Creare store per API del server per interagire col backend (che interagisce coi contratti) -> spostare logica dal frontend al backend
+    - [x] Creare store per interagire con Metamask: ottenere address utente (andrà passato con tutte le chiamate al server -> auth)
+    - [x] Creare store per API del server per interagire col backend (che interagisce coi contratti) -> spostare logica dal frontend al backend
     - Creare pagine:
         - Catalogo (con possibilita' di acquisto)
         - Wallet (vedere i miei progetti / quelli che ho comprato)
