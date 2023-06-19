@@ -14,6 +14,11 @@ const router = createRouter({
       component: () => import('../views/CatalogView.vue')
     },
     {
+      path: '/wallet',
+      name: 'wallet',
+      component: () => import('../views/WalletView.vue')
+    },
+    {
       path: '/upload',
       name: 'upload',
       component: () => import('../views/UploadView.vue')

@@ -16,6 +16,13 @@ import AppButton from '@/components/AppButton.vue';
             </AppButton>
         </RouterLink>
 
+        <RouterLink to="/wallet">
+            <AppButton class="bg-primary">
+                <Icon icon="ic:baseline-wallet" />
+                Manage wallet
+            </AppButton>
+        </RouterLink>
+
         <RouterLink to="/catalog">
             <AppButton class="bg-primary">
                 <Icon icon="material-symbols:explore" />
