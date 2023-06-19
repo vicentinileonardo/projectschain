@@ -55,6 +55,9 @@ const emits = defineEmits([
   border-radius: 5px;
   width: 200px;
   height: auto;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .card-title {

@@ -12,7 +12,7 @@ async function onBuyProject() {
         <p>🛒 Shop for projects</p>
     </header>
 
-    <div class="projects-card-row">
+    <div class="projects-card-row m2">
         <ProjectCard />
         <ProjectCard />
         <ProjectCard />

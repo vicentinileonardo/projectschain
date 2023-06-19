@@ -10,23 +10,27 @@ import ProjectCard from '@/components/ProjectCard.vue';
         <p>🔐 Manage your projects</p>
     </header>
 
-    <h3>Your projects</h3>
-    <RouterLink to="/upload">
-        <AppButton class="bg-primary">
-            <Icon icon="material-symbols:upload" />
-            Upload project
-        </AppButton>
-    </RouterLink>
-    <div class="projects-card-row">
-        <ProjectCard :hide-buy-button="true" />
-        <ProjectCard :hide-buy-button="true" />
+    <div class="m2">
+        <h3>Your projects</h3>
+        <RouterLink to="/upload">
+            <AppButton class="bg-primary">
+                <Icon icon="material-symbols:upload" />
+                Upload project
+            </AppButton>
+        </RouterLink>
+        <div class="projects-card-row my2">
+            <ProjectCard :hide-buy-button="true" />
+            <ProjectCard :hide-buy-button="true" />
+        </div>
     </div>
 
-    <h3>Purchased projects</h3>
-    <div class="projects-card-row">
-        <ProjectCard :hide-buy-button="true" />
-        <ProjectCard :hide-buy-button="true" />
-        <ProjectCard :hide-buy-button="true" />
+    <div class="m2">
+        <h3>Purchased projects</h3>
+        <div class="projects-card-row my2">
+            <ProjectCard :hide-buy-button="true" />
+            <ProjectCard :hide-buy-button="true" />
+            <ProjectCard :hide-buy-button="true" />
+        </div>
     </div>
 </template>
 

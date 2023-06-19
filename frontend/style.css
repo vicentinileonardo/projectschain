@@ -17,7 +17,11 @@ a {
 }
 
 .my2 {
-    margin: 2em 0;
+    margin: 2rem 0;
+}
+
+.m2 {
+    margin: 2rem;
 }
 
 .centered {
@@ -44,7 +48,6 @@ a {
 }
 
 .projects-card-row {
-    margin: 2rem 2rem;
     display: flex;
     gap: 2rem;
     flex-wrap: wrap;
