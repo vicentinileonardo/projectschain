@@ -5,11 +5,11 @@ import AppCard from './AppCard.vue';
 import AppButton from './AppButton.vue';
 import { URL } from 'url';
 
-/*
+
 const props = defineProps<{
-  project: NFT
+  project?: NFT
 }>();
-*/
+
 
 const emits = defineEmits([
   'buy'
@@ -38,6 +38,10 @@ const emits = defineEmits([
 </template>
 
 <style scoped>
+
+.card {
+  flex-basis: 15%;
+}
 
 .card-image {
   border-radius: 5px;
