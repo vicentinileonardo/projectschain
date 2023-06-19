@@ -34,3 +34,20 @@ a {
     background-color: #e52a2a;
     color: white;
 }
+
+.page-header {
+    margin: 2rem;
+}
+
+.page-header h2, p {
+    margin: 0.5rem;
+}
+
+.projects-card-row {
+    margin: 2rem 2rem;
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: start;
+}

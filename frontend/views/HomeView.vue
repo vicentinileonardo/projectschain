@@ -9,13 +9,6 @@ import AppButton from '@/components/AppButton.vue';
     <InfoHeader />
 
     <div class="buttons-row">
-        <RouterLink to="/upload">
-            <AppButton class="bg-primary">
-                <Icon icon="material-symbols:upload" />
-                Upload project
-            </AppButton>
-        </RouterLink>
-
         <RouterLink to="/wallet">
             <AppButton class="bg-primary">
                 <Icon icon="ic:baseline-wallet" />

@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import type { NFT } from '@/model/nft';
 import { Icon } from '@iconify/vue';
-import AppCard from './AppCard.vue';
 import AppButton from './AppButton.vue';
-import { URL } from 'url';
 
 
 const props = defineProps<{
   project?: NFT
+  hideBuyButton?: boolean;
 }>();
 
 
@@ -18,7 +17,7 @@ const emits = defineEmits([
 </script>
 
 <template>
-  <AppCard>
+  <div class="card">
     <div class="card-image-container">
       <img src="../assets/project1.jpg" class="card-image"/>
     </div>
@@ -29,18 +28,27 @@ const emits = defineEmits([
     </div>
 
     <div class="card-buttons">
-      <AppButton @click="emits('buy')" class="centered">
+      <AppButton @click="emits('buy')" class="centered" v-if="!props.hideBuyButton">
         <Icon icon="material-symbols:shopping-cart" />
         Buy
       </AppButton>
     </div>
-  </AppCard>
+  </div>
 </template>
 
 <style scoped>
 
 .card {
-  flex-basis: 15%;
+    width: fit-content;
+    padding: 0.5em 1.5em;
+    background-color: #fff;
+    border: #f3f3f3;
+    border-radius: 5px;
+    flex-basis: 15%;
+    -webkit-box-shadow: 5px 5px 10px 0px #7E7E7E;
+    -moz-box-shadow: 5px 5px 10px 0px #7E7E7E;
+    -o-box-shadow: 5px 5px 10px 0px #7E7E7E;
+    box-shadow: 5px 5px 10px 0px #7E7E7E;
 }
 
 .card-image {

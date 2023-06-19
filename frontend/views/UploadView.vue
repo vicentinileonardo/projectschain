@@ -54,7 +54,7 @@ function onResetUpload() {
 </script>
 
 <template>
-  <header>
+  <header class="page-header">
     <h2>Upload a project</h2>
     <p>🔒 Secure the intellectual property of your project on the blockchain.</p>
     <p>Upload your project file to add it to your wallet as an NFT.</p>
@@ -89,18 +89,6 @@ function onResetUpload() {
 </template>
 
 <style scoped>
-header {
-  margin: 1em;
-}
-
-header > h2 {
-  margin: 0;
-}
-
-header > p {
-  margin-top: 0.5em;
-}
-
 input[type="file"] {
   display: none;
 }

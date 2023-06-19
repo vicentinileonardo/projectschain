@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import CatalogCard from '@/components/CatalogCard.vue';
-
-
+import ProjectCard from '@/components/ProjectCard.vue';
 
 async function onBuyProject() {
 
@@ -9,31 +7,24 @@ async function onBuyProject() {
 </script>
 
 <template>
-    <h2>Projects catalog</h2>
-    <p>🛒 Shop for projects</p>
+    <header class="page-header">
+        <h2>Projects catalog</h2>
+        <p>🛒 Shop for projects</p>
+    </header>
 
-    <div class="projects">
-        <CatalogCard />
-        <CatalogCard />
-        <CatalogCard />
-        <CatalogCard />
-        <CatalogCard />
-        <CatalogCard />
-        <CatalogCard />
-        <CatalogCard />
-        <CatalogCard />
+    <div class="projects-card-row">
+        <ProjectCard />
+        <ProjectCard />
+        <ProjectCard />
+        <ProjectCard />
+        <ProjectCard />
+        <ProjectCard />
+        <ProjectCard />
+        <ProjectCard />
+        <ProjectCard />
     </div>
-    
-
 </template>
 
 <style scoped>
-.projects {
-    margin: 2rem 2rem;
-    display: flex;
-    gap: 2rem;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-}
+
 </style>
