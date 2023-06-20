@@ -37,7 +37,32 @@ onClickOutside(modalContent, () => {
 
   <dialog ref="modal">
     <div ref="modalContent" class="modal-content">
-      <h4>Project NFT info</h4>
+      <h3>Project NFT info</h3>
+
+      <div class="info-element">
+        <b>Project title:</b>
+        <p>{{ props.project?.name }}</p>
+      </div>
+
+      <div class="info-element">
+        <b>Project author:</b>
+        <p>{{ props.project?.owner }}</p>
+      </div>
+
+      <div class="info-element">
+        <b>Project description:</b>
+        <p>{{ props.project?.description }}</p>
+      </div>
+
+      <div class="info-element">
+        <b>Project price:</b>
+        <p>{{ props.project?.price }}ETH</p>
+      </div>
+
+      <div class="info-element">
+        <b>Project royalty price:</b>
+        <p>{{ props.project?.royaltyPrice }}ETH</p>
+      </div>
 
       <AppButton @click="onCloseModal" class="centered">
         Close
@@ -60,7 +85,7 @@ dialog {
   box-shadow: 5px 5px 10px 0px #333;
 }
 
-h4 {
+h3 {
   text-align: center;
   margin: 0.5rem;
 }
@@ -72,5 +97,13 @@ dialog::backdrop {
 
 .modal-content {
   padding: 0.5rem 1rem;
+}
+
+.info-element {
+  margin: 1rem 0;
+}
+
+.info-element b, p {
+  margin: 0
 }
 </style>

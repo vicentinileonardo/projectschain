@@ -2,10 +2,13 @@
 import ProjectCard from '@/components/ProjectCard.vue';
 import ProjectInfoModal from "@/components/ProjectInfoModal.vue";
 import {ref} from "vue";
+import {NFT} from "@/model/nft";
 
+const projectForInfo = ref<NFT | undefined>(undefined);
 const showInfo = ref(false);
 
-function onShowInfo() {
+function onShowInfo(project: NFT | undefined) {
+  projectForInfo.value = project;
   showInfo.value = true;
 }
 
@@ -24,7 +27,7 @@ async function onBuyProject() {
     <ProjectCard @info="onShowInfo" />
   </div>
 
-  <ProjectInfoModal v-model:show="showInfo" />
+  <ProjectInfoModal :project="projectForInfo" v-model:show="showInfo" />
 </template>
 
 <style scoped>

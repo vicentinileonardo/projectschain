@@ -27,5 +27,5 @@ export interface NFT {
     projectJSON: any,
 
     // IPFS link
-    ipfsLink: string,
+    ipfsLink?: string,
 }
