@@ -18,7 +18,7 @@ function onShowInfo(project: NFT | undefined) {
 <template>
   <header class="page-header">
     <h2>Projects wallet</h2>
-    <p>🔐 Manage your projects</p>
+    <p>🔐 Manage your projects. Browse the project you have uploaded and bought.</p>
   </header>
 
   <div class="m2">

@@ -96,8 +96,8 @@ const validSubmit = computed(() => {
 <template>
   <header class="page-header">
     <h2>Upload a project</h2>
-    <p>🔒 Secure the intellectual property of your project on the blockchain.</p>
-    <p>Upload your project file to add it to your wallet as an NFT.</p>
+    <p>🔒 Secure the intellectual property of your project on the blockchain:
+      upload your project file to add it to your wallet as an NFT.</p>
   </header>
 
   <div class="m2" v-if="!loading && !uploaded">

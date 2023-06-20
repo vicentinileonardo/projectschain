@@ -20,7 +20,7 @@ async function onBuyProject() {
 <template>
   <header class="page-header">
     <h2>Projects catalog</h2>
-    <p>🛒 Shop for projects</p>
+    <p>🛒 Shop for projects.</p>
   </header>
 
   <div class="projects-card-row m2">

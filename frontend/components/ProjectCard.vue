@@ -22,8 +22,8 @@ const emits = defineEmits(['buy', 'info']);
     </div>
 
     <div class="card-title">
-      <h4>Projects title</h4>
-      <p>Project's author</p>
+      <h4>{{ props.project?.name }}</h4>
+      <p v-if="!props.hideBuyButton">{{ props.project?.price }}ETH</p>
     </div>
 
     <div class="card-buttons">
@@ -47,7 +47,7 @@ const emits = defineEmits(['buy', 'info']);
     background-color: #fff;
     border: #f3f3f3;
     border-radius: 5px;
-    flex: 0 1 15%;
+    flex: 0 1 10%;
     -webkit-box-shadow: 5px 5px 10px 0px #7E7E7E;
     -moz-box-shadow: 5px 5px 10px 0px #7E7E7E;
     -o-box-shadow: 5px 5px 10px 0px #7E7E7E;
@@ -71,13 +71,16 @@ const emits = defineEmits(['buy', 'info']);
 
 .card-title h4, p {
   margin: 0;
-  width: 15vw;
+  width: 10vw;
 }
 
 .card-buttons {
   display: flex;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   gap: 0.5em;
 }
 </style>
