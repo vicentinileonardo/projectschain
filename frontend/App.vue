@@ -2,11 +2,13 @@
 import { RouterLink, RouterView } from 'vue-router';
 import AppNavbar from './components/AppNavbar.vue';
 import { useAccountStore } from './stores/account.store';
+import {useNFTsStore} from "@/stores/nfts.store";
 import { onMounted, ref } from 'vue';
 import { useToast } from "vue-toastification";
 import LoadingSpinner from './components/LoadingSpinner.vue';
 
 const accountStore = useAccountStore();
+const nftStore = useNFTsStore();
 const toast = useToast();
 
 const error = ref(false);
@@ -16,6 +18,7 @@ onMounted(async () => {
   loading.value = true;
   try {
     await accountStore.setUp();
+    await nftStore.setUp();
     toast.success("Connected to MetaMask wallet!");
   } catch (err) {
     console.error("Error in loading account address from MetaMask", err);

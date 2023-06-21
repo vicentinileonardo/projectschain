@@ -3,10 +3,10 @@ import {computed, ref} from "vue";
 import { Icon } from '@iconify/vue';
 import AppButton from "@/components/AppButton.vue";
 import LoadingSpinner from "@/components/LoadingSpinner.vue";
-import {NFT} from "@/model/nft";
-import {useAccountStore} from "@/stores/account.store";
+import type { NFT } from "@/model/nft";
+import {useNFTsStore} from "@/stores/nfts.store";
 
-const accountStore = useAccountStore();
+const nftStore = useNFTsStore();
 
 const fileToUpload = ref<File | null>(null);
 const uploadedPath = ref('');
@@ -45,6 +45,13 @@ function onDeleteFile() {
 async function onSubmit() {
   // TODO fix for upload to contract and backend
   loading.value = true;
+  try {
+    nftStore.mintNewProject(projectNFT.value);
+  } catch(err) {
+    console.error('Error in uploading project', err);
+  }
+
+  /*
   if(!fileToUpload.value){
       alert("No files selected");
   } else {
@@ -66,7 +73,8 @@ async function onSubmit() {
       }
       
   }
-  resetUpload();
+  */
+  // resetUpload();
   loading.value = false;
 }
 
