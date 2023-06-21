@@ -2,37 +2,27 @@
 pragma solidity ^0.8.19;
 
 import './ProjectNFT.sol';
+import './AccessSmartContract.sol';
 
 contract Master {
-  address public projectNFTAddress;
   ProjectNFT private projectNFT;
+  AccessSmartContract private accessContract;
 
-  constructor(address _contractAddress) {
-    projectNFTAddress = _contractAddress;
+  constructor(address projectNFTAddress, address accessContractAddress) {
     projectNFT = ProjectNFT(projectNFTAddress);
+    accessContract = AccessSmartContract(accessContractAddress);
   }
 
-  //from the address of the contract A, we can call the function mintToken
   function mintToken(
     uint256 price,
     uint256 royaltyPrice,
     string calldata projectHash,
     uint256[] calldata components
-  ) public returns (bool) {
-    //aggiungere hash
-    //TODO: check if the caller is authorized
+  ) public returns (uint256) {
+    //TODO: check if the caller is authorized?
 
-    projectNFT.mintToken(msg.sender, price, royaltyPrice, projectHash, components);
+    uint256 tokenId = projectNFT.mintToken(msg.sender, price, royaltyPrice, projectHash, components);
 
-    /*
-    (bool success, bytes memory result) = projectNFTAddress.call(
-      abi.encodeWithSignature('mintToken(address, uint256, uint256, string, uint256[])',
-       msg.sender, price, royaltyPrice, projectHash, components)
-    );
-    require(success, 'Failed to call mintToken on DesignerNFT');
-    //address sender = abi.decode(result, (address));
-    */
-
-    return true;
+    return tokenId;
   }
 }
