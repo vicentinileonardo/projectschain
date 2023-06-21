@@ -26,7 +26,6 @@ contract ProjectNFT is ERC721URIStorage {
 
   function mintToken(
     address sender,
-    string calldata uri,
     uint256 price,
     uint256 royaltyPrice,
     string calldata projectHash,
@@ -39,6 +38,8 @@ contract ProjectNFT is ERC721URIStorage {
     _mint(sender, newItemId);
 
     //uri = base_uri + newItemId
+    string memory baseUri = "localhost:3000/nfts/";
+    string memory uri = string.concat(baseUri, Strings.toString(newItemId));
     _setTokenURI(newItemId, uri);
 
     tokenCounter = tokenCounter + 1;
@@ -50,14 +51,15 @@ contract ProjectNFT is ERC721URIStorage {
     return newItemId;
   }
 
-  function getTokenPrice(uint256 tokenId) public view returns (uint256) {
-    return tokenIdToPrice[tokenId];
-  }
-
   function setTokenPrice(uint256 tokenId, uint256 price, uint256 royaltyPrice) public {
     require(_isApprovedOrOwner(msg.sender, tokenId), 'Caller is not owner nor approved');
     tokenIdToPrice[tokenId] = price;
     tokenIdToRoyaltyPrice[tokenId] = royaltyPrice;
+  }
+
+  function getTokenPrice(uint256 tokenId) public view returns (uint256) {
+    require(tokenId < tokenCounter);
+    return tokenIdToPrice[tokenId];
   }
 
   function setTokenHash(uint256 tokenId, string calldata hash) public {
@@ -73,4 +75,6 @@ contract ProjectNFT is ERC721URIStorage {
     }
     tokenIdToComponents[tokenId] = components;
   }
+
+
 }

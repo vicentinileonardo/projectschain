@@ -12,7 +12,6 @@ contract Master {
 
   //from the address of the contract A, we can call the function mintToken
   function mintToken(
-    string calldata uri,
     uint256 price,
     uint256 royaltyPrice,
     string calldata projectHash,
@@ -22,8 +21,8 @@ contract Master {
     //TODO: check if the caller is authorized
 
     (bool success, bytes memory result) = projectNFTAddress.call(
-      abi.encodeWithSignature('mintToken(address, string, uint256, uint256, string, uint256[])',
-       msg.sender, uri, price, royaltyPrice, projectHash, components)
+      abi.encodeWithSignature('mintToken(address, uint256, uint256, string, uint256[])',
+       msg.sender, price, royaltyPrice, projectHash, components)
     );
     require(success, 'Failed to call mintToken on DesignerNFT');
     //address sender = abi.decode(result, (address));
