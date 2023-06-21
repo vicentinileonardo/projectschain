@@ -7,9 +7,9 @@ import "../contracts/Master.sol";
 import "../contracts/ProjectNFT.sol";
 
 contract TestMaster {
-    function shouldMintToken() public {
-        Master master = Master(DeployedAddresses.Master());
+    function testShouldMintToken() public {
         ProjectNFT projectNFT = ProjectNFT(DeployedAddresses.ProjectNFT());
+        Master master = Master(DeployedAddresses.Master());
 
         string memory projectHash = "test";
         uint256 price = 100;
