@@ -37,11 +37,11 @@ https://docs.google.com/document/d/1N4C0VYREDxl1NqOsBbevRbWa5_r74DFTg6tUAF2v8X4/
     - [x] Creare store per interagire con Metamask: ottenere address utente (andrà passato con tutte le chiamate al server -> auth)
     - [x] Creare store per API del server per interagire col backend (che interagisce coi contratti) -> spostare logica dal frontend al backend
     - Creare pagine:
-        [x] Catalogo (con possibilita' di acquisto)
-        [x] Wallet (vedere i miei progetti / quelli che ho comprato)
-        [x] Upload di progetti
+        - [x] Catalogo (con possibilita' di acquisto)
+        - [x] Wallet (vedere i miei progetti / quelli che ho comprato)
+        - [x] Upload di progetti
     - [ ] implementare funzioni logica e collegare al backend
-    - [ ] creare modale per maggiori info progetto
+    - [x] creare modale per maggiori info progetto
 
 + Backend
     - Upload su IPFS gia' implementato (va messo alla fine del minting)
