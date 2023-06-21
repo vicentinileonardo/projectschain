@@ -69,11 +69,16 @@ https://docs.google.com/document/d/1N4C0VYREDxl1NqOsBbevRbWa5_r74DFTg6tUAF2v8X4/
 Flow per ora:
 1. [FRONTEND]: POST su server con JSON, il json contiene tutti i dati del NFT e le geometrie. 
 Assumption: questo JSON ha gia' un array to tokenId che rappresenta i componenti del NFT, se presenti. E' compito del software cad stabilre quali sono i componenti presenti
+
 2. [BACKEND]: Arriva una risorsa NFT "parziale", mancano tokenid, link a ipfs
 3. [BACKEND]: Genera hash del JSON geometrico
-4. [BACKEND]: Chiama mintToken su master contract, passando hash, price, royalties
+4. [BACKEND]: Finiti i controlli interni ritorna un response al frontend (via libera per mintare). I controlli in backend permettono di non usare la blockchain per un minting che non andrebbe a buon fine
+
+4. [FRONTEND]: Chiama mintToken su master contract, passando hash, price, royalties
+
 5. [BLOCKCHAIN]: Controlli vari, minta token, genera tokenID
+
 6. [BACKEND]: Upload su IPFS il JSON geometrico
-7. [BACKEND]: Salva su Redis 
+7. [BACKEND]: Salva su Redis, aggiungendo token id e link a ipfs
 8. [BACKEND]: Ritorna risorsa completa al frontend
 
