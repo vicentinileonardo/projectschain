@@ -44,15 +44,15 @@ contract ProjectNFT is ERC721URIStorage {
 
     tokenCounter = tokenCounter + 1;
 
-    setTokenHash(newItemId, projectHash);
-    setTokenPrice(newItemId, price, royaltyPrice);
-    setTokenComponents(newItemId, components);
+    setTokenHash(sender, newItemId, projectHash);
+    setTokenPrice(sender, newItemId, price, royaltyPrice);
+    setTokenComponents(sender, newItemId, components);
 
     return newItemId;
   }
 
-  function setTokenPrice(uint256 tokenId, uint256 price, uint256 royaltyPrice) public {
-    require(_isApprovedOrOwner(msg.sender, tokenId), 'Caller is not owner nor approved');
+  function setTokenPrice(address sender, uint256 tokenId, uint256 price, uint256 royaltyPrice) public {
+    require(_ownerOf(tokenId) == sender, 'Caller is not owner');
     tokenIdToPrice[tokenId] = price;
     tokenIdToRoyaltyPrice[tokenId] = royaltyPrice;
   }
@@ -62,13 +62,13 @@ contract ProjectNFT is ERC721URIStorage {
     return tokenIdToPrice[tokenId];
   }
 
-  function setTokenHash(uint256 tokenId, string calldata hash) public {
-    require(_isApprovedOrOwner(msg.sender, tokenId), 'Caller is not owner nor approved');
+  function setTokenHash(address sender, uint256 tokenId, string calldata hash) public {
+    require(_ownerOf(tokenId) == sender, 'Caller is not owner');
     tokenIdToHash[tokenId] = hash;
   }
 
-  function setTokenComponents(uint256 tokenId, uint256[] calldata components) public {
-    require(_isApprovedOrOwner(msg.sender, tokenId), 'Caller is not owner nor approved');
+  function setTokenComponents(address sender, uint256 tokenId, uint256[] calldata components) public {
+    require(_ownerOf(tokenId) == sender, 'Caller is not owner');
     // Check components exists
     for (uint i = 0; i < components.length; i++) {
         require(components[i] < tokenCounter);

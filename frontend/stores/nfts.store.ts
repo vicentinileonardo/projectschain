@@ -55,6 +55,8 @@ export const useNFTsStore = defineStore('nfts', () => {
       return;
     }
 
+    /*
+    // TODO make this call to backend for hash
     // Post new project
     const res = await fetch('/api/nfts', {
       method: "POST",
@@ -66,6 +68,11 @@ export const useNFTsStore = defineStore('nfts', () => {
     }
 
     const project = await res.json();
+    */
+
+    const project = nft;
+    project.hash = "test";
+    project.components = [];
 
     // Mint new project NFT on blockchain
     await masterContract.value.methods
