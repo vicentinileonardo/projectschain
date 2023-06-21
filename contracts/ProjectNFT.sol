@@ -31,30 +31,33 @@ contract ProjectNFT is ERC721URIStorage {
     string calldata projectHash,
     uint256[] calldata components
   ) public returns (uint256) {
-    //base_uri
-
+    // Check NFT parameters:
+    // Check components exists
+    for (uint i = 0; i < components.length; i++) {
+      require(components[i] < tokenCounter, 'Component is not a valid project');
+    }
+    
+    // Get NFT id
     uint256 newItemId = tokenCounter;
 
+    // Mint new token (openzeppelin)
     _mint(sender, newItemId);
 
-    //uri = base_uri + newItemId
+    // Build uri from base + tokenId
     string memory baseUri = "localhost:3000/nfts/";
     string memory uri = string.concat(baseUri, Strings.toString(newItemId));
     _setTokenURI(newItemId, uri);
 
+    // Set NFT parameters
+    tokenIdToPrice[newItemId] = price;
+    tokenIdToRoyaltyPrice[newItemId] = royaltyPrice;
+    tokenIdToHash[newItemId] = projectHash;
+    tokenIdToComponents[newItemId] = components;
+
+    // Increment token counter
     tokenCounter = tokenCounter + 1;
 
-    setTokenHash(sender, newItemId, projectHash);
-    setTokenPrice(sender, newItemId, price, royaltyPrice);
-    setTokenComponents(sender, newItemId, components);
-
     return newItemId;
-  }
-
-  function setTokenPrice(address sender, uint256 tokenId, uint256 price, uint256 royaltyPrice) public {
-    require(_ownerOf(tokenId) == sender, 'Caller is not owner');
-    tokenIdToPrice[tokenId] = price;
-    tokenIdToRoyaltyPrice[tokenId] = royaltyPrice;
   }
 
   function getTokenPrice(uint256 tokenId) public view returns (uint256) {
@@ -62,19 +65,26 @@ contract ProjectNFT is ERC721URIStorage {
     return tokenIdToPrice[tokenId];
   }
 
-  function setTokenHash(address sender, uint256 tokenId, string calldata hash) public {
-    require(_ownerOf(tokenId) == sender, 'Caller is not owner');
-    tokenIdToHash[tokenId] = hash;
+  function getTokenRoyaltyPrice(uint256 tokenId) public view returns (uint256) {
+    require(tokenId < tokenCounter);
+    return tokenIdToRoyaltyPrice[tokenId];
   }
 
-  function setTokenComponents(address sender, uint256 tokenId, uint256[] calldata components) public {
-    require(_ownerOf(tokenId) == sender, 'Caller is not owner');
-    // Check components exists
-    for (uint i = 0; i < components.length; i++) {
-        require(components[i] < tokenCounter);
+  function getTokenBuyPrice(uint256 tokenId) public view returns (uint256) {
+    require(tokenId < tokenCounter);
+
+    // Return token buy price plus royalties of all its components
+    uint256 total = 0;
+    total = total + tokenIdToPrice[tokenId];
+    for (uint256 i=0; i < tokenIdToComponents[tokenId].length; i++) {
+      total = total + tokenIdToPrice[tokenIdToComponents[tokenId][i]];
     }
-    tokenIdToComponents[tokenId] = components;
+    return total;
   }
 
+  function getTokenComponents(uint256 tokenId) public view returns (uint256[] memory) {
+    require(tokenId < tokenCounter);
+    return tokenIdToComponents[tokenId];
+  }
 
 }
