@@ -23,7 +23,8 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function"
+      "type": "function",
+      "constant": true
     }
   ],
   "metadata": "{\"compiler\":{\"version\":\"0.8.19+commit.7dd6d404\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_contractAAddress\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"DesignerNFTAddress\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/AccessSmartContract.sol\":\"AccessSmartContract\"},\"evmVersion\":\"paris\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"project:/contracts/AccessSmartContract.sol\":{\"keccak256\":\"0x94f15ffcd0fab433599c51160f37d3d25817efaa8a8e4f952174b9ddd5bf11ee\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://5c0d8f4a7698b958e057ba6205444f8e8e84e2b22719747494647d5c1dd53a7e\",\"dweb:/ipfs/Qmb5pPpNEtwhFFgmpiX5C6Rb2zdwpzmK1XFHA4MnTpkf2i\"]}},\"version\":1}",
@@ -1124,9 +1125,17 @@
     "name": "solc",
     "version": "0.8.19+commit.7dd6d404.Emscripten.clang"
   },
-  "networks": {},
+  "networks": {
+    "1687353182775": {
+      "events": {},
+      "links": {},
+      "address": "0x6E84Abb5b994b1a3F3f0415F100441E9b465c0fC",
+      "transactionHash": "0x3ef338aaf6297e7aeb93713b6de4bde44168c10b0428b90b11e462f61d8e0df0"
+    }
+  },
   "schemaVersion": "3.4.13",
-  "updatedAt": "2023-06-21T12:56:45.803Z",
+  "updatedAt": "2023-06-21T13:16:25.195Z",
+  "networkType": "ethereum",
   "devdoc": {
     "kind": "dev",
     "methods": {},
