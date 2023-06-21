@@ -26,8 +26,7 @@ app.get('/api/v1', (req, res) => {
     res.status(200).json(response);
 });
 
-const redisClient = createRedisClient();
-redisClient.connect();
+
 
 // Moralis gateway
 Moralis.start({
@@ -35,8 +34,20 @@ Moralis.start({
 })
 
 //routes
-require('./routes/owners.js')(app, redisClient);
-require('./routes/nfts.js')(app, redisClient, Moralis);
+
+//current strategy
+/*
+owner (key,value)
+key: owner:address
+value: set of nfts owned by the owner
+
+nft (json)
+*/
+
+
+
+require('./routes/owners.js')(app);
+require('./routes/nfts.js')(app,  Moralis);
 
 
 const storage = multer.diskStorage({

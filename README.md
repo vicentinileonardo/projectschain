@@ -59,7 +59,7 @@ https://docs.google.com/document/d/1N4C0VYREDxl1NqOsBbevRbWa5_r74DFTg6tUAF2v8X4/
     - aggiungere test
 
 + Report
-    - spiegare l'ownership ha senso solo per cose hanno valore "intellettuale". non avrebbe sensore fare nft per un progetto con all'interno una semplice sfera o cubo.
+    - spiegare l'ownership ha senso solo per cose hanno valore "intellettuale". non avrebbe senso fare nft per un progetto con all'interno una semplice sfera o cubo.
 
     - why storing nft metadata on our server and not entirely on IPFS?: 
         * easier to manage a dapp with a catalog of nft
@@ -71,14 +71,21 @@ Flow per ora:
 Assumption: questo JSON ha gia' un array to tokenId che rappresenta i componenti del NFT, se presenti. E' compito del software cad stabilre quali sono i componenti presenti
 
 2. [BACKEND]: Arriva una risorsa NFT "parziale", mancano tokenid, link a ipfs
-3. [BACKEND]: Genera hash del JSON geometrico
-4. [BACKEND]: Finiti i controlli interni ritorna un response al frontend (via libera per mintare). I controlli in backend permettono di non usare la blockchain per un minting che non andrebbe a buon fine
+3. [BACKEND]: Genera hash del JSON geometrico e controlli vari
+4. [BACKEND]: Pre-salva su Redis la risorsa, per ora indicizzata (individuabile) tramite hash
+4. [BACKEND]: Finiti i controlli interni ritorna un response al frontend (indicando via libera per mintare). I controlli in backend permettono di non usare la blockchain per un minting che non andrebbe a buon fine.
 
-4. [FRONTEND]: Chiama mintToken su master contract, passando hash, price, royalties
+5. [FRONTEND]: Chiama mintToken su master contract, passando hash, price, royalties
 
-5. [BLOCKCHAIN]: Controlli vari, minta token, genera tokenID
+6. [BLOCKCHAIN]: Controlli vari, minta token, genera tokenID
+DUBBIO 7. [BLOCKCHAIN]: Chiama endpoint su server per upload su IPFS e salvataggio definitivo su Redis,
+PUT  http://localhost:3000/api/v1/nfts/hash2345
+{
+    "tokenID": 1,
+}
+(o passandolo anche come query param dato che e' un unico campo)
 
-6. [BACKEND]: Upload su IPFS il JSON geometrico
-7. [BACKEND]: Salva su Redis, aggiungendo token id e link a ipfs
-8. [BACKEND]: Ritorna risorsa completa al frontend
+8. [BACKEND]: Upload su IPFS il JSON geometrico
+9. [BACKEND]: Salva su Redis, aggiungendo token id e link a ipfs
+10. [BACKEND]: Ritorna risorsa completa al frontend, per conferma
 

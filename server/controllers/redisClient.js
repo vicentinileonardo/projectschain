@@ -1,5 +1,5 @@
 // Redis client to store key-value pairs of owners and respective NFTs
-
+/*
 const { createClient } = require('redis');
 
 class RedisClient {
@@ -116,6 +116,24 @@ class RedisClient {
             clientResponse['status'] = 'error'
             clientResponse['message'] = 'Failed to retrieve NFTs';
             clientResponse['data'] = [];
+            return clientResponse;
+        }
+    }
+
+    async createPendingNft(nft) {
+        let clientResponse = {};
+        try {
+            let key = "nfts:" + nft.hash;
+            let value = JSON.stringify(nft);
+            await this.client.set(key, value);
+            clientResponse['status'] = 'success'
+            clientResponse['message'] = 'Pending NFT created successfully';
+            clientResponse['data'] = nft;
+            return clientResponse;
+        } catch (err) {
+            clientResponse['status'] = 'error'
+            clientResponse['message'] = 'Failed to create pending NFT';
+            clientResponse['data'] = {};
             return clientResponse;
         }
     }
@@ -299,3 +317,62 @@ class RedisClient {
 }
 
 module.exports = RedisClient;
+*/
+
+//import { Entity, Schema, Client, Repository } from 'redis-om';
+
+const redisOm = require('redis-om');
+const Entity = redisOm.Entity;
+const Schema = redisOm.Schema;
+const Client = redisOm.Client;
+const Repository = redisOm.Repository; 
+
+class NFT extends Entity {}
+
+let nft_schema = new Schema(NFT, {
+    status: { type: 'string', required: true },
+    tokenId: { type: 'number'},
+    name: { type: 'string', required: true },
+    description: { type: 'string'},
+    price: { type: 'number', required: true },
+    royaltyPrice: { type: 'number', required: true },
+    owner: { type: 'string', required: true },
+    hash: { type: 'string', required: true },
+    ipsfLink: { type: 'string', required: true },
+    projectJSON: { type: 'text', required: true },
+    manufacturers: {type: 'string[]', required: true },
+    buyers: {type: 'string[]', required: true }
+});
+
+async function setupRepository() {
+    let client = await new Client().open();
+    console.log("Redis client created", client);
+    let NFTRepository = client.fetchRepository(nft_schema);
+    console.log("NFTRepository created", NFTRepository);
+    //await NFTRepository.createIndex();
+    //console.log("NFTRepository index created");
+    return NFTRepository;
+}
+
+//save data to disk
+async function saveDataToDisk() {
+    //client used to save data on disk for redis
+    //the module "redis-om" is too high level and doesn't allow to save data on disk
+    //therefore we use the module "redis" to save data on disk
+    const redis = require("redis");
+    const redisSavingClient = redis.createClient();
+    console.log("Redis client created", redisSavingClient);
+
+    redisSavingClient.bgsave((err, response) => {
+        if (err) {
+          console.error("Error saving data:", err);
+        } else {
+          console.log("Data saved to disk");
+        }
+    });
+}
+    
+module.exports = {
+    setupRepository,
+    saveDataToDisk
+};
