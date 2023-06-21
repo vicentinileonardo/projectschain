@@ -24,6 +24,12 @@ module.exports = (app, redisClient) => {
 
         let nfts = clientResponse.data;
 
+        for (let i = 0; i < nfts.length; i++) {
+            if(!verifyIfOwner(nfts[i].owner,req.headers['authorization'])){
+                delete nfts[i].hash;
+            }
+        }
+
         if(req.query.fields && req.query.fields === 'hash') {
             //trimming the prefix 'nfts:' from the keys
             for (let i = 0; i < nfts.length; i++) {
@@ -70,6 +76,10 @@ module.exports = (app, redisClient) => {
 
         let nft = clientResponse.data;
         let data = { nft: nft };
+
+        if(!verifyIfOwner(data.nft.owner,req.headers['authorization'])){
+            delete data.nft.hash;
+        }
 
         let response = {};
         response['status'] = 'success';
@@ -338,4 +348,28 @@ async function validateNft(redisClient, nft_body) {
     response['status'] = 'success';
     response['message'] = 'NFT validated successfully';
     return response;
+}
+
+function verifyIfOwner(nftOwner,token) {
+    try {    
+        const jwt = require('jsonwebtoken');
+        console.log("hola")
+
+        console.log("token", token)  
+        console.log(JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())["address"])
+        const SECRET_KEY = process.env.JWT_SECRET;
+    
+        if (!token) return false;
+
+        token = token.split(' ')[1];
+        const verified = jwt.verify(token, SECRET_KEY);
+        if(JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())["address"] == nftOwner){
+            return true;
+        }else{
+            return false;
+        }
+    } catch (err) {
+        console.log(err.message)
+      return false;
+    }
 }

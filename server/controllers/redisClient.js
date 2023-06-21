@@ -297,6 +297,7 @@ class RedisClient {
             return clientResponse;
         }
     }
+      
 }
 
 module.exports = RedisClient;
