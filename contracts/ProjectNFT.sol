@@ -9,16 +9,19 @@ contract ProjectNFT is ERC721URIStorage {
   uint256 public tokenCounter;
 
   // Maps tokenId to project's price
-  mapping(uint256 => uint256) private tokenIdToPrice;
+  mapping(uint256 => uint256) private _tokenIdToPrice;
 
   // Maps tokenId to royalty price
-  mapping(uint256 => uint256) private tokenIdToRoyaltyPrice;
+  mapping(uint256 => uint256) private _tokenIdToRoyaltyPrice;
 
   // Maps tokenId to hash of project
-  mapping(uint256 => string) private tokenIdToHash;
+  mapping(uint256 => string) private _tokenIdToHash;
 
   // Maps tokenId to list of components of project
-  mapping(uint256 => uint256[]) private tokenIdToComponents;
+  mapping(uint256 => uint256[]) private _tokenIdToComponents;
+
+  // Map to check hashes are unique
+  mapping(string => bool) private _hashes;
 
   constructor() ERC721('DesignerNFT', 'DNFT') {
     tokenCounter = 1;
@@ -32,6 +35,10 @@ contract ProjectNFT is ERC721URIStorage {
     uint256[] calldata components
   ) public returns (uint256) {
     // Check NFT parameters:
+    
+    // Check hash is unique
+    require(!_hashes[projectHash], 'A project with this hash already exists');
+
     // Check components exists
     for (uint i = 0; i < components.length; i++) {
       require(components[i] < tokenCounter, 'Component is not a valid project');
@@ -49,10 +56,11 @@ contract ProjectNFT is ERC721URIStorage {
     _setTokenURI(newItemId, uri);
 
     // Set NFT parameters
-    tokenIdToPrice[newItemId] = price;
-    tokenIdToRoyaltyPrice[newItemId] = royaltyPrice;
-    tokenIdToHash[newItemId] = projectHash;
-    tokenIdToComponents[newItemId] = components;
+    _tokenIdToPrice[newItemId] = price;
+    _tokenIdToRoyaltyPrice[newItemId] = royaltyPrice;
+    _tokenIdToHash[newItemId] = projectHash;
+    _hashes[projectHash] = true;
+    _tokenIdToComponents[newItemId] = components;
 
     // Increment token counter
     tokenCounter = tokenCounter + 1;
@@ -62,12 +70,12 @@ contract ProjectNFT is ERC721URIStorage {
 
   function getTokenPrice(uint256 tokenId) public view returns (uint256) {
     require(tokenId < tokenCounter);
-    return tokenIdToPrice[tokenId];
+    return _tokenIdToPrice[tokenId];
   }
 
   function getTokenRoyaltyPrice(uint256 tokenId) public view returns (uint256) {
     require(tokenId < tokenCounter);
-    return tokenIdToRoyaltyPrice[tokenId];
+    return _tokenIdToRoyaltyPrice[tokenId];
   }
 
   function getTokenBuyPrice(uint256 tokenId) public view returns (uint256) {
@@ -75,16 +83,16 @@ contract ProjectNFT is ERC721URIStorage {
 
     // Return token buy price plus royalties of all its components
     uint256 total = 0;
-    total = total + tokenIdToPrice[tokenId];
-    for (uint256 i=0; i < tokenIdToComponents[tokenId].length; i++) {
-      total = total + tokenIdToPrice[tokenIdToComponents[tokenId][i]];
+    total = total + _tokenIdToPrice[tokenId];
+    for (uint256 i=0; i < _tokenIdToComponents[tokenId].length; i++) {
+      total = total + _tokenIdToPrice[_tokenIdToComponents[tokenId][i]];
     }
     return total;
   }
 
   function getTokenComponents(uint256 tokenId) public view returns (uint256[] memory) {
     require(tokenId < tokenCounter);
-    return tokenIdToComponents[tokenId];
+    return _tokenIdToComponents[tokenId];
   }
 
 }
