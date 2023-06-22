@@ -1,5 +1,6 @@
 const { error } = require('console');
 const RedisClient = require('../controllers/redisClient');
+const Web3Token = require('web3-token');
 
 //Exposing a key-value table of owners and respective NFTs
 module.exports = (app, redisClient) => {
@@ -25,7 +26,7 @@ module.exports = (app, redisClient) => {
         let nfts = clientResponse.data;
 
         for (let i = 0; i < nfts.length; i++) {
-            if(!verifyIfOwner(nfts[i].owner,req.headers['authorization'])){
+            if(!await verifyIfOwner(nfts[i].owner,req.headers['authorization'])){
                 delete nfts[i].hash;
             }
         }
@@ -77,7 +78,7 @@ module.exports = (app, redisClient) => {
         let nft = clientResponse.data;
         let data = { nft: nft };
 
-        if(!verifyIfOwner(data.nft.owner,req.headers['authorization'])){
+        if(!await verifyIfOwner(data.nft.owner,req.headers['authorization'])){
             delete data.nft.hash;
         }
 
@@ -350,26 +351,21 @@ async function validateNft(redisClient, nft_body) {
     return response;
 }
 
-function verifyIfOwner(nftOwner,token) {
-    try {    
-        const jwt = require('jsonwebtoken');
-        console.log("hola")
-
-        console.log("token", token)  
-        console.log(JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())["address"])
-        const SECRET_KEY = process.env.JWT_SECRET;
-    
+async function verifyIfOwner(nftOwner,token) {
+    try {
         if (!token) return false;
-
         token = token.split(' ')[1];
-        const verified = jwt.verify(token, SECRET_KEY);
-        if(JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())["address"] == nftOwner){
+
+        const {address, body} = await Web3Token.verify(token);
+        console.log("ADDRESS RECOVERED ",address,body)
+      
+        if(address == nftOwner){
             return true;
         }else{
             return false;
         }
     } catch (err) {
         console.log(err.message)
-      return false;
+        return false;
     }
 }
