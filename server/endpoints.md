@@ -4,20 +4,63 @@ On the server:
 
 Resources and Endpoints:
 
-**Key on Redis**: "nft:{tokenId}"
-**Value on Redis**: NFT resource in JSON format
+First resource coming from frontend, so it is the payload of the POST
+
 {
-    //"tokenId": "1", //incremental identifier
     "name": "NFT name",
     "description": "NFT description",
     "price": 0.1,
-    "hash": "hash of the NFT",
-    "project": another link to IPFS,
-    "image": link to IPFS,
-    "components": [1,34,5] //list of tokenIds of the components,
-    "owner": "wallet address"
+    "royalties": 0.1,
+    "components": [1,34,5], //list of tokenIds of the components,
+    "owner": "wallet address",
+    "projectJSON": {
+        "C1": "asd",
+        "C2": "abc",
+        "C3": "123"
+    }
 }
 
+
+**Key on Redis**: "nft:{tokenId}"
+**Value on Redis**: NFT resource in JSON format
+{
+    "status": premint | active
+    "tokenId": "1", //incremental identifier, returned by the master contract after minting
+    "name": "NFT name",
+    "description": "NFT description",
+    "price": 0.1,
+    "royaltyPrice": 0.1,
+    "owner": "wallet address", 
+    "hash": "hash of the NFT",
+    "ipsfLink": link to IPFS,
+    "projectJSON": {
+        "components": [1,34,5], //list of tokenIds of the components,
+        "C1": "asd",
+        "C2": "abc",
+        "C3": "123"
+    }
+    "manufacturers": [
+        {
+            "wallet": "wallet address",
+            "expiration": "date of expiration of the license"
+        },
+        {
+            "wallet": "wallet address",
+            "expiration": "date of expiration of the license"
+        }
+    ],
+    "buyers": [
+        {
+            "wallet": "wallet address",
+            "expiration": "date of expiration of the license"
+        },
+        {
+            "wallet": "wallet address",
+            "expiration": "date of expiration of the license"
+        }
+    ]
+
+}
 
 
 GET /nfts
@@ -25,6 +68,14 @@ GET /nfts/{id}
 POST /nfts
 PUT /nfts/{id} (optional)
 DELETE /nfts/{id}
+
+
+
+
+
+
+
+
 
 
 **Key on Redis**: "owner:{wallet}"
