@@ -100,4 +100,13 @@ contract ProjectNFT is ERC721URIStorage {
     return _tokenIdToComponents[tokenId];
   }
 
+  function transferPayment(uint256 tokenId, uint256 amount) public {
+    // TODO transfer ether to poject owner (price) and components owners (royalty price) from amount
+    // TODO needs requires
+    address payable owner = payable(ownerOf(tokenId));
+    owner.transfer(amount - _tokenIdToPrice[tokenId]);
+
+    // TODO similarly needs to pay owners of components
+  }
+
 }

@@ -18,13 +18,14 @@ contract AccessSmartContract {
         projectNFT = ProjectNFT(projectNFTAddress);
     }
 
-    function buyProject(uint256 tokenId, address ownerAddress, uint256 price) public returns (string memory) {
+    function buyProject(uint256 tokenId, address ownerAddress) public payable returns (string memory) {
         // TODO require token exists;
         projectNFT.getTokenPrice(tokenId); //check if token exists
 
-        // TODO require price to pay is equal to total price of token
+        require(msg.value == projectNFT.getTokenBuyPrice(tokenId), 'Need to pay buy price to buy token');
 
-        // TODO pay buy price
+        // Pay projects owner
+        projectNFT.transferPayment(tokenId, msg.value);
 
         // Set ownership
         _addressToTokens[ownerAddress][tokenId] = true;
@@ -39,7 +40,7 @@ contract AccessSmartContract {
     function getTokenDetails(uint256 tokenId, address ownerAddress) public view returns (string memory){
         // Requires to be owner and not expired
         require(_addressToTokens[ownerAddress][tokenId], 'Address does not own this project');
-        require(_ownershipExpirationTime[keccak256(abi.encodePacked(ownerAddress, tokenId))] > block.timestamp);
+        require(_ownershipExpirationTime[keccak256(abi.encodePacked(ownerAddress, tokenId))] > block.timestamp, 'Ownership is expired');
 
         return projectNFT.getProjectHash(tokenId);
     }
