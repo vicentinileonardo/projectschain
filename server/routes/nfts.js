@@ -8,6 +8,9 @@ const flatten = require('flat');
 
 //const repository = await Repository.setupRepository();
 
+const { error } = require('console');
+const Web3Token = require('web3-token');
+
 //Exposing a key-value table of owners and respective NFTs
 module.exports = (app, repository, Moralis) => {
 
@@ -22,6 +25,12 @@ module.exports = (app, repository, Moralis) => {
         try{
             let nfts = await repository.search().returnAll();
             console.log("nfts: ", nfts);
+
+            for (let i = 0; i < nfts.length; i++) {
+                if(!await verifyIfOwner(nfts[i].owner,req.headers['authorization'])){
+                    delete nfts[i].hash;
+                }
+            }
 
             //unflatten the projectJSON
             nfts = unflattenJSONfield('projectJSON', nfts);
@@ -92,6 +101,10 @@ module.exports = (app, repository, Moralis) => {
         let nft = nfts[0];
             
         let data = { nft: nft };
+
+        if(!await verifyIfOwner(data.nft.owner,req.headers['authorization'])){
+            delete data.nft.hash;
+        }
 
         let response = {};
         response['status'] = 'success';
@@ -685,4 +698,22 @@ async function updateNft(req, res, nft, repository) {
     res.status(200).send(response);
     return;
 }
-     
+
+async function verifyIfOwner(nftOwner,token) {
+    try {
+        if (!token) return false;
+        token = token.split(' ')[1];
+
+        const {address, body} = await Web3Token.verify(token);
+        console.log("ADDRESS RECOVERED ",address,body)
+      
+        if(address == nftOwner){
+            return true;
+        }else{
+            return false;
+        }
+    } catch (err) {
+        console.log(err.message)
+        return false;
+    }
+}

@@ -22,8 +22,12 @@ const props = defineProps<{
     border-radius: 0.5em;
 }
 
-.button:hover {
+.button:hover:enabled {
     background-image: linear-gradient(rgb(0 0 0/20%) 0 0);
+}
+
+.button:disabled {
+  background-color: #a6a6a6;
 }
 
 .rounded {

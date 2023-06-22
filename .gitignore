@@ -1,7 +1,10 @@
 node_modules
 .DS_Store
 
-.idea/
+.idea
+
+ganache-data
+ganache-data/*
 
 # dotenv environment variables file
 .env

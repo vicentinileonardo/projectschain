@@ -1,24 +1,28 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "./DesignerNFT.sol";
+import './ProjectNFT.sol';
+import './AccessSmartContract.sol';
 
 contract Master {
-    address public DesignerNFTAddress;
+  ProjectNFT private projectNFT;
+  AccessSmartContract private accessContract;
 
-    constructor(address _contractAAddress) {
-        DesignerNFTAddress = _contractAAddress;
-    }
+  constructor(address projectNFTAddress, address accessContractAddress) {
+    projectNFT = ProjectNFT(projectNFTAddress);
+    accessContract = AccessSmartContract(accessContractAddress);
+  }
 
-    //from the address of the contract A, we can call the function mintToken
-    function mintToken(string memory uri, uint256 price) public returns (bool){ //aggiungere hash
-        //TODO: check if the caller is authorized
-        
-        (bool success, bytes memory result) = DesignerNFTAddress.call(abi.encodeWithSignature("mintToken(address,string, uint256)", msg.sender, uri, price));
-        require(success, "Failed to call mintToken on DesignerNFT");
-        //address sender = abi.decode(result, (address));
+  function mintToken(
+    uint256 price,
+    uint256 royaltyPrice,
+    string calldata projectHash,
+    uint256[] calldata components
+  ) public returns (uint256) {
+    //TODO: check if the caller is authorized?
 
-        return success;
-    }
+    uint256 tokenId = projectNFT.mintToken(msg.sender, price, royaltyPrice, projectHash, components);
 
+    return tokenId;
+  }
 }

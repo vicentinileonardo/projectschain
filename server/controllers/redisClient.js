@@ -314,6 +314,7 @@ class RedisClient {
             return clientResponse;
         }
     }
+      
 }
 
 module.exports = RedisClient;
@@ -357,3 +358,4 @@ async function setupRepository() {
 module.exports = {
     setupRepository
 };
+
