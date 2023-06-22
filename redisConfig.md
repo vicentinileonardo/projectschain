@@ -8,13 +8,13 @@ lsof -i :6379
 kill <PID>
 
 # start redis stack
-# option1: without saving config, probably problem with saving the snapshot
+# [NOT IN USE] [OPTION 1]: without saving config, probably problemS with saving the snapshot
 docker run -d --name redis-stack \
 -p 6379:6379 -p 8001:8001 \
 -v /Users/leonardovicentini/Desktop/Magistrale/Blockchain/Redis:/data \
 redis/redis-stack:latest
 
-# option2: latest, not good since could led to reproducibility issues
+# [NOT IN USE] [OPTION 2]: using latest image, not good since could led to reproducibility issues
 docker run -d --name redis-stack \
 -p 6379:6379 -p 8001:8001 \
 -v /Users/leonardovicentini/Desktop/Magistrale/Blockchain/Redis:/data \
@@ -22,7 +22,21 @@ docker run -d --name redis-stack \
 redis/redis-stack:latest \
 redis-server /usr/local/etc/redis/redis.conf
 
-# CURRENT OPTION, using a specific version
+# [IN USE] [CURRENT OPTION], using a specific version
+
+generic:
+
+docker run -d --name redis-stack \
+-p 6379:6379 \
+-p 8001:8001 \
+-v <path-to-local-folder-to-mount>:/data \
+-v <path-to-local-folder-of-redis-conf-file>/redis.conf:/usr/local/etc/redis/redis.conf \
+redis/redis-stack:6.2.6-v7 \
+redis-server /usr/local/etc/redis/redis.conf
+
+
+personal (machine: mac M1):
+
 docker run -d --name redis-stack \
 -p 6379:6379 \
 -p 8001:8001 \
@@ -31,10 +45,10 @@ docker run -d --name redis-stack \
 redis/redis-stack:6.2.6-v7 \
 redis-server /usr/local/etc/redis/redis.conf
 
-note: this works even if the container is stopped: when restarted, the data is still there
-however, when the container is removed, the data is lost, even if the volume is still there
-for the MVP, this is not a problem, in real life, backup policies should be implemented
+note: this works even if the container is stopped or removed since the dump of the redis data is stored (and recovered) in the mounted folder
 
 
 # localize the .so file, it is the module to be loaded in the config file
+docker exec -it redis-stack sh
 find . -name rejson.so
+find . -name redisearch.so
