@@ -69,17 +69,17 @@ contract ProjectNFT is ERC721URIStorage {
   }
 
   function getTokenPrice(uint256 tokenId) public view returns (uint256) {
-    require(tokenId < tokenCounter);
+    require(tokenId < tokenCounter, 'Token with this id does not exit');
     return _tokenIdToPrice[tokenId];
   }
 
   function getTokenRoyaltyPrice(uint256 tokenId) public view returns (uint256) {
-    require(tokenId < tokenCounter);
+    require(tokenId < tokenCounter, 'Token with this id does not exit');
     return _tokenIdToRoyaltyPrice[tokenId];
   }
 
   function getTokenBuyPrice(uint256 tokenId) public view returns (uint256) {
-    require(tokenId < tokenCounter);
+    require(tokenId < tokenCounter, 'Token with this id does not exit');
 
     // Return token buy price plus royalties of all its components
     uint256 total = 0;
@@ -91,22 +91,29 @@ contract ProjectNFT is ERC721URIStorage {
   }
 
   function getProjectHash(uint256 tokenId) public view returns (string memory) {
-    require(tokenId < tokenCounter);
+    require(tokenId < tokenCounter, 'Token with this id does not exit');
     return _tokenIdToHash[tokenId];
   }
 
   function getTokenComponents(uint256 tokenId) public view returns (uint256[] memory) {
-    require(tokenId < tokenCounter);
+    require(tokenId < tokenCounter, 'Token with this id does not exit');
     return _tokenIdToComponents[tokenId];
   }
 
   function transferPayment(uint256 tokenId, uint256 amount) public {
-    // TODO transfer ether to poject owner (price) and components owners (royalty price) from amount
-    // TODO needs requires
+    require(tokenId < tokenCounter, 'Token with this id does not exit');
+    require(amount == getTokenPrice(tokenId), 'Pay amount is not price of project');
+
     address payable owner = payable(ownerOf(tokenId));
     owner.transfer(amount - _tokenIdToPrice[tokenId]);
+    amount = amount - _tokenIdToPrice[tokenId];
 
-    // TODO similarly needs to pay owners of components
+    for (uint256 i=0; i < _tokenIdToComponents[tokenId].length; i++) {
+      uint256 componentTokenId = _tokenIdToComponents[tokenId][i];
+      address payable componentOwner = payable(ownerOf(componentTokenId));
+      componentOwner.transfer(amount - _tokenIdToRoyaltyPrice[componentTokenId]);
+      amount = amount - _tokenIdToRoyaltyPrice[componentTokenId];
+    }
   }
 
 }
