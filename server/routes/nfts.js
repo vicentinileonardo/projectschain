@@ -18,26 +18,39 @@ module.exports = (app, repository, Moralis) => {
 
     //GET
 
-    //OK
-    //TODO: hide sensitive fields like projectJSON, hash, ipfsLink
     router.get('/nfts', async (req, res) => {
 
         try{
-            let nfts = await repository.search().returnAll();
-            console.log("nfts: ", nfts);
+            let nfts = await repository.search().where('status').eq('minted').returnAll();
 
-            for (let i = 0; i < nfts.length; i++) {
-                if(!await verifyIfOwner(nfts[i].owner,req.headers['authorization'])){
-                    delete nfts[i].hash;
-                }
+            if (nfts.length === 0) {
+                let response = {};
+                response['status'] = 'error';
+                response['message'] = 'NFTs not found';
+                res.status(404).send(response);
+                return;
             }
 
             //unflatten the projectJSON
             nfts = unflattenJSONfield('projectJSON', nfts);
 
-            //TODO: keep fields in the query string if they exist, to reduce overfetching 
+            //hide sensitive fields like projectJSON, hash, ipfsLink
+            for(let i = 0; i < nfts.length; i++){
+                let check1 = await verifyIfOwner(nfts[i].owner,req.headers['authorization'])
+                let check2 = await verifyIfManufacturer(nfts[i].manufacturers,req.headers['authorization'])
+                if(!check1 && !check2){
+                    nfts[i] = hideField('hash', nfts[i]);
+                    nfts[i] = hideField('ipfsLink', nfts[i]);
+                    nfts[i] = hideField('projectJSON', nfts[i]);
+                }
+            }
 
-            //TODO: hide sensitive fields like projectJSON, hash, ipfsLink
+            //hide entityId (redis key)
+            for(let i = 0; i < nfts.length; i++){
+                nfts[i] = hideField('entityId', nfts[i]);
+            }
+            
+            //TODO: keep fields in the query string if they exist, to reduce overfetching 
 
             let data = { nfts: nfts };
         
@@ -58,26 +71,221 @@ module.exports = (app, repository, Moralis) => {
         }
     });
 
+    router.get('/nfts/catalog', async (req, res) => {
+        
+        try{
+            if(!req.headers['authorization']){
+                let response = {};
+                response['status'] = 'error';
+                response['message'] = 'Authorization token missing';
+                res.status(401).send(response);
+                return;
+            }
+            
+            let token = req.headers['authorization'];
+            token = token.split(' ')[1];
+            const {address, body} = await Web3Token.verify(token);
+
+            let ownerAddress = address;
+                               
+            console.log("ownerAddress: ", ownerAddress);
+
+            //get all nfts from repository that have the owner different from the one in the request
+            let nfts = await repository.search().where('status').eq('minted').and('owner').not.eq(ownerAddress).returnAll();
+            
+            if (nfts.length === 0) {
+                let response = {};
+                response['status'] = 'error';
+                response['message'] = 'NFTs not found';
+                res.status(404).send(response);
+                return;
+            }
+
+            //unflatten the projectJSON
+            nfts = unflattenJSONfield('projectJSON', nfts);
+
+            //hide sensitive fields like projectJSON, hash, ipfsLink
+            for(let i = 0; i < nfts.length; i++){
+                let check1 = await verifyIfOwner(nfts[i].owner,req.headers['authorization'])
+                let check2 = await verifyIfManufacturer(nfts[i].manufacturers,req.headers['authorization'])
+                if(!check1 && !check2){
+                    nfts[i] = hideField('hash', nfts[i]);
+                    nfts[i] = hideField('ipfsLink', nfts[i]);
+                    nfts[i] = hideField('projectJSON', nfts[i]);
+                }
+            }
+        
+            //hide entityId (redis key)
+            for(let i = 0; i < nfts.length; i++){
+                nfts[i] = hideField('entityId', nfts[i]);
+            }
+            
+            let data = { nfts: nfts };
+            
+            let response = {};
+            response['status'] = 'success';
+            response['message'] = 'NFTs found';
+            response['data'] = data;
+
+            res.status(200).send(response);
+            return;
+        } catch (err) {
+            console.log("err: ", err);
+
+            let response = {};
+            response['status'] = 'error';
+            response['message'] = 'Error fetching NFTs';
+            res.status(500).send(response);
+            return;
+        }
+    });
+
+    router.get('/owners/:ownerAddress/nfts', async (req, res) => {
+        
+        try{
+
+            let ownerAddress = req.params.ownerAddress;
+            if(ownerAddress === undefined){
+                let response = {};
+                response['status'] = 'error';
+                response['message'] = 'Owner address not found';
+                res.status(404).send(response);
+                return;
+            }
+
+            //get all nfts from repository that have the owner passed in the request
+            let nfts = await repository.search().where('status').eq('minted').and('owner').eq(ownerAddress).returnAll();
+            
+            if (nfts.length === 0) {
+                let response = {};
+                response['status'] = 'error';
+                response['message'] = 'NFTs not found';
+                res.status(404).send(response);
+                return;
+            }
+
+            //unflatten the projectJSON
+            nfts = unflattenJSONfield('projectJSON', nfts);
+
+            //hide sensitive fields like projectJSON, hash, ipfsLink
+            for(let i = 0; i < nfts.length; i++){
+                let check1 = await verifyIfOwner(nfts[i].owner,req.headers['authorization'])
+                let check2 = await verifyIfManufacturer(nfts[i].manufacturers,req.headers['authorization'])
+                if(!check1 && !check2){
+                    nfts[i] = hideField('hash', nfts[i]);
+                    nfts[i] = hideField('ipfsLink', nfts[i]);
+                    nfts[i] = hideField('projectJSON', nfts[i]);
+                }
+            }
+            
+            //hide entityId (redis key)
+            for(let i = 0; i < nfts.length; i++){
+                nfts[i] = hideField('entityId', nfts[i]);
+            }
+            
+            let data = { nfts: nfts };
+            
+            let response = {};
+            response['status'] = 'success';
+            response['message'] = 'NFTs found';
+            response['data'] = data;
+
+            res.status(200).send(response);
+            return;
+        } catch (err) {
+            console.log("err: ", err);
+
+            let response = {};
+            response['status'] = 'error';
+            response['message'] = 'Error fetching NFTs';
+            res.status(500).send(response);
+            return;
+        }
+    });
+
+    router.get('/buyers/:manufacturerAddress/nfts', async (req, res) => {
+        
+        try{
+
+            let manufacturerAddress = req.params.manufacturerAddress;
+            if(manufacturerAddress === undefined){
+                let response = {};
+                response['status'] = 'error';
+                response['message'] = 'Buyer address not found';
+                res.status(404).send(response);
+                return;
+            }
+
+            //get all nfts from repository that have the owner passed in the request
+            let nfts = await repository.search().where('status').eq('minted').and('manufacturers').contains(manufacturerAddress).returnAll();
+            
+            if (nfts.length === 0) {
+                let response = {};
+                response['status'] = 'error';
+                response['message'] = 'NFTs not found';
+                res.status(404).send(response);
+                return;
+            }
+
+            //unflatten the projectJSON
+            nfts = unflattenJSONfield('projectJSON', nfts);
+
+            //hide sensitive fields like projectJSON, hash, ipfsLink
+            for(let i = 0; i < nfts.length; i++){
+                let check1 = await verifyIfOwner(nfts[i].owner,req.headers['authorization'])
+                let check2 = await verifyIfManufacturer(nfts[i].manufacturers,req.headers['authorization'])
+                if(!check1 && !check2){
+                    nfts[i] = hideField('hash', nfts[i]);
+                    nfts[i] = hideField('ipfsLink', nfts[i]);
+                    nfts[i] = hideField('projectJSON', nfts[i]);
+                }
+            }
+            
+            //hide entityId (redis key)
+            for(let i = 0; i < nfts.length; i++){
+                nfts[i] = hideField('entityId', nfts[i]);
+            }
+            
+            let data = { nfts: nfts };
+            
+            let response = {};
+            response['status'] = 'success';
+            response['message'] = 'NFTs found';
+            response['data'] = data;
+
+            res.status(200).send(response);
+            return;
+        } catch (err) {
+            console.log("err: ", err);
+
+            let response = {};
+            response['status'] = 'error';
+            response['message'] = 'Error fetching NFTs';
+            res.status(500).send(response);
+            return;
+        }
+    });
+
     router.get('/nfts/:tokenId', async (req, res) => {
         
         let tokenId = req.params.tokenId;
         if (!tokenId) {
             let response = {};
-            response['status'] = 'error';
-            response['message'] = 'Missing required parameter: tokenId';
+            response['status'] = 'fail';
+            response['data'] = {tokenId: 'tokenId is required'};
             res.status(400).send(response);
             return;
         }
         //check that tokenId is a number
         if (isNaN(tokenId)) {
             let response = {};
-            response['status'] = 'error';
-            response['message'] = 'Invalid parameter: tokenId';
+            response['status'] = 'fail';
+            response['data'] = {tokenId: "tokenId must be a number"};
             res.status(400).send(response);
             return;
         }
         
-        let nfts = await repository.search().where('tokenId').eq(tokenId).returnAll();
+        let nfts = await repository.search().where('status').eq('minted').and('tokenId').eq(tokenId).returnAll();
         if (nfts.length === 0) {
             let response = {};
             response['status'] = 'error';
@@ -96,15 +304,25 @@ module.exports = (app, repository, Moralis) => {
         //unflatten the projectJSON
         nfts = unflattenJSONfield('projectJSON', nfts);
 
-        //TODO; hide sensitive fields like projectJSON, hash, ipfsLink
+        //hide sensitive fields like projectJSON, hash, ipfsLink
+        for(let i = 0; i < nfts.length; i++){
+            let check1 = await verifyIfOwner(nfts[i].owner,req.headers['authorization'])
+            let check2 = await verifyIfManufacturer(nfts[i].manufacturers,req.headers['authorization'])
+            if(!check1 && !check2){
+                nfts[i] = hideField('hash', nfts[i]);
+                nfts[i] = hideField('ipfsLink', nfts[i]);
+                nfts[i] = hideField('projectJSON', nfts[i]);
+            }
+        }
+        
+        //hide entityId (redis key)
+        for(let i = 0; i < nfts.length; i++){
+            nfts[i] = hideField('entityId', nfts[i]);
+        }
 
         let nft = nfts[0];
             
         let data = { nft: nft };
-
-        if(!await verifyIfOwner(data.nft.owner,req.headers['authorization'])){
-            delete data.nft.hash;
-        }
 
         let response = {};
         response['status'] = 'success';
@@ -116,7 +334,6 @@ module.exports = (app, repository, Moralis) => {
     });
 
     //POST
-
     //preminting
     router.post('/nfts', async (req, res) => {
         let nft_body = req.body
@@ -154,16 +371,14 @@ module.exports = (app, repository, Moralis) => {
         }
         
         // validate against existing nfts
-        /*
-        let validationResponse = await validateNft(redisClient, nft_body);
-        if (validationResponse.status === 'error') {
+        let validationResponse = await validateNft(nft_body, repository);
+        if (validationResponse.status === 'fail') {
             let response = {};
-            response['status'] = 'error';
-            response['message'] = validationResponse.message;
+            response['status'] = validationResponse.status;
+            response['data'] = validationResponse.data;
             res.status(400).send(response);
             return;
         }
-        */
 
         //save a JSON file to file system
         const projectJSON = JSON.stringify(nft_body.projectJSON);
@@ -178,10 +393,9 @@ module.exports = (app, repository, Moralis) => {
 
         let url = 'https://ipfs.io/ipfs/' + hash;
 
-        //call to IPFS to check if hash already exists, the request should last 7 seconds max
+        //call to IPFS to check if hash already exists, the request should last 3 seconds max
         try{
-            const ipfsResponse = await fetch(url, {method: 'HEAD', timeout: 7000});
-            //console.log("ipfsResponse: ", ipfsResponse);
+            const ipfsResponse = await fetch(url, {method: 'HEAD', timeout: 3000});
             if (ipfsResponse.status === 200) {
                 console.log("file exists already on IPFS");
                 let response = {};
@@ -191,20 +405,22 @@ module.exports = (app, repository, Moralis) => {
                 return;
             }  
         } catch (error) {
-            //network error, hash does not exist
+            //network error, hash does not exist, good to go
             console.log("file does not exist on IPFS");
         }
 
         //flatten the projectJSON
         let flattenedProjectJSON = flatten(nft_body.projectJSON);
-        console.log("flattenedProjectJSON: ", flattenedProjectJSON);
-
+        
         //encode to text
         const encodedProjectJson = JSON.stringify(flattenedProjectJSON);
-        console.log(encodedProjectJson);
 
         //save nft metadata to redis
         let nft = repository.createEntity();
+
+        //random number between 1 and 3
+        let randomImageNumber = Math.floor(Math.random() * 3) + 1;
+        let imageLink = 'project' + randomImageNumber + '.jpg';
 
         nft.status = 'premint';
         nft.name = nft_body.name;
@@ -213,12 +429,13 @@ module.exports = (app, repository, Moralis) => {
         nft.royaltyPrice = nft_body.royaltyPrice;
         nft.owner = nft_body.owner;
         nft.hash = hash; 
+        nft.imageLink = imageLink;
         nft.ipfsLink = url;
-        nft.projectJSON = encodedProjectJson
+        nft.projectJSON = encodedProjectJson;
         nft.manufacturers = [];
         nft.buyers = [];
 
-        console.log("nft: ", nft);
+        //console.log("nft: ", nft);
          
         // save the NFT to Redis
         try {
@@ -226,11 +443,13 @@ module.exports = (app, repository, Moralis) => {
             
             console.log("id: ", id);
 
+            let data = { nft: nft };
+
             //all validations passed and metadata saved
             let response = {};
             response['status'] = 'success';
             response['message'] = 'All validations passed for NFT, metadata saved';
-            response['data'] = nft;
+            response['data'] = data;
             res.status(200).send(response);
             return;
         }
@@ -242,9 +461,7 @@ module.exports = (app, repository, Moralis) => {
             res.status(500).send(response);
             return;
         }
-        
     });
-
 
     //PUT
     // effectively minting the NFT (uploading to IPFS and updating status to minted)
@@ -253,8 +470,8 @@ module.exports = (app, repository, Moralis) => {
         let hash = req.params.hash;
         if (!hash) {
             let response = {};
-            response['status'] = 'error';
-            response['message'] = 'Missing required parameter: hash';
+            response['status'] = 'fail';
+            response['data'] = {hash: 'hash is required'};
             res.status(400).send(response);
             return;
         }
@@ -280,8 +497,8 @@ module.exports = (app, repository, Moralis) => {
             nfts = unflattenJSONfield('projectJSON', nfts);
             
             let nft = await repository.fetch(nfts[0].entityId);
-            console.log("nft: ", nft);
-                
+            //console.log("nft: ", nft);
+
             mintNft(req, res, nft, repository);
                     
         } catch (error) {
@@ -300,15 +517,15 @@ module.exports = (app, repository, Moralis) => {
         let tokenId = req.params.tokenId;
         if (!tokenId) {
             let response = {};
-            response['status'] = 'error';
-            response['message'] = 'Missing required parameter: tokenId';
+            response['status'] = 'fail';
+            response['data'] = {tokenId: 'tokenId is required'};
             res.status(400).send(response);
             return;
         }
         if (isNaN(tokenId)) {
             let response = {};
-            response['status'] = 'error';
-            response['message'] = 'Invalid parameter: tokenId';
+            response['status'] = 'fail';
+            response['data'] = {tokenId: 'tokenId must be a number'};
             res.status(400).send(response);
             return;
         }
@@ -334,7 +551,7 @@ module.exports = (app, repository, Moralis) => {
             nfts = unflattenJSONfield('projectJSON', nfts);
             
             let nft = await repository.fetch(nfts[0].entityId);
-            console.log("nft: ", nft);
+            //console.log("nft: ", nft);
             
             updateNft(req, res, nft, repository);
 
@@ -350,7 +567,6 @@ module.exports = (app, repository, Moralis) => {
 
     //DELETE
 
-    //OK
     router.delete('/nfts', async (req, res) => {
         let nfts = await repository.search().returnAll();
 
@@ -383,7 +599,6 @@ module.exports = (app, repository, Moralis) => {
  
     });
 
-    //OK
     //delete by hash since it is the unique identifier we have before minting
     //we could think to delete if something went wrong during minting
     //after minting it does not make sense to delete the NFT
@@ -392,8 +607,8 @@ module.exports = (app, repository, Moralis) => {
         let hash = req.params.hash;
         if (!hash) {
             let response = {};
-            response['status'] = 'error';
-            response['message'] = 'Missing required parameter: hash';
+            response['status'] = 'fail';
+            response['data'] = {hash: 'hash is required'};
             res.status(400).send(response);
             return;
         }
@@ -440,8 +655,8 @@ module.exports = (app, repository, Moralis) => {
 
 function bodyValidationErrorResponse(parameter) {
     let response = {};
-    response['status'] = 'error';
-    response['message'] =  'Missing required parameter: ' + parameter;
+    response['status'] = 'fail';
+    response['data'] =  {parameter: 'Missing required parameter: ' + parameter};
     return response;
 }
 
@@ -461,46 +676,66 @@ function handleFields(nfts, query_fields){
     }
 }
 
-async function validateNft(nft_body) {
-
-    /*
-    
-    //check if hash is already in use
-    let nfts = await repository.search().where('hash').eq(nft_body.hash).returnAll();
+async function validateNft(nft_body, repository) {
 
     //check if name is already in use
+    let nftsToBeChecked = await repository.search().where('name').eq(nft_body.name).returnAll();
+    if (nftsToBeChecked.length > 0) {
+        let response = {};
+        response['status'] = 'fail';
+        response['data'] = {name: 'Name already in use'};
+        return response;
+    }
     
     //check if price is valid
-
-    //check if royaltyPrice is valid
-    
-
-    //check if components (inside projectJSON) are valid (if the tokenId exist)
-    /*
-    if (nft_body.components) {
-        let components = nft_body.components;
-        let unknownComponents = [];
-        let hashes = [];
-        for (let i = 0; i < nfts.length; i++) {
-            hashes.push(nfts[i].hash);
-        }
-        for (let i = 0; i < components.length; i++) {
-            let component = components[i];
-            if (!hashes.includes(component)) {
-                unknownComponents.push(component);
-            }
-        }
-
-        if (unknownComponents.length > 0) {
+    if (nft_body.price) {
+        if (nft_body.price < 0) {
             let response = {};
-            response['status'] = 'error';
-            response['message'] = 'Unknown components: ' + unknownComponents + '. Please check the hashes.';
+            response['status'] = 'fail';
+            response['data'] = {price: 'Price must be greater than 0'};
             return response;
         }
     }
     
+    //check if royaltyPrice is valid
+    if (nft_body.royaltyPrice) {
+        if (nft_body.royaltyPrice < 0) {
+            let response = {};
+            response['status'] = 'fail';
+            response['data'] = {royaltyPrice: 'royaltyPrice must be greater than 0'};
+            return response;
+        }
+    }
+      
+    //check if components (inside projectJSON) are valid (if the tokenId exist)
+    if (nft_body.projectJSON.components) {
+        let components = nft_body.projectJSON.components;
+        let unknownComponents = [];
+        let tokenIds = [];
 
-    */
+        //get all the tokenIds from repository
+        let nfts = await repository.search().returnAll();
+
+        for (let i = 0; i < nfts.length; i++) {
+            tokenIds.push(nfts[i].tokenId);
+        }
+        for (let i = 0; i < components.length; i++) {
+            let component = components[i];
+            if (!tokenIds.includes(component)) {
+                unknownComponents.push(component);
+            }
+        }
+        if (unknownComponents.length > 0) {
+            let response = {};
+            response['status'] = 'fail';
+            response['data'] = {projectJSONcomponents: 'Unknown components: ' + unknownComponents + '. Please check the tokenIds'};
+            return response;
+        }
+    }
+    
+    let response = {};
+    response['status'] = 'success';
+    return response;
 }
 
 function unflattenJSONfield(field, nfts) {
@@ -513,48 +748,61 @@ function unflattenJSONfield(field, nfts) {
     return nfts;
 }
 
+function hideField(field, nft) {
+    if(field === 'entityId'){
+        delete nft['entityId'];
+        return nft;
+    }
+    delete nft['entityFields'][field]['_value'];
+    return nft;
+}
+
 async function mintNft(req, res, nft, repository) {
 
     //check if status exist and is premint
     if(!nft.status) {
-        console.log("status is missing");
         let response = {};
-        response['status'] = 'error';
-        response['message'] = 'NFT status is missing, cannot mint';
+        response['status'] = 'fail';
+        response['data'] = {status: 'Missing required parameter: status'};
         res.status(400).send(response);
         return;
     }
     if(nft.status === 'minted') {
-        console.log("status is minted");
         let response = {};
-        response['status'] = 'error';
-        response['message'] = 'NFT status is minted, cannot mint again';
+        response['status'] = 'fail';
+        response['data'] = {status: 'NFT status is minted, cannot mint again'};
         res.status(400).send(response);
         return;
     }
     if(nft.status !== 'premint') {
-        console.log("status is not premint");
         let response = {};
-        response['status'] = 'error';
-        response['message'] = 'NFT status is not premint, cannot mint';
+        response['status'] = 'fail';
+        response['data'] = {status: 'NFT status is not premint, cannot mint'};
         res.status(400).send(response);
         return;
     }
 
     let tokenId = req.body.tokenId;
-    console.log("tokenId", tokenId);
     if (!tokenId) {
-        console.log("tokenId is missing");
+        let response = {};
+        response['status'] = 'fail';
+        response['data'] = {tokenId: 'Missing required parameter: tokenId'};
+        res.status(400).send(response);
+        return;
+    }
+
+    //check if tokenId is not already in use
+    let nftsToBeChecked = await repository.search().where('tokenId').eq(tokenId).returnAll();
+    if(nftsToBeChecked.length > 0) {
         let response = {};
         response['status'] = 'error';
-        response['message'] = 'Missing required parameter: tokenId';
+        response['message'] = 'TokenId is already in use';
         res.status(400).send(response);
         return;
     }
 
     const filename = nft.name + "_" + nft.owner + '.json';
     const filepath = '../temp/' + filename;
-    const file = await fs.readFile(path.resolve(__dirname, filepath));
 
     //if successful, store save projectJSON to IPFS
     let dataToUpload = await fs.readFile(path.resolve(__dirname, filepath), {encoding:"base64"});
@@ -567,7 +815,7 @@ async function mintNft(req, res, nft, repository) {
 
     let resIpfs = await Moralis.EvmApi.ipfs.uploadFolder({ abi });
     resIpfs = resIpfs.toJSON();
-    console.log("resIpfs: ", resIpfs[0]['path']);
+    //console.log("resIpfs: ", resIpfs[0]['path']);
     
     //check if IPFS upload was successful
     if(!resIpfs[0]['path']){
@@ -584,15 +832,18 @@ async function mintNft(req, res, nft, repository) {
     nft.ipfsLink = ipfsLink;
     nft.status = 'minted';
 
-    console.log("nft before saving: ", nft);
-
     let id = await repository.save(nft);
     console.log("saving id: ", id);
+
+    //delete temp file from disk
+    await removeFile(filepath);
+
+    let data = {nft: nft};
 
     let response = {};
     response['status'] = 'success';
     response['message'] = 'NFT updated successfully (minting)';
-    response['data'] = nft;
+    response['data'] = data;
     res.status(200).send(response);
     return;
 }
@@ -602,37 +853,36 @@ async function updateNft(req, res, nft, repository) {
     //check if status exist and is minted
     if(!nft.status) {
         let response = {};
-        response['status'] = 'error';
-        response['message'] = 'NFT status is missing, cannot update';
+        response['status'] = 'fail';
+        response['data'] = {status: 'Missing required parameter: status'};
         res.status(400).send(response);
         return;
     }
     if(nft.status === 'premint') {
         let response = {};
-        response['status'] = 'error';
-        response['message'] = 'NFT status is premint, cannot update';
+        response['status'] = 'fail';
+        response['data'] = {status: 'NFT status is premint, cannot update'};
         res.status(400).send(response);
         return;
     }
     if(nft.status !== 'minted') {
         let response = {};
-        response['status'] = 'error';
-        response['message'] = 'NFT status is not minted, cannot update';
+        response['status'] = 'fail';
+        response['data'] = {status: 'NFT status is not minted, cannot update'};
         res.status(400).send(response);
         return;
     }
-    console.log("req.body: ", req.body);
     if(!req.body.manufacturer && !req.body.buyer) {
         let response = {};
-        response['status'] = 'error';
-        response['message'] = 'Missing required parameter: manufacturer or buyer';
+        response['status'] = 'fail';
+        response['data'] = {body: 'Missing required parameter: manufacturer or buyer'};
         res.status(400).send(response);
         return;
     }
     if(req.body.manufacturer && req.body.buyer) {
         let response = {};
-        response['status'] = 'error';
-        response['message'] = 'Cannot update both manufacturer and buyer';
+        response['status'] = 'fail';
+        response['data'] = {body: 'Cannot update both manufacturer and buyer'};
         res.status(400).send(response);
         return;
     }
@@ -664,8 +914,8 @@ async function updateNft(req, res, nft, repository) {
     if(req.body.manufacturer) {
         if(nft.manufacturers.includes(req.body.manufacturer)) {
             let response = {};
-            response['status'] = 'error';
-            response['message'] = 'Manufacturer already exists';
+            response['status'] = 'fail';
+            response['data'] = {manufacturer: 'Manufacturer already exists'};
             res.status(400).send(response);
             return;
         }
@@ -674,16 +924,16 @@ async function updateNft(req, res, nft, repository) {
     else if(req.body.buyer) {
         if(nft.buyers.includes(req.body.buyer)) {
             let response = {};
-            response['status'] = 'error';
-            response['message'] = 'Buyer already exists';
+            response['status'] = 'fail';
+            response['data'] = {buyer: 'Buyer already exists'};
             res.status(400).send(response);
             return;
         }
         nft.buyers.push(req.body.buyer);
     } else {
         let response = {};
-        response['status'] = 'error';
-        response['message'] = 'Missing required parameter: manufacturer or buyer';
+        response['status'] = 'fail';
+        response['data'] = {body: 'Missing required parameter: manufacturer or buyer'};
         res.status(400).send(response);
         return;
     }
@@ -691,15 +941,17 @@ async function updateNft(req, res, nft, repository) {
     let id = await repository.save(nft);
     console.log("id: ", id);
 
+    let data = {nft: nft};
+
     let response = {};
     response['status'] = 'success';
     response['message'] = 'NFT updated successfully (updating manufacturers or buyers)';
-    response['data'] = nft;
+    response['data'] = data;
     res.status(200).send(response);
     return;
 }
 
-async function verifyIfOwner(nftOwner,token) {
+async function verifyIfOwner(nftOwner, token) {
     try {
         if (!token) return false;
         token = token.split(' ')[1];
@@ -715,5 +967,34 @@ async function verifyIfOwner(nftOwner,token) {
     } catch (err) {
         console.log(err.message)
         return false;
+    }
+}
+
+async function verifyIfManufacturer(nftManufacturers, token) {
+    try {
+        if (!token) return false;
+        token = token.split(' ')[1];
+
+        const {address, body} = await Web3Token.verify(token);
+        console.log("ADDRESS RECOVERED ",address,body)
+      
+        if(nftManufacturers.includes(address)){
+            return true;
+        }else{
+            return false;
+        }
+    } catch (err) {
+        console.log(err.message)
+        return false;
+    }
+}
+
+//remove file from disk
+async function removeFile(filepath) {
+    try {
+        await fs.unlink(path.resolve(__dirname, filepath));
+        console.log('File removed');
+    } catch(err) {
+        console.error(err);
     }
 }
