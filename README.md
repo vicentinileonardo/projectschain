@@ -44,10 +44,10 @@ https://docs.google.com/document/d/1N4C0VYREDxl1NqOsBbevRbWa5_r74DFTg6tUAF2v8X4/
     - [x] creare modale per maggiori info progetto
 
 + Backend
-    - Upload su IPFS gia' implementato (va messo alla fine del minting)
-    - Sistemare alcune API
-    - aggiungere logica di accesso con JWT o altro 
-    - POST su server, quando ho ottenuto succes, tokenID da dal master contarct, in questo modo posso assegnare come id sul server il tokenID
+    - [x]Upload su IPFS gia' implementato (va messo alla fine del minting)
+    - [x] Sistemare alcune API
+    - [x] aggiungere logica di accesso con JWT o altro 
+    - [x]POST su server, quando ho ottenuto succes, tokenID da dal master contarct, in questo modo posso assegnare come id sul server il tokenID
 
 
 + On-chain
@@ -59,6 +59,9 @@ https://docs.google.com/document/d/1N4C0VYREDxl1NqOsBbevRbWa5_r74DFTg6tUAF2v8X4/
     - logica access smart contract
     - nella mint token di designerNFT, controllare che il tokenURI sia gia' presente sul server
     - aggiungere test
+
+
+
 
 + Report
     - spiegare l'ownership ha senso solo per cose hanno valore "intellettuale". non avrebbe senso fare nft per un progetto con all'interno una semplice sfera o cubo.

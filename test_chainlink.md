@@ -1,6 +1,7 @@
 https://docs.chain.link/chainlink-nodes/v1/running-a-chainlink-node
 
 used alchemy ethereum client, not a local one like geth
+accessed with google credentials
 
 
 

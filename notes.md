@@ -19,3 +19,7 @@ Validate the inputs: Check if the required parameters for minting are provided a
 Perform pre-minting checks: Perform additional checks specific to your use case to ensure that the minting process is likely to succeed. This could include checking the availability of resources, verifying permissions or roles, and enforcing any business rules or constraints.
 Handle errors gracefully: If any validation or pre-minting check fails, handle the error gracefully and provide appropriate feedback to the user. This can help avoid unnecessary transactions on the blockchain and improve the user experience.
 By implementing these internal checks, you can ensure that the minting process is more reliable and efficient. However, it is important to note that these checks should complement the inherent validation mechanisms provided by the smart contract itself, as the blockchain is ultimately the authoritative source of truth for the minting process.
+
+## About manufactures and buyers lists
+
+These list are **whitelists**, so the platform that has our plugin can check if the manufacturer can use the project
