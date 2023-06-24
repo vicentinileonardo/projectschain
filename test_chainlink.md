@@ -1,6 +1,6 @@
 https://docs.chain.link/chainlink-nodes/v1/running-a-chainlink-node
 
-used alchemy ethereum client
+used alchemy ethereum client, not a local one like geth
 
 
 
@@ -54,26 +54,35 @@ test at: http://localhost:6688/
 
 https://docs.chain.link/chainlink-nodes/v1/fulfilling-requests
 
-funding the node:
-https://sepoliafaucet.com/
+funding the chainlink node:
+https://sepoliafaucet.com/ (by alchemy)
 
 
-operator/oracle contract address
-0x069910B257CB7288e61041C8d18357C1Fd352BB7
+# admin address (the one on metamask) [needs to be funded]
+0x46D72b1e93D5daaD3b68104F437Dbe0a4b00e18c
 
-External Job ID
-ea3a33f4-5439-4853-b41e-104e6197c4b6
-ea3a33f454394853b41e104e6197c4b6
+# node address [needs to be funded]
+0x66f3742D3b5C9d104FCaE69f4Fcc4bc734396377
 
-Consumer address
-0x70D20BA7EBa6E4A85E83d70945d7bCE72C5aAe03
+# operator/oracle contract address [does not need to be funded]
+0xe367a0f5E216dE86a90FD9E0d8aea27d6a4956bd
+
+# Job ID
+38d2757024be4f4ba47f80bcd173ca6a
+
+# Consumer/client address [needs to be funded]
+0x408E2CF31923427C1304AB02e8F68b74feb47Fc2
+
+# host machine ip address, since we are running the node on docker
+ifconfig | grep 'inet ' | grep -v 127.0.0.1 | awk '{print $2}'
+192.168.1.238
 
 
 
 
 
 
-notes on job toml file: 
+# notes on job toml file: 
 
 decode_log: This task decodes the input data from the blockchain log using the OracleRequest ABI. The input data contains information about the oracle request, such as the requestId, payment, and data parameters.
 
@@ -92,11 +101,7 @@ submit_tx: This task submits the encoded transaction to the specified contract a
 
 
 
-
-
-
-
-notes on client smart contract:
+# notes on client smart contract:
 
 explain this in details
 function fulfillEthereumPrice(
