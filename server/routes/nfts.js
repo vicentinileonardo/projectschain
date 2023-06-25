@@ -434,6 +434,9 @@ module.exports = (app, repository, Moralis) => {
 
             console.log("id: ", id);
 
+            //in order to have the unflattened projectJSON in the response
+            nft['entityFields']['projectJSON']['_value'] = nft_body.projectJSON;
+
             let data = { nft: nft };
 
             //all validations passed and metadata saved
