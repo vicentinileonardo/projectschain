@@ -88,21 +88,25 @@ export const useNFTsStore = defineStore('nfts', () => {
     }
 
     // Pre-mint: post new project to backend for preliminary checks and hash
-    const preMintedProject = await request('/api/v1/nfts', 'POST', nft) as NFT;
+    const preMintedProject = await request('/api/v1/nfts', 'POST', nft);
 
-    console.log(preMintedProject);
-    console.log(preMintedProject.nft);
+    console.log(`price = ${preMintedProject.nft.price}`);
+    console.log(`royalty price = ${preMintedProject.nft.royaltyPrice}`);
+    console.log(`hash = ${preMintedProject.nft.hash}`);
+    console.log(`components = ${preMintedProject.nft.components}`);
 
     // Mint new project NFT on blockchain
     try {
       const tokenId = await masterContract.value.methods
         .mintToken(
-          preMintedProject.price,
-          preMintedProject.royaltyPrice,
-          preMintedProject.hash,
-          preMintedProject.components
+          preMintedProject.nft.price,
+          preMintedProject.nft.royaltyPrice,
+          preMintedProject.nft.hash,
+          preMintedProject.nft.components ? preMintedProject.nft.components : [],
         )
         .send({ from: accountStore.getAccount });
+
+      console.log(tokenId);
 
       /*
       .on('confirmation', (confirmationNumber: number, receipt: any) => {

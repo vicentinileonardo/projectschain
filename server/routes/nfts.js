@@ -422,6 +422,7 @@ module.exports = (app, repository, Moralis) => {
         nft.imageLink = imageLink;
         nft.ipfsLink = url;
         nft.projectJSON = encodedProjectJson;
+        nft.components = nft_body.components;
         nft.manufacturers = [];
         nft.buyers = [];
 
@@ -669,6 +670,7 @@ function handleFields(nfts, query_fields) {
 async function validateNft(nft_body, repository) {
 
     //check if name is already in use
+    /*
     let nftsToBeChecked = await repository.search().where('name').eq(nft_body.name).returnAll();
     if (nftsToBeChecked.length > 0) {
         let response = {};
@@ -676,6 +678,7 @@ async function validateNft(nft_body, repository) {
         response['data'] = { name: 'Name already in use' };
         return response;
     }
+    */
 
     //check if price is valid
     if (nft_body.price) {

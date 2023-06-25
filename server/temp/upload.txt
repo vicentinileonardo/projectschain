@@ -1,5 +1,0 @@
-{
-    "name": "byhyuij",
-    "size": "C",
-    "color": "d"
-}

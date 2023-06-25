@@ -7,6 +7,8 @@ ganache-data
 
 redis-data
 
+server/temp
+
 # dotenv environment variables file
 .env
 .env.test
