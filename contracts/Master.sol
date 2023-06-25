@@ -25,4 +25,8 @@ contract Master {
 
     return tokenId;
   }
+
+  function buyToken() public {
+    // TODO
+  }
 }

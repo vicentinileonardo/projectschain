@@ -5,8 +5,12 @@ import AppButton from "@/components/AppButton.vue";
 import LoadingSpinner from "@/components/LoadingSpinner.vue";
 import type { NFT } from "@/model/nft";
 import {useNFTsStore} from "@/stores/nfts.store";
+import { useToast } from "vue-toastification";
+import { useAccountStore } from "@/stores/account.store";
 
 const nftStore = useNFTsStore();
+const toast = useToast();
+const accountStore = useAccountStore();
 
 const fileToUpload = ref<File | null>(null);
 const uploadedPath = ref('');
@@ -19,7 +23,7 @@ const projectNFT = ref<NFT>({
   description: "",
   price: 0,
   royaltyPrice: 0,
-  owner: "",
+  owner: accountStore.getAccount!,
   projectJSON: null,
 });
 
@@ -45,10 +49,10 @@ function onDeleteFile() {
 async function onSubmit() {
   // TODO fix for upload to contract and backend
   loading.value = true;
-  try {
-    nftStore.mintNewProject(projectNFT.value);
-  } catch(err) {
-    console.error('Error in uploading project', err);
+  const outcome = await nftStore.mintNewProject(projectNFT.value);
+
+  if (!outcome.ok) {
+    toast.error("Error in saving project as NFT");
   }
 
   /*
@@ -138,7 +142,7 @@ const validSubmit = computed(() => {
       </label>
       <div v-if="fileToUpload" class="uploaded-file">
         <Icon icon="mdi:file" />
-        <span>{{ fileToUpload.name }}</span>
+        <p>{{ fileToUpload.name }}</p>
         <AppButton :round="true" class="bg-danger" @click="onDeleteFile">
           <Icon icon="material-symbols:close" />
         </AppButton>
@@ -146,7 +150,7 @@ const validSubmit = computed(() => {
     </div>
   </div>
 
-  <AppButton class="bg-primary centered" :disabled="!validSubmit && !loading" @click="onSubmit">
+  <AppButton class="bg-primary centered" v-if="!loading" :disabled="!validSubmit" @click="onSubmit">
     <Icon icon="material-symbols:save" />
     Save project
   </AppButton>
@@ -187,10 +191,15 @@ input[type="file"] {
   border-radius: 0.5em;
   border: 1px #d0d0d0 solid;
   display: flex;
+  justify-content: space-between;
   align-items: center;
   gap: 0.5em;
-  padding: 0.5em 1em;
+  padding: 0.5em 0.5em;
   margin-top: 1rem;
+}
+
+.uploaded-file p {
+  margin: 0.1rem;
 }
 
 .upload-result {
@@ -214,6 +223,8 @@ label {
 }
 
 input, textarea {
+  font-size: medium;
+  font-family: 'Lato', sans-serif;
   padding: 0.5rem;
   background-color: #fcfcfc;
   border-radius: 5px;

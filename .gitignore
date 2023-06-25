@@ -4,7 +4,8 @@ node_modules
 .idea
 
 ganache-data
-ganache-data/*
+
+redis-data
 
 # dotenv environment variables file
 .env

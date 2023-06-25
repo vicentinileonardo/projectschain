@@ -25,21 +25,20 @@ onMounted(async () => {
 
     try { //token expired or not present
       let token = localStorage.getItem('token');
-      const {address, body} = await Web3Token.verify(token.split(' ')[1]);
+      const {address, body} = await Web3Token.verify(token?.split(' ')[1]);
     } catch (err) {
       const web3 = new Web3(window.ethereum);
       await window.ethereum.request({ method: 'eth_requestAccounts'});
 
       // getting address from which we will sign message
-      const my_address = (await web3.eth.getAccounts())[0];
+      const my_address = accountStore.getAccount;
 
       // generating a token with 1 day of expiration time
       let token = await Web3Token.sign(msg => web3.eth.personal.sign(msg, my_address), '1d');
       localStorage.setItem('token', 'Bearer '+token);
       console.log("Bearer "+token);
-
-      toast.success("Connected to MetaMask wallet!");
     }
+    toast.success("Connected to MetaMask wallet!");
   } catch (err) {
     console.error("Error in loading account address from MetaMask", err);
     error.value = true;
