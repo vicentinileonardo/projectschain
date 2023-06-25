@@ -76,6 +76,7 @@ https://sepoliafaucet.com/ (by alchemy)
 
 # host machine ip address, since we are running the node on docker
 ifconfig | grep 'inet ' | grep -v 127.0.0.1 | awk '{print $2}'
+ifconfig | grep 'inet ' | grep -v 127.0.0.1 | awk '{print $2}' | head -1
 192.168.1.238
 
 

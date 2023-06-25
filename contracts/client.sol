@@ -48,6 +48,9 @@ contract ATestnetConsumer is ChainlinkClient, ConfirmedOwner {
         uint256 _tokenId,
         string memory _host_machine_ip
     ) public onlyOwner {
+
+        checkTokenIdToHash(_tokenId);
+
         Chainlink.Request memory req = buildChainlinkRequest(
             stringToBytes32(_jobId),
             address(this),
@@ -77,9 +80,19 @@ contract ATestnetConsumer is ChainlinkClient, ConfirmedOwner {
 
         if(keccak256(abi.encodePacked(_success)) == keccak256(abi.encodePacked("success"))){
             _tokenIdToMinted[_tokenId] = true;
+
+        //(once we do the merge of projectNFT and this skeleton contract)
+        //here we could make the reuturn statement of the Mint function of the ProjectNFT contract
+        // like return newItemId;
+
+
         }
         else{
             _tokenIdToMinted[_tokenId] = false;
+
+        //if something goes wrong, since we must return a uint256 in the Mint function of the ProjectNFT contract
+        //we could return 0, (tokenIds start from 1)
+
         }
         
     }
@@ -134,5 +147,10 @@ contract ATestnetConsumer is ChainlinkClient, ConfirmedOwner {
             // solhint-disable-line no-inline-assembly
             result := mload(add(source, 32))
         }
+    }
+
+    function checkTokenIdToHash(uint256 tokenId) public view {
+        bytes memory hashBytes = bytes(_tokenIdToHash[tokenId]);
+        require(hashBytes.length > 0, "Hash for provided tokenId is empty");
     }
 }
