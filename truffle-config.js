@@ -41,9 +41,9 @@
  * https://trufflesuite.com/docs/truffle/getting-started/using-the-truffle-dashboard/
  */
 
-//require("dotenv").config();
-//const { INFURA_API_KEY, MNEMONIC } = process.env;
-//const HDWalletProvider = require("@truffle/hdwallet-provider");
+require("dotenv").config();
+const { INFURA_API_KEY, MNEMONIC } = process.env;
+const HDWalletProvider = require("@truffle/hdwallet-provider");
 
 module.exports = {
   /**
@@ -62,11 +62,11 @@ module.exports = {
       port: 8545,            // Standard Ethereum port (default: none)
       network_id: "*",       // Any network (default: none)
     },
-    //sepolia: {
-    //  provider: () => new HDWalletProvider(MNEMONIC, INFURA_API_KEY),
-    //  network_id: "11155111",
-    //  gas: 4465030,
-    //},
+    sepolia: {
+      provider: () => new HDWalletProvider(MNEMONIC, INFURA_API_KEY),
+      network_id: "11155111",
+      gas: 4465030,
+    },
 
     // Useful for testing. The `development` name is special - truffle uses it by default
     // if it's defined here and no other network is specified at the command line.
