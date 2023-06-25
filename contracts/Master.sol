@@ -8,6 +8,8 @@ contract Master {
   ProjectNFT private projectNFT;
   AccessSmartContract private accessContract;
 
+  event NewToken(address owner, uint256 tokenId);
+
   constructor(address projectNFTAddress, address accessContractAddress) {
     projectNFT = ProjectNFT(projectNFTAddress);
     accessContract = AccessSmartContract(accessContractAddress);
@@ -18,12 +20,12 @@ contract Master {
     uint256 royaltyPrice,
     string calldata projectHash,
     uint256[] calldata components
-  ) public returns (uint256) {
+  ) public {
     //TODO: check if the caller is authorized?
 
     uint256 tokenId = projectNFT.mintToken(msg.sender, price, royaltyPrice, projectHash, components);
 
-    return tokenId;
+    emit NewToken(msg.sender, tokenId);
   }
 
   function buyToken() public {

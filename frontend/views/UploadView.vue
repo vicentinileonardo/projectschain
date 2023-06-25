@@ -47,38 +47,15 @@ function onDeleteFile() {
 }
 
 async function onSubmit() {
-  // TODO fix for upload to contract and backend
   loading.value = true;
-  const outcome = await nftStore.mintNewProject(projectNFT.value);
-
-  if (!outcome.ok) {
-    toast.error("Error in saving project as NFT");
+  try {
+    await nftStore.mintNewProject(projectNFT.value);
+    resetUpload();
+    toast.success("Project successfully secured as NFT!");
+  } catch (err) {
+    toast.error("Error in uploading project NFT");
+    console.error('Error in minting', err);
   }
-
-  /*
-  if(!fileToUpload.value){
-      alert("No files selected");
-  } else {
-      const formData = new FormData();
-      formData.append("file", fileToUpload.value);
-      let res = await fetch("http://127.0.0.1:3000/api/uploadIPFS", {
-          method: 'POST',
-          body: formData,
-      });
-      res = await res.json();
-      res = JSON.parse(res)
-      //console.log(res);
-      if(res.status=="FAIL"){
-          alert(res.message);
-          resetUpload();
-      }else{
-          uploadedPath.value = res.url;
-          uploaded.value = true;
-      }
-      
-  }
-  */
-  // resetUpload();
   loading.value = false;
 }
 

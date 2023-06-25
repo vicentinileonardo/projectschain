@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import {NFT} from "@/model/nft";
+import type {NFT} from "@/model/nft";
 import {ref, watch} from "vue";
 import AppButton from "@/components/AppButton.vue";
 import {onClickOutside} from "@vueuse/core";

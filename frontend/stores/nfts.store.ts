@@ -11,9 +11,9 @@ interface ApiError {
   message: string,
 }
 
-export interface Outcome {
-  message: string,
-  ok: boolean;
+interface NewTokenEvent {
+  tokenId: number,
+  owner: string,
 }
 
 /**
@@ -75,67 +75,44 @@ export const useNFTsStore = defineStore('nfts', () => {
     }
   }
 
-  async function mintNewProject(nft: NFT): Promise<Outcome> {
+  async function mintNewProject(nft: NFT) {
     const accountStore = useAccountStore();
 
     // Requires contract and user addresses
     if (!contractAddress.value || !accountStore.getAccount) {
-      console.error('Need to have account and master contract addresses');
-      return {
-        message: "Cannot perform transaction, need account and contract addresses",
-        ok: false
-      };
+      throw new Error('Need to have account and master contract addresses');
     }
 
     // Pre-mint: post new project to backend for preliminary checks and hash
     const preMintedProject = await request('/api/v1/nfts', 'POST', nft);
 
-    console.log(`price = ${preMintedProject.nft.price}`);
-    console.log(`royalty price = ${preMintedProject.nft.royaltyPrice}`);
-    console.log(`hash = ${preMintedProject.nft.hash}`);
-    console.log(`components = ${preMintedProject.nft.components}`);
+    console.log('Pre-mint successfull');
 
     // Mint new project NFT on blockchain
-    try {
-      const tokenId = await masterContract.value.methods
-        .mintToken(
-          preMintedProject.nft.price,
-          preMintedProject.nft.royaltyPrice,
-          preMintedProject.nft.hash,
-          preMintedProject.nft.components ? preMintedProject.nft.components : [],
-        )
-        .send({ from: accountStore.getAccount });
 
-      console.log(tokenId);
+    // Listen for new tokenId event
+    masterContract.value.events.NewToken()
+      .on('data', async (event: any) => {
+        const address = event.returnValues[0];
+        const tokenId = event.returnValues[1];
 
-      /*
-      .on('confirmation', (confirmationNumber: number, receipt: any) => {
-        console.log(receipt);
-        // Add new project to store
-        nfts.value.push(project);
-      })
-      .on('error', (error: Error, receipt: any) => {
-        throw error;
-      });  
-      */
+        console.log(`Mint successfull with token id ${tokenId}`);
 
-      // Add to store minted project from server
-      const res = await fetch(`/api/v1/nfts/${tokenId}`);
-      const mintedProject = await res.json() as NFT;
-      myNfts.value.push(mintedProject);
+        // Add to store minted project from server
+        const res = await fetch(`/api/v1/nfts/${tokenId}`);
+        const mintedProject = await res.json() as NFT;
+        myNfts.value.push(mintedProject);
+      });
 
-      return {
-        message: `Transaction successfull, saved project as token ${tokenId}`,
-        ok: true,
-      }
-
-    } catch (err) {
-      console.error("Error during mint transaction", err);
-      return {
-        message: "Error during mint transaction",
-        ok: false
-      };
-    }
+    // Then send real transaction
+    await masterContract.value.methods
+      .mintToken(
+        preMintedProject.nft.price,
+        preMintedProject.nft.royaltyPrice,
+        preMintedProject.nft.hash,
+        preMintedProject.nft.components ? preMintedProject.nft.components : [],
+      )
+      .send({ from: accountStore.getAccount });
   }
 
   async function buyProject(nft: NFT) {
@@ -143,8 +120,7 @@ export const useNFTsStore = defineStore('nfts', () => {
 
     // Requires contract and user addresses
     if (!contractAddress.value || !accountStore.getAccount) {
-      console.error('Need to have account and master contract addresses');
-      return;
+      throw new Error('Need to have account and master contract addresses');
     }
 
     // TODO complete

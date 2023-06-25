@@ -4,7 +4,7 @@ import { Icon } from '@iconify/vue';
 import ProjectCard from '@/components/ProjectCard.vue';
 import ProjectInfoModal from "@/components/ProjectInfoModal.vue";
 import { onMounted, ref } from "vue";
-import { NFT } from "@/model/nft";
+import type { NFT } from "@/model/nft";
 import { useNFTsStore } from '@/stores/nfts.store';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
 
