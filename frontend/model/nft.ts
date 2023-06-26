@@ -28,4 +28,7 @@ export interface NFT {
 
     // IPFS link
     ipfsLink?: string,
+
+    //Link to thumbnail
+    imageLink?: string,
 }

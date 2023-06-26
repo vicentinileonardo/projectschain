@@ -52,8 +52,8 @@ export const useNFTsStore = defineStore('nfts', () => {
   async function getCatalogNfts() {
     if (catalogNfts.value.length == 0) {
       // Get catalog nfts
-      const projects = await request('/api/v1/nfts/catalog', 'GET') as NFT[];
-      catalogNfts.value = projects;
+      const projects = await request('/api/v1/nfts/catalog', 'GET');
+      catalogNfts.value = projects.nfts;
     }
   }
 
@@ -61,8 +61,8 @@ export const useNFTsStore = defineStore('nfts', () => {
     if (myNfts.value.length == 0) {
       // Get my nfts
       const accountStore = useAccountStore();
-      const projects = await request(`/api/v1/owners/${accountStore.getAccount}/nfts`, 'GET') as NFT[];
-      myNfts.value = projects;
+      const projects = await request(`/api/v1/owners/${accountStore.getAccount}/nfts`, 'GET');
+      myNfts.value = projects.nfts;
     }
   }
 
@@ -70,8 +70,8 @@ export const useNFTsStore = defineStore('nfts', () => {
     if (myNfts.value.length == 0) {
       // Get my nfts
       const accountStore = useAccountStore();
-      const projects = await request(`/api/v1/buyers/${accountStore.getAccount}/nfts`, 'GET') as NFT[];
-      boughtNfts.value = projects;
+      const projects = await request(`/api/v1/buyers/${accountStore.getAccount}/nfts`, 'GET');
+      boughtNfts.value = projects.nfts;
     }
   }
 
@@ -87,21 +87,29 @@ export const useNFTsStore = defineStore('nfts', () => {
     const preMintedProject = await request('/api/v1/nfts', 'POST', nft);
 
     console.log('Pre-mint successfull');
+    console.log(preMintedProject);
 
     // Mint new project NFT on blockchain
 
     // Listen for new tokenId event
     masterContract.value.events.NewToken()
       .on('data', async (event: any) => {
+        // TODO maybe check if event is for my address?
         const address = event.returnValues[0];
         const tokenId = event.returnValues[1];
 
         console.log(`Mint successfull with token id ${tokenId}`);
 
+        // Set tokenId
+        preMintedProject.nft.tokenId = parseInt(tokenId);
+
+        // Need to simulate oracle: make put to complete minting with token id
+        const mintedProject = await request(`/api/v1/nfts/${preMintedProject.nft.hash}`, 'PUT', preMintedProject.nft);
+
+        console.log(mintedProject);
+
         // Add to store minted project from server
-        const res = await fetch(`/api/v1/nfts/${tokenId}`);
-        const mintedProject = await res.json() as NFT;
-        myNfts.value.push(mintedProject);
+        myNfts.value.push(mintedProject.nft);
       });
 
     // Then send real transaction
@@ -110,7 +118,7 @@ export const useNFTsStore = defineStore('nfts', () => {
         preMintedProject.nft.price,
         preMintedProject.nft.royaltyPrice,
         preMintedProject.nft.hash,
-        preMintedProject.nft.components ? preMintedProject.nft.components : [],
+        preMintedProject.nft.projectJSON.components,
       )
       .send({ from: accountStore.getAccount });
   }
@@ -126,7 +134,7 @@ export const useNFTsStore = defineStore('nfts', () => {
     // TODO complete
   }
 
-  async function request(url: string, method: "GET" | "POST", data?: any) {
+  async function request(url: string, method: "GET" | "POST" | "PUT" | "PATCH", data?: any) {
     const headers = new Headers();
     headers.append("authorization", localStorage.getItem("token")!);
     headers.append("Content-Type", "application/json");

@@ -5,20 +5,22 @@ import AppButton from '@/components/AppButton.vue';
 
 
 const props = defineProps<{
-  // TODO remove optional nft prop
-  project?: NFT
+  project: NFT
   hideBuyButton?: boolean;
 }>();
 
-
 const emits = defineEmits(['buy', 'info']);
+
+function getThumbnail() {
+  return new URL('../public/' + props.project.imageLink, import.meta.url);
+}
 
 </script>
 
 <template>
   <div class="card">
     <div class="card-image-container">
-      <img src="../assets/project1.jpg" class="card-image"/>
+      <img :src="getThumbnail().toString()" class="card-image"/>
     </div>
 
     <div class="card-title">
