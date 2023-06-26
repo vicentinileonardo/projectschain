@@ -1,6 +1,6 @@
 export interface NFT {
     // Id of nft
-    tokenId?: string,
+    tokenId?: number,
 
     // Name of project
     name: string,

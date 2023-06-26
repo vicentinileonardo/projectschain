@@ -14,6 +14,11 @@ const router = createRouter({
       component: () => import('../views/CatalogView.vue')
     },
     {
+      path: '/checkout/:tokenId',
+      name: 'checkout',
+      component: () => import('../views/CheckoutView.vue')
+    },
+    {
       path: '/wallet',
       name: 'wallet',
       component: () => import('../views/WalletView.vue')

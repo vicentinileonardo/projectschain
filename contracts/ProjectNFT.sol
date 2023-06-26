@@ -91,67 +91,6 @@ contract ProjectNFT is ERC721URIStorage {
     return total;
   }
 
-  /*
-    //ALTERNATIVE 1, assuming not all the components already present, components cascade must to be a tree
-    function getTokenBuyPrice(uint256 tokenId) public view returns (uint256) {
-      require(tokenId < tokenCounter, 'Token with this id does not exit');
-  
-      // Return token buy price plus royalties of all its components
-      uint256 total = 0;
-      total = total + _tokenIdToPrice[tokenId];
-
-      for (uint256 i=0; i < _tokenIdToComponents[tokenId].length; i++) {
-        total = total + getTokenBuyPrice(_tokenIdToComponents[tokenId][i]);
-      }
-
-      return total;
-    }
-
-    //ALTERNATIVE 2, assuming not all the components already present, components cascade can have cycles
-    function computeAllComponents(uint256 tokenId, uint256[] memory components) public view returns (uint256[] memory) {
-        if(components.length==0){
-            uint256[] memory singleComponentArray = new uint256[](1);
-            singleComponentArray[0] = tokenId;
-            return singleComponentArray;
-        }else{
-            for(uint256 i=0; i<components.length; i++){
-                //TO FIX
-                components = unionComponentsArrays(components,computeAllComponents(components[i], _tokenIdToComponents[components[i]]));
-            }
-            return components;
-        }
-    }
-
-    function unionComponentsArrays(uint256[] memory array1, uint256[] memory array2) public pure returns (uint256[] memory) {
-        uint256[] memory result = new uint256[](array1.length + array2.length);
-        uint256 i;
-        uint256 j;
-        uint256 k;
-        for (i = 0; i < array1.length; i++) {
-            result[k++] = array1[i];
-        }
-        for (j = 0; j < array2.length; j++) {
-            bool found = false;
-            for (i = 0; i < array1.length; i++) {
-                if (array2[j] == array1[i]) {
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) {
-                result[k++] = array2[j];
-            }
-        }
-        uint256[] memory resizedResult = new uint256[](k);
-        for (i = 0; i < k; i++) {
-            resizedResult[i] = result[i];
-        }
-        return resizedResult;
-    }
-
-  }
-  */
-
   function getProjectHash(uint256 tokenId) public view returns (string memory) {
     require(tokenId < tokenCounter, 'Token with this id does not exit');
     return _tokenIdToHash[tokenId];

@@ -9,7 +9,7 @@ const props = defineProps<{
   hideBuyButton?: boolean;
 }>();
 
-const emits = defineEmits(['buy', 'info']);
+const emits = defineEmits(['info']);
 
 function getThumbnail() {
   return new URL('../public/' + props.project.imageLink, import.meta.url);
@@ -20,7 +20,7 @@ function getThumbnail() {
 <template>
   <div class="card">
     <div class="card-image-container">
-      <img :src="getThumbnail().toString()" class="card-image"/>
+      <img :src="getThumbnail().toString()" class="card-image" />
     </div>
 
     <div class="card-title">
@@ -29,10 +29,13 @@ function getThumbnail() {
     </div>
 
     <div class="card-buttons">
-      <AppButton @click="emits('buy', props.project)" class="centered" v-if="!props.hideBuyButton">
-        <Icon icon="material-symbols:shopping-cart" />
-        Buy
-      </AppButton>
+      <RouterLink :to="`/checkout/${props.project?.tokenId}`" v-if="!props.hideBuyButton">
+        <AppButton class="centered" >
+          <Icon icon="material-symbols:shopping-cart" />
+          Buy
+        </AppButton>
+      </RouterLink>
+
       <AppButton @click="emits('info', props.project)" class="centered">
         <Icon icon="ep:info-filled" />
         Info
@@ -42,18 +45,17 @@ function getThumbnail() {
 </template>
 
 <style scoped>
-
 .card {
-    width: fit-content;
-    padding: 0 0 0.5rem 0;
-    background-color: #fff;
-    border: #f3f3f3;
-    border-radius: 5px;
-    flex: 0 1 10%;
-    -webkit-box-shadow: 5px 5px 10px 0px #7E7E7E;
-    -moz-box-shadow: 5px 5px 10px 0px #7E7E7E;
-    -o-box-shadow: 5px 5px 10px 0px #7E7E7E;
-    box-shadow: 5px 5px 10px 0px #7E7E7E;
+  width: fit-content;
+  padding: 0 0 0.5rem 0;
+  background-color: #fff;
+  border: #f3f3f3;
+  border-radius: 5px;
+  flex: 0 1 10%;
+  -webkit-box-shadow: 5px 5px 10px 0px #7E7E7E;
+  -moz-box-shadow: 5px 5px 10px 0px #7E7E7E;
+  -o-box-shadow: 5px 5px 10px 0px #7E7E7E;
+  box-shadow: 5px 5px 10px 0px #7E7E7E;
 }
 
 .card-image {
@@ -71,7 +73,8 @@ function getThumbnail() {
   padding: 0 4rem;
 }
 
-.card-title h4, p {
+.card-title h4,
+p {
   margin: 0;
   width: 10vw;
 }

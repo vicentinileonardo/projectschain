@@ -9,6 +9,7 @@ contract Master {
   AccessSmartContract private accessContract;
 
   event NewToken(address owner, uint256 tokenId);
+  event NewBuyer(address buyer, uint256 tokenId);
 
   constructor(address projectNFTAddress, address accessContractAddress) {
     projectNFT = ProjectNFT(projectNFTAddress);
@@ -28,7 +29,9 @@ contract Master {
     emit NewToken(msg.sender, tokenId);
   }
 
-  function buyToken() public {
-    // TODO
+  function buyToken(uint256 tokenId) public {
+    address buyerAddress = accessContract.buyProject(tokenId, msg.sender);
+
+    emit NewBuyer(buyerAddress, tokenId);
   }
 }

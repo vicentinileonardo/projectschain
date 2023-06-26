@@ -11,9 +11,10 @@ interface ApiError {
   message: string,
 }
 
-interface NewTokenEvent {
-  tokenId: number,
-  owner: string,
+export interface BuyPrice {
+  base: number, 
+  royaltyPrice: number,
+  total: number,
 }
 
 /**
@@ -123,7 +124,12 @@ export const useNFTsStore = defineStore('nfts', () => {
       .send({ from: accountStore.getAccount });
   }
 
-  async function buyProject(nft: NFT) {
+  async function getBuyPrice(tokenId: number): Promise<BuyPrice> {
+    const res = await request(`/api/v1/nfts/${tokenId}/buyPrice`, 'GET');
+    return res;
+  }
+
+  async function buyProject(nft: NFT, buyPrice: number) {
     const accountStore = useAccountStore();
 
     // Requires contract and user addresses
@@ -131,7 +137,20 @@ export const useNFTsStore = defineStore('nfts', () => {
       throw new Error('Need to have account and master contract addresses');
     }
 
-    // TODO complete
+    masterContract.value.events.NewBuyer()
+      .on('data', async (event: any) => {
+        // TODO maybe check if event is for my address?
+        const address = event.returnValues[0];
+        const tokenId = event.returnValues[1];
+
+        console.log(`Buy successfull for token ${tokenId} by ${address}`);
+
+        // TODO patch for manufacturer
+      });
+
+      await masterContract.value.methods
+        .buyProject(nft.tokenId!)
+        .send({ from: accountStore.getAccount, value: buyPrice });
   }
 
   async function request(url: string, method: "GET" | "POST" | "PUT" | "PATCH", data?: any) {
@@ -153,5 +172,5 @@ export const useNFTsStore = defineStore('nfts', () => {
     }
   }
 
-  return { myNfts, boughtNfts, catalogNfts, setUp, getMyNfts, getBoughtNfts, getCatalogNfts, mintNewProject, }
+  return { myNfts, boughtNfts, catalogNfts, setUp, getMyNfts, getBoughtNfts, getCatalogNfts, mintNewProject, getBuyPrice, buyProject }
 });

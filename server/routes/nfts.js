@@ -323,6 +323,68 @@ module.exports = (app, repository, Moralis) => {
         return;
     });
 
+    router.get('/nfts/:tokenId/buyPrice', async (req, res) => {
+        let tokenId = req.params.tokenId;
+        if (!tokenId) {
+            let response = {};
+            response['status'] = 'fail';
+            response['data'] = { tokenId: 'tokenId is required' };
+            res.status(400).send(response);
+            return;
+        }
+        //check that tokenId is a number
+        if (isNaN(tokenId)) {
+            let response = {};
+            response['status'] = 'fail';
+            response['data'] = { tokenId: "tokenId must be a number" };
+            res.status(400).send(response);
+            return;
+        }
+
+        let nfts = await repository.search().where('status').eq('minted').and('tokenId').eq(tokenId).returnAll();
+        if (nfts.length === 0) {
+            let response = {};
+            response['status'] = 'error';
+            response['message'] = 'NFT not found';
+            res.status(404).send(response);
+            return;
+        }
+        if (nfts.length > 1) {
+            let response = {};
+            response['status'] = 'error';
+            response['message'] = 'Multiple NFTs found, something went wrong';
+            res.status(500).send(response);
+            return;
+        }
+
+        nfts = unflattenJSONfield('projectJSON', nfts);
+
+        let nft = nfts[0];
+
+        console.log('getting buy price for NFT ' + nft.tokenId);
+
+        let royaltyPrice = 0;
+
+        for (const c of nft.projectJSON.components) {
+            console.log('component ' + c);
+
+            let components = await repository.search().where('status').eq('minted').and('tokenId').eq(c).returnAll();
+            let component = components[0];
+
+            console.log('royalty price = ' + component.royaltyPrice);
+            royaltyPrice = royaltyPrice + component.royaltyPrice;
+        }
+
+        let data = { base: nft.price, royaltyPrice: royaltyPrice };
+
+        let response = {};
+        response['status'] = 'success';
+        response['message'] = 'Returning buy price';
+        response['data'] = data;
+        res.status(200).send(response);
+        return;
+    })
+
     //POST
     //preminting
     router.post('/nfts', async (req, res) => {
