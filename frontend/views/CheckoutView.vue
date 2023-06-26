@@ -16,6 +16,7 @@ const nftsStore = useNFTsStore();
 const loading = ref(false);
 const toBuy = ref<NFT | null>(null);
 const buyPrice = ref<BuyPrice | null>(null);
+const buying = ref(false);
 
 onMounted(async () => {
     loading.value = true;
@@ -31,6 +32,12 @@ onMounted(async () => {
     loading.value = false;
 });
 
+async function onBuy() {
+    buying.value = true;
+
+    //buying.value = false;
+}
+
 </script>
 
 <template>
@@ -39,23 +46,28 @@ onMounted(async () => {
         <p>🛒 Complete the operation and buy the project</p>
     </header>
 
-    <div class="info">
-        <p><b>Project: </b>{{ toBuy?.name }}</p>
-        <p><b>Description: </b>{{ toBuy?.description }}</p>
-        <p><b>Author: </b>{{ toBuy?.owner }}</p>
-    </div>
+    <div v-if="!loading">
+        <div class="info">
+            <p><b>Project: </b>{{ toBuy?.name }}</p>
+            <p><b>Description: </b>{{ toBuy?.description }}</p>
+            <p><b>Author: </b>{{ toBuy?.owner }}</p>
+        </div>
 
+        <div class="price">
+            <p><b>Base price: </b>{{ buyPrice?.base }}ETH</p>
+            <p><b>Royalty price: </b>{{ buyPrice?.royaltyPrice }}ETH</p>
+            <hr />
+            <p><b>Total: </b>{{ buyPrice?.total }}ETH</p>
+        </div>
 
-    <div class="price">
-        <p><b>Base price: </b>{{ buyPrice?.base }}ETH</p>
-        <p><b>Royalty price: </b>{{ buyPrice?.royaltyPrice }}ETH</p>
-        <hr />
-        <p><b>Total: </b>{{ buyPrice?.total }}ETH</p>
+        <AppButton class="bg-primary centered" v-if="!buying" @click="onBuy">
+            <Icon icon="formkit:ethereum" />
+            <p>Buy project</p>
+        </AppButton>
+        <LoadingSpinner class="centered" v-else />
     </div>
-    <AppButton class="bg-primary centered">
-        <Icon icon="formkit:ethereum" />
-        <p>Buy project</p>
-    </AppButton>
+    
+    <LoadingSpinner v-else />
 </template>
 
 <style scoped>

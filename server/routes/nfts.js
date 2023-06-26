@@ -366,13 +366,13 @@ module.exports = (app, repository, Moralis) => {
         let royaltyPrice = 0;
 
         for (const c of nft.projectJSON.components) {
-            console.log('component ' + c);
 
             let components = await repository.search().where('status').eq('minted').and('tokenId').eq(c).returnAll();
             let component = components[0];
 
-            console.log('royalty price = ' + component.royaltyPrice);
-            royaltyPrice = royaltyPrice + component.royaltyPrice;
+            if (component.owner != nft.owner) {
+                royaltyPrice = royaltyPrice + component.royaltyPrice;
+            }
         }
 
         let data = { base: nft.price, royaltyPrice: royaltyPrice };
