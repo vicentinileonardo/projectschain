@@ -67,7 +67,7 @@ function onShowInfo(project: NFT | undefined) {
     <h3>Purchased projects</h3>
     <div class="projects-card-row my2" v-if="!loading && nftsStore.boughtNfts.length > 0">
       <ProjectCard 
-        v-for="project in nftsStore.catalogNfts" 
+        v-for="project in nftsStore.boughtNfts" 
         :project="project"
         :key="project.tokenId" 
         :hide-buy-button="true"

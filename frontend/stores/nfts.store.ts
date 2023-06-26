@@ -67,7 +67,7 @@ export const useNFTsStore = defineStore('nfts', () => {
   }
 
   async function getBoughtNfts() {
-    if (myNfts.value.length == 0) {
+    if (boughtNfts.value.length == 0) {
       // Get my nfts
       const accountStore = useAccountStore();
       const projects = await request(`/api/v1/buyers/${accountStore.getAccount}/nfts`, 'GET');

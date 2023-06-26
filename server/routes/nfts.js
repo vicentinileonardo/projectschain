@@ -98,7 +98,7 @@ module.exports = (app, repository, Moralis) => {
             response['message'] = 'NFTs found';
 
             if (nfts.length === 0) {
-                response['data'] = [];
+                response['data'] = { nfts: []};
             } else {
                 //unflatten the projectJSON
                 nfts = unflattenJSONfield('projectJSON', nfts);
@@ -158,7 +158,7 @@ module.exports = (app, repository, Moralis) => {
             response['message'] = 'NFTs found';
 
             if (nfts.length === 0) {
-                response['data'] = [];
+                response['data'] = { nfts: []};
             } else {
 
                 //unflatten the projectJSON
@@ -218,7 +218,7 @@ module.exports = (app, repository, Moralis) => {
             response['message'] = 'NFTs found';
 
             if (nfts.length === 0) {
-                response['data'] = [];
+                response['data'] = { nfts: []};
             } else {
                 //unflatten the projectJSON
                 nfts = unflattenJSONfield('projectJSON', nfts);

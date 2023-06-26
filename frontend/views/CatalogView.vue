@@ -46,7 +46,7 @@ async function onBuyProject() {
   </div>
 
   <div v-else-if="!loading && nftsStore.catalogNfts.length == 0">
-    <h4>Catalog is empty. Be the first user to upload a project as an NFT!</h4>
+    <h4>Catalog is empty.</h4>
   </div>
   
   <LoadingSpinner v-else class="centered"/>
