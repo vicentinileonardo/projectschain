@@ -25,7 +25,7 @@ contract AccessSmartContract {
         require(msg.value == projectNFT.getTokenBuyPrice(tokenId,ownerAddress), 'Need to pay buy price to buy token');
 
         // Pay projects owner
-        projectNFT.transferPayment(tokenId, msg.value);
+        projectNFT.transferPayment(tokenId, msg.value, ownerAddress);
 
         // Set ownership
         _addressToTokens[ownerAddress][tokenId] = true;
