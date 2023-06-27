@@ -374,10 +374,12 @@ module.exports = (app, repository, Moralis) => {
 
             if (component.owner != user) {
                 royaltyPrice = royaltyPrice + component.royaltyPrice;
+                royaltyPrice = royaltyPrice + Math.floor(component.royaltyPrice*5/100); //commissions
             }
         }
 
-        let data = { base: nft.price, royaltyPrice: royaltyPrice };
+        let price= Math.floor(nft.price+(nft.price*5/100)); //commissions
+        let data = { base: price, royaltyPrice: royaltyPrice };
 
         let response = {};
         response['status'] = 'success';
