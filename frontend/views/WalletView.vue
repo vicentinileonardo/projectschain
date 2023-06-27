@@ -47,8 +47,13 @@ function onShowInfo(project: NFT | undefined) {
     </RouterLink>
 
     <div class="projects-card-row my2" v-if="!loading && nftsStore.myNfts.length > 0">
-      <ProjectCard v-for="project in nftsStore.myNfts" :key="project.tokenId" :hide-buy-button="true"
-        @info="onShowInfo" />
+      <ProjectCard 
+        v-for="project in nftsStore.myNfts" 
+        :project="project"
+        :key="project.tokenId" 
+        :hide-buy-button="true"
+        @info="onShowInfo" 
+      />
     </div>
 
     <div v-else-if="!loading && nftsStore.myNfts.length == 0">
@@ -61,8 +66,13 @@ function onShowInfo(project: NFT | undefined) {
   <div class="m2">
     <h3>Purchased projects</h3>
     <div class="projects-card-row my2" v-if="!loading && nftsStore.boughtNfts.length > 0">
-      <ProjectCard v-for="project in nftsStore.catalogNfts" :key="project.tokenId" :hide-buy-button="true"
-        @info="onShowInfo" />
+      <ProjectCard 
+        v-for="project in nftsStore.boughtNfts" 
+        :project="project"
+        :key="project.tokenId" 
+        :hide-buy-button="true"
+        @info="onShowInfo" 
+      />
     </div>
 
     <div v-else-if="!loading && nftsStore.boughtNfts.length == 0">

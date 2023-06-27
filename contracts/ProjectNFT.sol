@@ -7,11 +7,14 @@ import '@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol';
 
 import "./CustomChainlinkClient.sol";
 
+
 contract ProjectNFT is ERC721URIStorage, CustomChainlinkClient {
     
     using Counters for Counters.Counter;
      
     Counters.Counter private tokenCounter;
+
+    address payable pluginAddress; //where to pay commissions
 
     struct TokenInfo {
        uint256 price;
@@ -25,9 +28,10 @@ contract ProjectNFT is ERC721URIStorage, CustomChainlinkClient {
     // Map to check hashes are unique
     mapping(string => bool) private _hashes;
 
-    constructor(string memory host_machine_ip, address oracle, string memory jobId_1, string memory jobId_2) ERC721('ProjectNFT', 'PNFT') CustomChainlinkClient(host_machine_ip, oracle, jobId_1, jobId_2)  {
-
+    constructor(address payable _pluginAddress, string memory host_machine_ip, address oracle, string memory jobId_1, string memory jobId_2) ERC721('ProjectNFT', 'PNFT') CustomChainlinkClient(host_machine_ip, oracle, jobId_1, jobId_2)  {
+      pluginAddress = _pluginAddress;
     }
+
 
     function mintToken(
         address sender,
@@ -80,7 +84,7 @@ contract ProjectNFT is ERC721URIStorage, CustomChainlinkClient {
     }
 
     //assuming all the subcomponents already present in the project given (maybe is the best idea)
-    function getTokenBuyPrice(uint256 tokenId) public view returns (uint256) {
+    function getTokenBuyPriceOLD(uint256 tokenId) public view returns (uint256) {
         tokenIdCheck(tokenId);
 
         // Return token buy price plus royalties of all its components
@@ -103,21 +107,31 @@ contract ProjectNFT is ERC721URIStorage, CustomChainlinkClient {
         return _tokenInfos[tokenId].components;
     }
 
-    function transferPayment(uint256 tokenId, uint256 amount) public {
-        tokenIdCheck(tokenId);
-        require(amount == getTokenPrice(tokenId), 'Pay amount is not price of project');
+ 
 
-        address payable owner = payable(ownerOf(tokenId));
-        owner.transfer(amount - _tokenInfos[tokenId].price);
-        amount = amount - _tokenInfos[tokenId].price;
 
-        for (uint256 i=0; i < _tokenInfos[tokenId].components.length; i++) {
-            uint256 componentTokenId = _tokenInfos[tokenId].components[i];
-            address payable componentOwner = payable(ownerOf(componentTokenId));
-            componentOwner.transfer(amount - _tokenInfos[componentTokenId].royaltyPrice);
-            amount = amount - _tokenInfos[componentTokenId].royaltyPrice;
-        }
+  function getTokenBuyPrice(uint256 tokenId, address buyerProject) public view returns (uint256) {
+    require(tokenId < tokenCounter, 'Token with this id does not exit');
+    
+    uint256 amount;
+    if(buyerProject==ownerOf(tokenId)){ //buyer and token owner are the same
+      amount = 0;
+    } else {
+      amount = getTokenPrice(tokenId);
+      amount = amount + (getTokenPrice(tokenId)*5/100); //commissions
     }
+
+    for (uint256 i=0; i < _tokenIdToComponents[tokenId].length; i++) {
+      uint256 componentTokenId = _tokenIdToComponents[tokenId][i];
+
+      if(buyerProject != ownerOf(componentTokenId)){ //buyer and component owner are NOT the same
+        amount = amount + _tokenIdToRoyaltyPrice[componentTokenId];
+        amount = amount + (_tokenIdToRoyaltyPrice[componentTokenId]*5/100); //commissions
+      }
+    }
+
+    return amount;
+  }
 
     function tokenIdCheck(uint256 tokenId) private view{
         require(tokenId < tokenCounter.current(), 'Token does not exist');
@@ -127,4 +141,37 @@ contract ProjectNFT is ERC721URIStorage, CustomChainlinkClient {
         require(_exists(tokenId), 'Token does not exist22222');
     }
 
+    function transferPayment(uint256 tokenId, uint256 amount, address buyerProject) public {
+      require(tokenId < tokenCounter, 'Token with this id does not exit');
+
+      uint256 amountToPay = getTokenBuyPrice(tokenId,buyerProject);
+      require(amount >= amountToPay, 'Pay amount is not price of project');
+
+      address payable owner = payable(ownerOf(tokenId));
+
+      if(buyerProject != owner){
+        owner.transfer(_tokenIdToPrice[tokenId]);
+        amount = amount - _tokenIdToPrice[tokenId];
+
+        pluginAddress.transfer(_tokenIdToPrice[tokenId]*5/100); //commissions
+        amount = amount - (_tokenIdToPrice[tokenId]*5/100);
+      }
+
+      for (uint256 i=0; i < _tokenIdToComponents[tokenId].length; i++) {
+        uint256 componentTokenId = _tokenIdToComponents[tokenId][i];
+        address payable componentOwner = payable(ownerOf(componentTokenId));
+
+        if(buyerProject != componentOwner){
+          componentOwner.transfer(_tokenIdToRoyaltyPrice[componentTokenId]);
+          amount = amount - _tokenIdToRoyaltyPrice[componentTokenId];
+
+          pluginAddress.transfer(_tokenIdToRoyaltyPrice[componentTokenId]*5/100);
+          amount = amount - (_tokenIdToRoyaltyPrice[componentTokenId]*5/100);
+        }
+
+      }
+
+    }
+
 }
+

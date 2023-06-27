@@ -1,6 +1,6 @@
 export interface NFT {
     // Id of nft
-    tokenId?: string,
+    tokenId?: number,
 
     // Name of project
     name: string,
@@ -28,4 +28,7 @@ export interface NFT {
 
     // IPFS link
     ipfsLink?: string,
+
+    //Link to thumbnail
+    imageLink?: string,
 }

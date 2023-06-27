@@ -11,9 +11,10 @@ interface ApiError {
   message: string,
 }
 
-interface NewTokenEvent {
-  tokenId: number,
-  owner: string,
+export interface BuyPrice {
+  base: number, 
+  royaltyPrice: number,
+  total: number,
 }
 
 /**
@@ -52,8 +53,8 @@ export const useNFTsStore = defineStore('nfts', () => {
   async function getCatalogNfts() {
     if (catalogNfts.value.length == 0) {
       // Get catalog nfts
-      const projects = await request('/api/v1/nfts/catalog', 'GET') as NFT[];
-      catalogNfts.value = projects;
+      const projects = await request('/api/v1/nfts/catalog', 'GET');
+      catalogNfts.value = projects.nfts;
     }
   }
 
@@ -61,17 +62,17 @@ export const useNFTsStore = defineStore('nfts', () => {
     if (myNfts.value.length == 0) {
       // Get my nfts
       const accountStore = useAccountStore();
-      const projects = await request(`/api/v1/owners/${accountStore.getAccount}/nfts`, 'GET') as NFT[];
-      myNfts.value = projects;
+      const projects = await request(`/api/v1/owners/${accountStore.getAccount}/nfts`, 'GET');
+      myNfts.value = projects.nfts;
     }
   }
 
   async function getBoughtNfts() {
-    if (myNfts.value.length == 0) {
+    if (boughtNfts.value.length == 0) {
       // Get my nfts
       const accountStore = useAccountStore();
-      const projects = await request(`/api/v1/buyers/${accountStore.getAccount}/nfts`, 'GET') as NFT[];
-      boughtNfts.value = projects;
+      const projects = await request(`/api/v1/buyers/${accountStore.getAccount}/nfts`, 'GET');
+      boughtNfts.value = projects.nfts;
     }
   }
 
@@ -87,21 +88,29 @@ export const useNFTsStore = defineStore('nfts', () => {
     const preMintedProject = await request('/api/v1/nfts', 'POST', nft);
 
     console.log('Pre-mint successfull');
+    console.log(preMintedProject);
 
     // Mint new project NFT on blockchain
 
     // Listen for new tokenId event
     masterContract.value.events.NewToken()
       .on('data', async (event: any) => {
+        // TODO maybe check if event is for my address?
         const address = event.returnValues[0];
         const tokenId = event.returnValues[1];
 
         console.log(`Mint successfull with token id ${tokenId}`);
 
+        // Set tokenId
+        preMintedProject.nft.tokenId = parseInt(tokenId);
+
+        // Need to simulate oracle: make put to complete minting with token id
+        const mintedProject = await request(`/api/v1/nfts/${preMintedProject.nft.hash}`, 'PUT', preMintedProject.nft);
+
+        console.log(mintedProject);
+
         // Add to store minted project from server
-        const res = await fetch(`/api/v1/nfts/${tokenId}`);
-        const mintedProject = await res.json() as NFT;
-        myNfts.value.push(mintedProject);
+        myNfts.value.push(mintedProject.nft);
       });
 
     // Then send real transaction
@@ -110,12 +119,18 @@ export const useNFTsStore = defineStore('nfts', () => {
         preMintedProject.nft.price,
         preMintedProject.nft.royaltyPrice,
         preMintedProject.nft.hash,
-        preMintedProject.nft.components ? preMintedProject.nft.components : [],
+        preMintedProject.nft.projectJSON.components,
       )
       .send({ from: accountStore.getAccount });
   }
 
-  async function buyProject(nft: NFT) {
+  async function getBuyPrice(tokenId: number): Promise<BuyPrice> {
+    const accountStore = useAccountStore();
+    const res = await request(`/api/v1/nfts/${tokenId}/buyPrice/${accountStore.getAccount}`, 'GET');
+    return res;
+  }
+
+  async function buyProject(nft: NFT, buyPrice: number) {
     const accountStore = useAccountStore();
 
     // Requires contract and user addresses
@@ -123,10 +138,33 @@ export const useNFTsStore = defineStore('nfts', () => {
       throw new Error('Need to have account and master contract addresses');
     }
 
-    // TODO complete
+    masterContract.value.events.NewBuyer()
+      .on('data', async (event: any) => {
+        // TODO maybe check if event is for my address?
+        const address = event.returnValues[0];
+        const tokenId = event.returnValues[1];
+
+        console.log(`Buy successfull for token ${tokenId} by ${address}`);
+
+        // TODO patch for manufacturer
+      });
+
+    console.log(`${accountStore.getAccount} is buying token ${nft.tokenId} for ${buyPrice}ETH`);
+
+    // Get web3 instance from browser: connect to MetaMask
+    await window.ethereum.request({ method: 'eth_requestAccounts' });
+    const web3 = new Web3(window.ethereum);
+
+    await masterContract.value.methods
+      .buyToken(nft.tokenId!)
+      .send({ 
+        from: accountStore.getAccount, 
+        to: contractAddress.value, 
+        value: web3.utils.toWei(buyPrice+'', 'ether') 
+      });
   }
 
-  async function request(url: string, method: "GET" | "POST", data?: any) {
+  async function request(url: string, method: "GET" | "POST" | "PUT" | "PATCH", data?: any) {
     const headers = new Headers();
     headers.append("authorization", localStorage.getItem("token")!);
     headers.append("Content-Type", "application/json");
@@ -145,5 +183,5 @@ export const useNFTsStore = defineStore('nfts', () => {
     }
   }
 
-  return { myNfts, boughtNfts, catalogNfts, setUp, getMyNfts, getBoughtNfts, getCatalogNfts, mintNewProject, }
+  return { myNfts, boughtNfts, catalogNfts, setUp, getMyNfts, getBoughtNfts, getCatalogNfts, mintNewProject, getBuyPrice, buyProject }
 });

@@ -27,9 +27,6 @@ function onShowInfo(project: NFT | undefined) {
   showInfo.value = true;
 }
 
-async function onBuyProject() {
-
-}
 </script>
 
 <template>
@@ -39,14 +36,16 @@ async function onBuyProject() {
   </header>
 
   <div class="projects-card-row m2" v-if="!loading && nftsStore.catalogNfts.length > 0">
-    <ProjectCard @info="onShowInfo" 
+    <ProjectCard 
+      @info="onShowInfo" 
       v-for="project in nftsStore.catalogNfts" 
       :project="project"
-      :key="project.tokenId" />
+      :key="project.tokenId"
+    />
   </div>
 
   <div v-else-if="!loading && nftsStore.catalogNfts.length == 0">
-    <h4>Catalog is empty. Be the first user to upload a project as an NFT!</h4>
+    <h4>Catalog is empty.</h4>
   </div>
   
   <LoadingSpinner v-else class="centered"/>

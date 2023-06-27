@@ -1,0 +1,28 @@
+{
+    "status": "success",
+    "message": "All validations passed for NFT, metadata saved",
+    "data": {
+        "nft": {
+            "entityId": "01H3VENNKQ321CSZTFZERG94GE",
+            "status": "premint",
+            "tokenId": null,
+            "name": "test",
+            "description": "test",
+            "price": 1000,
+            "royaltyPrice": 10,
+            "owner": "0xc9377962e787F8c9Bd5d2B387d6E1dcCe52a9B4A",
+            "hash": "QmcTXcuW7wWkP9W1nSD6p5q4Po8QsyR3VFWkynRrR7qDoZ",
+            "imageLink": "project1.jpg",
+            "ipfsLink": "https://ipfs.io/ipfs/QmcTXcuW7wWkP9W1nSD6p5q4Po8QsyR3VFWkynRrR7qDoZ",
+            "projectJSON": {
+                "point": {
+                    "x": 30,
+                    "y": 30,
+                    "z": 30
+                }
+            },
+            "manufacturers": [],
+            "buyers": []
+        }
+    }
+}
