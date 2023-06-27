@@ -132,7 +132,7 @@ contract ProjectNFT is ERC721URIStorage {
     require(tokenId < tokenCounter, 'Token with this id does not exit');
 
     uint256 amountToPay = getTokenBuyPrice(tokenId,buyerProject);
-    require(amount == amountToPay, 'Pay amount is not price of project');
+    require(amount >= amountToPay, 'Pay amount is not price of project');
 
     address payable owner = payable(ownerOf(tokenId));
 

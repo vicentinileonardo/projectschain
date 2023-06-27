@@ -18,14 +18,15 @@ contract AccessSmartContract {
         projectNFT = ProjectNFT(projectNFTAddress);
     }
 
-    function buyProject(uint256 tokenId, address ownerAddress) public payable returns (address) {
+    function buyProject(uint256 tokenId, address ownerAddress, uint256 payAmount) public returns (address) {
         // TODO require token exists;
         projectNFT.getTokenPrice(tokenId); //check if token exists
 
-        require(msg.value == projectNFT.getTokenBuyPrice(tokenId,ownerAddress), 'Need to pay buy price to buy token');
+        require(payAmount >= projectNFT.getTokenBuyPrice(tokenId,ownerAddress), 
+            'Need to pay buy price to buy token');
 
         // Pay projects owner
-        projectNFT.transferPayment(tokenId, msg.value, ownerAddress);
+        projectNFT.transferPayment(tokenId, payAmount, ownerAddress);
 
         // Set ownership
         _addressToTokens[ownerAddress][tokenId] = true;

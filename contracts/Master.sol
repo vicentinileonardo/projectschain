@@ -29,8 +29,8 @@ contract Master {
     emit NewToken(msg.sender, tokenId);
   }
 
-  function buyToken(uint256 tokenId) public {
-    address buyerAddress = accessContract.buyProject(tokenId, msg.sender);
+  function buyToken(uint256 tokenId) payable public {
+    address buyerAddress = accessContract.buyProject(tokenId, msg.sender, msg.value);
 
     emit NewBuyer(buyerAddress, tokenId);
   }

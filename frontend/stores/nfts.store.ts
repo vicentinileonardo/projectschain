@@ -149,9 +149,19 @@ export const useNFTsStore = defineStore('nfts', () => {
         // TODO patch for manufacturer
       });
 
+    console.log(`${accountStore.getAccount} is buying token ${nft.tokenId} for ${buyPrice}ETH`);
+
+    // Get web3 instance from browser: connect to MetaMask
+    await window.ethereum.request({ method: 'eth_requestAccounts' });
+    const web3 = new Web3(window.ethereum);
+
     await masterContract.value.methods
       .buyToken(nft.tokenId!)
-      .send({ from: accountStore.getAccount, value: buyPrice });
+      .send({ 
+        from: accountStore.getAccount, 
+        to: contractAddress.value, 
+        value: web3.utils.toWei(buyPrice+'', 'ether') 
+      });
   }
 
   async function request(url: string, method: "GET" | "POST" | "PUT" | "PATCH", data?: any) {
