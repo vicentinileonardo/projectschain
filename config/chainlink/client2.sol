@@ -12,7 +12,7 @@ import "@openzeppelin/contracts/utils/Strings.sol";
  * DO NOT USE THIS CODE IN PRODUCTION.
  */
 
-contract ATestnetConsumer is ChainlinkClient, ConfirmedOwner {
+contract Client2 is ChainlinkClient, ConfirmedOwner {
     using Chainlink for Chainlink.Request;
 
     uint256 private constant ORACLE_PAYMENT = (1 * LINK_DIVISIBILITY) / 10; // 0.1 * 10**18
@@ -20,11 +20,9 @@ contract ATestnetConsumer is ChainlinkClient, ConfirmedOwner {
     string public base_url_part_1 = "http://";
     string public base_url_part_2 = ":3000/api/v1/nfts/";
 
-    mapping(uint256 => bool) public _tokenIdToMinted;
-
     mapping(uint256 => string) private _tokenIdToHash;
 
-    event RequestConfirmMintingFulfilled(
+    event RequestUpdateFulfilled(
         bytes32 indexed requestId,
         uint256 tokenId,
         string success
@@ -37,64 +35,56 @@ contract ATestnetConsumer is ChainlinkClient, ConfirmedOwner {
      */
     constructor() ConfirmedOwner(msg.sender) {
         setChainlinkToken(0x779877A7B0D9E8603169DdbD7836e478b4624789);
-        _tokenIdToHash[15] = "QmevypABzm3DB3srcjbb2KCZtfQU4nSdSe6r6wiqqAvRi3";
     }
 
-    //called inside the mint function of the NFT contract
-    //we need a modifier to check if the caller is the NFT contract (now it's only the owner of the contract)
-    function requestConfirmMinting(
+    function requestUpdate(
         address _oracle,
         string memory _jobId,
         uint256 _tokenId,
+        string memory _key,
+        address _assignee,
         string memory _host_machine_ip
     ) public onlyOwner {
 
-        checkTokenIdToHash(_tokenId);
+        //_key must be "buyer" or "manufacturer"
+        require(
+            keccak256(abi.encodePacked(_key)) == keccak256(abi.encodePacked("buyer")) ||
+            keccak256(abi.encodePacked(_key)) == keccak256(abi.encodePacked("manufacturer")),
+            "You can update either a buyer or a manufacturer"
+        );
+
+        //require(_tokenId < tokenCounter, 'TokenId does not exist');
 
         Chainlink.Request memory req = buildChainlinkRequest(
             stringToBytes32(_jobId),
             address(this),
-            this.fulfillConfirmMinting.selector
+            this.fulfillRequestUpdate.selector
         );
 
-        req.add("url", string(abi.encodePacked(base_url_part_1, _host_machine_ip, base_url_part_2, _tokenIdToHash[_tokenId])));
+        req.add("url", string(abi.encodePacked(base_url_part_1, _host_machine_ip, base_url_part_2, Strings.toString(_tokenId))));
         //req.add("method", "PUT"); already in TOML of the node
         //req.add("headers", "Content-Type: application/json"); omit for now
+
+        //if(keccak256(abi.encodePacked(_key)) == keccak256(abi.encodePacked("buyer")))
+        
+        
         req.add(
             "body",
-            string(abi.encodePacked('{"tokenId":',Strings.toString(_tokenId),'}'))
+            string(abi.encodePacked('{"', _key, '":"', Strings.toHexString(uint256(uint160(_assignee)), 20),'"}'))
+            //tring(abi.encodePacked('{"', _key, '":"', _assignee,'"}')) //to be tested
         );
         req.add("tokenId", Strings.toString(_tokenId));
 
         sendChainlinkRequestTo(_oracle, req, ORACLE_PAYMENT);
     }
 
-    function fulfillConfirmMinting(
+    function fulfillRequestUpdate(
         bytes32 _requestId,
         uint256 _tokenId,
         string memory _success
     ) public recordChainlinkFulfillment(_requestId) {
 
-        //this event must be checked by the NFT contract in order to have the minting confirmed
-        emit RequestConfirmMintingFulfilled(_requestId, _tokenId ,_success);
-
-        if(keccak256(abi.encodePacked(_success)) == keccak256(abi.encodePacked("success"))){
-            _tokenIdToMinted[_tokenId] = true;
-
-        //(once we do the merge of projectNFT and this skeleton contract)
-        //here we could make the reuturn statement of the Mint function of the ProjectNFT contract
-        // like return newItemId;
-
-
-        }
-        else{
-            _tokenIdToMinted[_tokenId] = false;
-
-        //if something goes wrong, since we must return a uint256 in the Mint function of the ProjectNFT contract
-        //we could return 0, (tokenIds start from 1)
-
-        }
-        
+        emit RequestUpdateFulfilled(_requestId, _tokenId ,_success); 
     }
 
     function getChainlinkToken() public view returns (address) {
@@ -148,9 +138,5 @@ contract ATestnetConsumer is ChainlinkClient, ConfirmedOwner {
             result := mload(add(source, 32))
         }
     }
-
-    function checkTokenIdToHash(uint256 tokenId) public view {
-        bytes memory hashBytes = bytes(_tokenIdToHash[tokenId]);
-        require(hashBytes.length > 0, "Hash for provided tokenId is empty");
-    }
 }
+

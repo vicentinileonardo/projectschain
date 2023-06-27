@@ -1,3 +1,6 @@
+
+# First step: Running a Chainlink node
+
 https://docs.chain.link/chainlink-nodes/v1/running-a-chainlink-node
 
 used alchemy ethereum client, not a local one like geth
@@ -53,6 +56,10 @@ test at: http://localhost:6688/
 
 
 
+
+
+# Second step: Fulfilling requests
+
 https://docs.chain.link/chainlink-nodes/v1/fulfilling-requests
 
 funding the chainlink node:
@@ -68,17 +75,27 @@ https://sepoliafaucet.com/ (by alchemy)
 # operator/oracle contract address [does not need to be funded]
 0xe367a0f5E216dE86a90FD9E0d8aea27d6a4956bd
 
-# Job ID
+# Job #1 ID
 38d2757024be4f4ba47f80bcd173ca6a
 
-# Consumer/client address [needs to be funded]
+# Job #2 ID
+de80a02e11e540fea0de2177bb55f717
+
+
+# ProjectNFT address (chainlink client) [needs to be funded with LINK]
 0x408E2CF31923427C1304AB02e8F68b74feb47Fc2
+
+# Users contract addresses [needs to be funded] in order to buy projects
+
+
 
 # host machine ip address, since we are running the node on docker
 ifconfig | grep 'inet ' | grep -v 127.0.0.1 | awk '{print $2}'
 ifconfig | grep 'inet ' | grep -v 127.0.0.1 | awk '{print $2}' | head -1
 192.168.1.238
 
+start the container with --network=host and then you can use localhost instead of the ip address, 
+this should work on linux but not on mac
 
 
 
@@ -135,3 +152,15 @@ If the _success parameter is false, the function handles the unsuccessful respon
 Overall, this function provides a way for the smart contract to receive and process the response from the Chainlink oracle service, and to take appropriate action based on the success or failure of the request.
 
 
+TOO big smart contract:
+Warning: Contract code size is 26765 bytes and exceeds 24576 bytes (a limit introduced in Spurious Dragon). This contract may not be deployable on Mainnet. Consider enabling the optimizer (with a low "runs" value!), turning off revert strings, or using libraries.
+
+Contract creation initialization returns data with length of more than 24576 bytes. The deployment will likely fail if the current network has activated the eip 170. More info: eip-170
+
+struct instead of mapping
+reduced error messages
+created function for a message error
+activated optimizer, with a low runs value
+
+(You can also change the optimizer settings. The default value of 200 means that it's trying to optimize the bytecode as if a function is called 200 times. If you change it to 1, you basically tell the optimizer to optimize for the case of running each function only once. An optimized function for running only one time means it is optimized for the deployment itself. Be aware that this increases the gas costs for running the functions, so you may not want to do it.
+)
