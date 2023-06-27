@@ -739,7 +739,6 @@ function handleFields(nfts, query_fields) {
 async function validateNft(nft_body, repository) {
 
     //check if name is already in use
-    /*
     let nftsToBeChecked = await repository.search().where('name').eq(nft_body.name).returnAll();
     if (nftsToBeChecked.length > 0) {
         let response = {};
@@ -747,7 +746,7 @@ async function validateNft(nft_body, repository) {
         response['data'] = { name: 'Name already in use' };
         return response;
     }
-    */
+    
 
     //check if price is valid
     if (nft_body.price) {
@@ -755,6 +754,14 @@ async function validateNft(nft_body, repository) {
             let response = {};
             response['status'] = 'fail';
             response['data'] = { price: 'Price must be greater than 0' };
+            return response;
+        }
+
+        //price must be integer
+        if (!Number.isInteger(nft_body.price)) {
+            let response = {};
+            response['status'] = 'fail';
+            response['data'] = { price: 'Price must be integer' };
             return response;
         }
     }
@@ -765,6 +772,14 @@ async function validateNft(nft_body, repository) {
             let response = {};
             response['status'] = 'fail';
             response['data'] = { royaltyPrice: 'royaltyPrice must be greater than 0' };
+            return response;
+        }
+
+        //royaltyPrice must be integer
+        if (!Number.isInteger(nft_body.royaltyPrice)) {
+            let response = {};
+            response['status'] = 'fail';
+            response['data'] = { royaltyPrice: 'royaltyPrice must be integer' };
             return response;
         }
     }
