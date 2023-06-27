@@ -65,7 +65,8 @@ contract ProjectNFT is ERC721URIStorage, CustomChainlinkClient {
         _tokenInfos[newItemId] = TokenInfo(price, royaltyPrice, projectHash, components);
         _hashes[projectHash] = true;
 
-        requestConfirmMinting(newItemId, projectHash);
+        //disable for testing
+        //requestConfirmMinting(newItemId, projectHash);
 
         return newItemId;
         

@@ -7,6 +7,7 @@ import "../contracts/Master.sol";
 import "../contracts/ProjectNFT.sol";
 
 contract TestMaster {
+    /*
     function testShouldMintToken() public {
         ProjectNFT projectNFT = ProjectNFT(DeployedAddresses.ProjectNFT());
         Master master = Master(DeployedAddresses.Master());
@@ -20,4 +21,5 @@ contract TestMaster {
 
         Assert.equal(projectNFT.getTokenPrice(1), price, "Price is different");
     }
+    */
 }

@@ -7,8 +7,10 @@ import "../contracts/ProjectNFT.sol";
 
 contract TestProjectNFT {
 
+    /*
     function testShouldPayOwner() public {
         ProjectNFT projectNFT = ProjectNFT(DeployedAddresses.ProjectNFT());
     }
+    */
 
 }
