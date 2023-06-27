@@ -20,7 +20,6 @@ const buying = ref(false);
 
 onMounted(async () => {
     loading.value = true;
-    console.log('Checkout for NFT ' + tokenId);
     try {
         await nftsStore.getCatalogNfts();
         toBuy.value = nftsStore.catalogNfts.find(nft => nft.tokenId === tokenId)!;
@@ -34,8 +33,12 @@ onMounted(async () => {
 
 async function onBuy() {
     buying.value = true;
-
-    //buying.value = false;
+    try {
+        await nftsStore.buyProject(toBuy.value!, buyPrice.value?.total!);
+    } catch(err) {
+        console.error(err);
+    }
+    buying.value = false;
 }
 
 </script>
@@ -43,7 +46,7 @@ async function onBuy() {
 <template>
     <header class="page-header">
         <h2>Checkout</h2>
-        <p>🛒 Complete the operation and buy the project</p>
+        <p>🛒 Complete the operation and buy the project.</p>
     </header>
 
     <div v-if="!loading">
@@ -66,8 +69,8 @@ async function onBuy() {
         </AppButton>
         <LoadingSpinner class="centered" v-else />
     </div>
-    
-    <LoadingSpinner v-else />
+
+    <LoadingSpinner class="centered" v-else />
 </template>
 
 <style scoped>

@@ -323,7 +323,8 @@ module.exports = (app, repository, Moralis) => {
         return;
     });
 
-    router.get('/nfts/:tokenId/buyPrice', async (req, res) => {
+    router.get('/nfts/:tokenId/buyPrice/:user', async (req, res) => {
+        let user = req.params.user;
         let tokenId = req.params.tokenId;
         if (!tokenId) {
             let response = {};
@@ -362,6 +363,7 @@ module.exports = (app, repository, Moralis) => {
         let nft = nfts[0];
 
         console.log('getting buy price for NFT ' + nft.tokenId);
+        console.log(`it has ${nft.projectJSON.components.length} components`);
 
         let royaltyPrice = 0;
 
@@ -370,7 +372,7 @@ module.exports = (app, repository, Moralis) => {
             let components = await repository.search().where('status').eq('minted').and('tokenId').eq(c).returnAll();
             let component = components[0];
 
-            if (component.owner != nft.owner) {
+            if (component.owner != user) {
                 royaltyPrice = royaltyPrice + component.royaltyPrice;
             }
         }

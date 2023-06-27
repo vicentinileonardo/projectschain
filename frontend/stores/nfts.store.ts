@@ -125,7 +125,8 @@ export const useNFTsStore = defineStore('nfts', () => {
   }
 
   async function getBuyPrice(tokenId: number): Promise<BuyPrice> {
-    const res = await request(`/api/v1/nfts/${tokenId}/buyPrice`, 'GET');
+    const accountStore = useAccountStore();
+    const res = await request(`/api/v1/nfts/${tokenId}/buyPrice/${accountStore.getAccount}`, 'GET');
     return res;
   }
 
@@ -148,9 +149,9 @@ export const useNFTsStore = defineStore('nfts', () => {
         // TODO patch for manufacturer
       });
 
-      await masterContract.value.methods
-        .buyProject(nft.tokenId!)
-        .send({ from: accountStore.getAccount, value: buyPrice });
+    await masterContract.value.methods
+      .buyToken(nft.tokenId!)
+      .send({ from: accountStore.getAccount, value: buyPrice });
   }
 
   async function request(url: string, method: "GET" | "POST" | "PUT" | "PATCH", data?: any) {
