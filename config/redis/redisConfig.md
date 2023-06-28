@@ -41,7 +41,7 @@ docker run -d --name redis-stack \
 -p 6379:6379 \
 -p 8001:8001 \
 -v /Users/leonardovicentini/Desktop/Magistrale/Blockchain/Redis:/data \
--v /Users/leonardovicentini/Desktop/Magistrale/Blockchain/blockchain-project/redis.conf:/usr/local/etc/redis/redis.conf \
+-v /Users/leonardovicentini/Desktop/Magistrale/Blockchain/blockchain-project/config/redis/redis.conf:/usr/local/etc/redis/redis.conf \
 redis/redis-stack:6.2.6-v7 \
 redis-server /usr/local/etc/redis/redis.conf
 
