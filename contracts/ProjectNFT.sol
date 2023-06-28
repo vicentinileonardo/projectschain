@@ -5,6 +5,8 @@ import '@openzeppelin/contracts/utils/Counters.sol';
 import '@openzeppelin/contracts/token/ERC721/ERC721.sol';
 import '@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol';
 
+import "truffle/Console.sol";
+
 import "./CustomChainlinkClient.sol";
 
 
@@ -128,6 +130,10 @@ contract ProjectNFT is ERC721URIStorage, CustomChainlinkClient {
 
         address payable owner = payable(ownerOf(tokenId));
 
+        console.log("Checks passed will start paying from amount ", amount);
+
+        console.log("Paying owner ", owner);
+
         if(buyerProject != owner){
             owner.transfer(_tokenInfos[tokenId].price);
             amount = amount - _tokenInfos[tokenId].price;
@@ -139,6 +145,8 @@ contract ProjectNFT is ERC721URIStorage, CustomChainlinkClient {
         for (uint256 i=0; i < _tokenInfos[tokenId].components.length; i++) {
             uint256 componentTokenId = _tokenInfos[tokenId].components[i];
             address payable componentOwner = payable(ownerOf(componentTokenId));
+
+            console.log("Paying owner of component ", componentOwner);
 
             if(buyerProject != componentOwner){
             componentOwner.transfer(_tokenInfos[componentTokenId].royaltyPrice);

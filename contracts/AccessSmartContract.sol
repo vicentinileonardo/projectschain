@@ -23,6 +23,12 @@ contract AccessSmartContract {
         // TODO require token exists;
         projectNFT.getTokenPrice(tokenId); //check if token exists
 
+        console.log("Starting buy for token ", tokenId);
+
+        console.log("With amount ", payAmount);
+
+        console.log("From address ", ownerAddress);
+
         require(payAmount >= projectNFT.getTokenBuyPrice(tokenId,ownerAddress), 
             'Need to pay buy price to buy token');
 
