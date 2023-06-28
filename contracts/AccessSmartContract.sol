@@ -2,6 +2,7 @@
 pragma solidity ^0.8.18;
 
 import './ProjectNFT.sol';
+import "truffle/Console.sol";
 
 contract AccessSmartContract {
     ProjectNFT private projectNFT;
@@ -25,8 +26,12 @@ contract AccessSmartContract {
         require(payAmount >= projectNFT.getTokenBuyPrice(tokenId,ownerAddress), 
             'Need to pay buy price to buy token');
 
+        console.log("Checks passed, will call transfer payment");
+
         // Pay projects owner
         projectNFT.transferPayment(tokenId, payAmount, ownerAddress);
+
+        console.log("Payed creators, will set ownership");
 
         // Set ownership
         _addressToTokens[ownerAddress][tokenId] = true;
