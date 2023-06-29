@@ -6,6 +6,13 @@ import Web3 from 'web3';
 import type { AbiItem } from 'web3-utils';
 import contractABI from '../../build/contracts/Master.json';
 
+
+//with Chainlink we must import also ProjectNFT since the Chainlink events are emitted by the ProjectNFT contract and not by the Master contract
+
+const CHAINLINK_ENABLED = false;
+
+
+
 interface ApiError {
   status: number,
   message: string,
@@ -112,13 +119,20 @@ export const useNFTsStore = defineStore('nfts', () => {
         // Set tokenId
         preMintedProject.nft.tokenId = parseInt(tokenId);
 
-        // Need to simulate oracle: make put to complete minting with token id
-        const mintedProject = await request(`/api/v1/nfts/${preMintedProject.nft.hash}`, 'PUT', preMintedProject.nft);
+        if(!CHAINLINK_ENABLED) {
 
-        console.log("minted project", mintedProject);
+          // Need to simulate oracle: make put to complete minting with token id
+          const mintedProject = await request(`/api/v1/nfts/${preMintedProject.nft.hash}`, 'PUT', preMintedProject.nft);
 
-        // Add to store minted project from server
-        myNfts.value.push(mintedProject.nft);
+          console.log("minted project", mintedProject);
+
+          // Add to store minted project from server
+          myNfts.value.push(mintedProject.nft);
+
+        } else {
+          // wait for Chainlink event
+         console.log("Waiting for Chainlink event");
+        }
 
       });
     // Get web3 instance from browser: connect to MetaMask
@@ -158,13 +172,19 @@ export const useNFTsStore = defineStore('nfts', () => {
 
         console.log(`Buy successfull for token ${tokenId} by ${address}`);
 
-        const bought = await request(`/api/v1/nfts/${tokenId}`, 'PATCH', 
-          { manufacturer: accountStore.getAccount }
-        );
+        if(!CHAINLINK_ENABLED){
+          const bought = await request(`/api/v1/nfts/${tokenId}`, 'PATCH', 
+            { manufacturer: accountStore.getAccount }
+          );
 
-        console.log('Project bought and patched buyer to backend, got nft: ', bought);
+          console.log('Project bought and patched buyer to backend, got nft: ', bought);
 
-        boughtNfts.value.push(bought.nft);
+          boughtNfts.value.push(bought.nft);
+
+        } else {
+          //wait for chainlink event
+          console.log('Waiting for chainlink event');
+        }        
       });
 
     console.log(`${accountStore.getAccount} is buying token ${nft.tokenId} for ${buyPrice}ETH`);
