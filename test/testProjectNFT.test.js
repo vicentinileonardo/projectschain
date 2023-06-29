@@ -11,34 +11,75 @@ contract("ProjectNFT", (accounts) => {
     const platformAddress = accounts[0];
     const sender = accounts[1];
 
-    const price = 1000;
-    const royaltyPrice = 100;
-    const projectHash = "hash";
-    const components = [];
+    const project1 = {
+        price: 100,
+        royaltyPrice: 10,
+        projectHash: "0x123",
+        components: []
+    };
 
     beforeEach(async () => {
         contractInstance = await ProjectNFT.new(platformAddress, HOST_MACHINE_IP, ORACLE, JOBID_1, JOBID_2);
     });
 
+    it("should revert for unknown component", async () => {
+        await truffleAssert.reverts(
+            contractInstance.mintToken(sender, project1.price, project1.royaltyPrice, project1.projectHash, [42], { from: sender }),
+        "Component not valid");    
+    });
+
     it("should mint a token successfully", async () => {
-        const result = await contractInstance.mintToken(sender, price, royaltyPrice, projectHash, components, { from: sender });
+        const result = await contractInstance.mintToken(sender, project1.price, project1.royaltyPrice, project1.projectHash, project1.components, { from: sender });
         const tokenId = result.logs[0].args.tokenId;
         assert.strictEqual(tokenId.toString(), '1');
     });
 
     it("should fail if projectHash already exists", async () => {
-        await contractInstance.mintToken(sender, price, royaltyPrice, projectHash, components, { from: sender });
+        await contractInstance.mintToken(sender, project1.price, project1.royaltyPrice, project1.projectHash, project1.components, { from: sender });
         await truffleAssert.reverts(
-            contractInstance.mintToken(sender, price, royaltyPrice, projectHash, components, { from: sender }),
+            contractInstance.mintToken(sender, project1.price, project1.royaltyPrice, project1.projectHash, project1.components, { from: sender }),
             "Project already exists"
         );
     });
 
     it("should return correct token price", async () => {
-        await contractInstance.mintToken(sender, price, royaltyPrice, projectHash, components, { from: sender });
+        await contractInstance.mintToken(sender, project1.price, project1.royaltyPrice, project1.projectHash, project1.components, { from: sender });
         const tokenPrice = await contractInstance.getTokenPrice(1);
-        assert.equal(tokenPrice, price);
+        assert.equal(tokenPrice, project1.price);
     });
+
+    it("should not pass id check when getting price (id:0)", async () => {
+        await truffleAssert.reverts(
+            contractInstance.getTokenPrice(0),
+            "Token does not exist"
+        );
+    });
+
+    it("should not pass id check when getting price (id:2)", async () => {
+        await truffleAssert.reverts(
+            contractInstance.getTokenPrice(2),
+            "Token does not exist"
+        );
+    });
+
+    it("should return correct token royalty price", async () => {
+        await contractInstance.mintToken(sender, project1.price, project1.royaltyPrice, project1.projectHash, project1.components, { from: sender });
+        const tokenRoyaltyPrice = await contractInstance.getTokenRoyaltyPrice(1);
+        assert.equal(tokenRoyaltyPrice, project1.royaltyPrice);
+    });
+
+    it("should return correct project hash", async () => {
+        await contractInstance.mintToken(sender, project1.price, project1.royaltyPrice, project1.projectHash, project1.components, { from: sender });
+        const projectHash = await contractInstance.getProjectHash(1);
+        assert.equal(projectHash, project1.projectHash);
+    });
+
+    it("should return correct project components (empty)", async () => {
+        await contractInstance.mintToken(sender, project1.price, project1.royaltyPrice, project1.projectHash, project1.components, { from: sender });
+        const projectComponents = await contractInstance.getTokenComponents(1);
+        assert.deepEqual(projectComponents, project1.components);
+    });
+
 
     // Add more tests here according to your contract functionalities
 });
