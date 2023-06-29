@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import {computed, ref} from "vue";
+import { computed, ref } from "vue";
 import { Icon } from '@iconify/vue';
 import AppButton from "@/components/AppButton.vue";
 import LoadingSpinner from "@/components/LoadingSpinner.vue";
 import type { NFT } from "@/model/nft";
-import {useNFTsStore} from "@/stores/nfts.store";
+import { useNFTsStore } from "@/stores/nfts.store";
 import { useToast } from "vue-toastification";
 import { useAccountStore } from "@/stores/account.store";
 
@@ -13,7 +13,6 @@ const toast = useToast();
 const accountStore = useAccountStore();
 
 const fileToUpload = ref<File | null>(null);
-const uploadedPath = ref('');
 
 const uploaded = ref(false);
 const loading = ref(false);
@@ -52,8 +51,9 @@ async function onSubmit() {
     await nftStore.mintNewProject(projectNFT.value);
     resetUpload();
     toast.success("Project successfully secured as NFT!");
+    uploaded.value = true;
   } catch (err) {
-    toast.error("Error in uploading project NFT");
+    toast.error("Error in uploading project as NFT");
     console.error('Error in minting', err);
   }
   loading.value = false;
@@ -75,10 +75,10 @@ function resetUpload() {
 
 const validSubmit = computed(() => {
   return projectNFT.value.price > 0
-      && projectNFT.value.royaltyPrice > 0
-      && projectNFT.value.name.length > 0
-      && projectNFT.value.description.length > 0
-      && projectNFT.value.projectJSON
+    && projectNFT.value.royaltyPrice > 0
+    && projectNFT.value.name.length > 0
+    && projectNFT.value.description.length > 0
+    && projectNFT.value.projectJSON
 })
 </script>
 
@@ -113,7 +113,7 @@ const validSubmit = computed(() => {
 
     <div class="form-entry">
       <label class="file-uploader bg-primary" v-if="!projectNFT.projectJSON">
-        <input type="file" accept=".json" @change="onFileUpload"/>
+        <input type="file" accept=".json" @change="onFileUpload" />
         <Icon icon="material-symbols:upload" />
         <span>Select geometries JSON</span>
       </label>
@@ -125,16 +125,19 @@ const validSubmit = computed(() => {
         </AppButton>
       </div>
     </div>
+
+    <AppButton class="bg-primary centered" v-if="!loading" :disabled="!validSubmit" @click="onSubmit">
+      <Icon icon="material-symbols:save" />
+      Save project
+    </AppButton>
   </div>
 
-  <AppButton class="bg-primary centered" v-if="!loading" :disabled="!validSubmit" @click="onSubmit">
-    <Icon icon="material-symbols:save" />
-    Save project
-  </AppButton>
+  <div v-else-if="uploaded && !loading" class="completed">
+    <h3>Upload successful!</h3>
+    <p>Project was secured as NFT to your wallet.</p>
+  </div>
 
-  <LoadingSpinner v-if="loading" class="centered" />
-
-  <div v-if="uploaded" class="upload-result">{{ uploadedPath }}</div>
+  <LoadingSpinner v-else class="centered" />
 </template>
 
 <style scoped>
@@ -199,12 +202,17 @@ label {
   font-weight: bold;
 }
 
-input, textarea {
+input,
+textarea {
   font-size: medium;
   font-family: 'Lato', sans-serif;
   padding: 0.5rem;
   background-color: #fcfcfc;
   border-radius: 5px;
   border: solid 1px #777;
+}
+
+.completed {
+  text-align: center;
 }
 </style>

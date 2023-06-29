@@ -7,16 +7,19 @@ import type { BuyPrice } from '@/stores/nfts.store';
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import AppButton from '@/components/AppButton.vue';
 import { Icon } from '@iconify/vue';
+import { useToast } from "vue-toastification";
 
 const route = useRoute();
 const tokenId = parseInt(route.params.tokenId as string);
 
 const nftsStore = useNFTsStore();
+const toast = useToast();
 
 const loading = ref(false);
 const toBuy = ref<NFT | null>(null);
 const buyPrice = ref<BuyPrice | null>(null);
 const buying = ref(false);
+const completed = ref(false);
 
 onMounted(async () => {
     loading.value = true;
@@ -35,8 +38,11 @@ async function onBuy() {
     buying.value = true;
     try {
         await nftsStore.buyProject(toBuy.value!, buyPrice.value?.total!);
+        toast.success("Checkout complete, project bought!");
+        completed.value = true;
     } catch(err) {
-        console.error(err);
+        toast.error("Error in buying the project NFT");
+        console.error('Error in buying the project', err);
     }
     buying.value = false;
 }
@@ -49,7 +55,7 @@ async function onBuy() {
         <p>🛒 Complete the operation and buy the project.</p>
     </header>
 
-    <div v-if="!loading">
+    <div v-if="!loading && !completed">
         <div class="info">
             <p><b>Project: </b>{{ toBuy?.name }}</p>
             <p><b>Description: </b>{{ toBuy?.description }}</p>
@@ -58,8 +64,8 @@ async function onBuy() {
 
         <div class="price">
             <p>Price to pay for project: it includes the base price of the project 
-                plus the roaylties of its components (if any) 
-                and a 5% commission fee for the platform.</p>
+                plus the royalties of its components (if any). 
+                For both costs, a 5% commission fee is included for the platform.</p>
             <p><b>Base price: </b>{{ buyPrice?.base }}ETH</p>
             <p><b>Royalty price: </b>{{ buyPrice?.royaltyPrice }}ETH</p>
             <hr />
@@ -73,6 +79,11 @@ async function onBuy() {
         <LoadingSpinner class="centered" v-else />
     </div>
 
+    <div v-else-if="!loading && completed" class="completed">
+        <h3>Transaction completed!</h3>
+        <p>Bought project NFT is added to your wallet.</p>
+    </div>
+
     <LoadingSpinner class="centered" v-else />
 </template>
 
@@ -83,5 +94,9 @@ async function onBuy() {
 
 .price {
     margin: 1rem 2rem;
+}
+
+.completed {
+    text-align: center;
 }
 </style>

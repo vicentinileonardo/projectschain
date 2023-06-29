@@ -158,7 +158,13 @@ export const useNFTsStore = defineStore('nfts', () => {
 
         console.log(`Buy successfull for token ${tokenId} by ${address}`);
 
-        // TODO patch for manufacturer
+        const bought = await request(`/api/v1/nfts/${tokenId}`, 'PATCH', 
+          { manufacturer: accountStore.getAccount }
+        );
+
+        console.log('Project bought and patched buyer to backend, got nft: ', bought);
+
+        boughtNfts.value.push(bought.nft);
       });
 
     console.log(`${accountStore.getAccount} is buying token ${nft.tokenId} for ${buyPrice}ETH`);
