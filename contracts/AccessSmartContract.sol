@@ -19,39 +19,29 @@ contract AccessSmartContract {
         projectNFT = ProjectNFT(projectNFTAddress);
     }
 
-    function buyProject(uint256 tokenId, address ownerAddress) public payable returns (address) {
+    function buyProject(uint256 tokenId, address projectBuyer) public payable returns (address) {
         // TODO require token exists;
         projectNFT.getTokenPrice(tokenId); //check if token exists
 
-        console.log("Starting buy for token ", tokenId);
+        console.log("New buy project from user ", projectBuyer);
+        console.log("For token ", tokenId);
+        console.log("With pay amount: ", msg.value);
 
-        console.log("With amount ", msg.value);
-
-        console.log("From address ", ownerAddress);
-
-        console.log("msg.value", msg.value);
-        console.log("projectNFT.getTokenBuyPrice(tokenId,ownerAddress)", projectNFT.getTokenBuyPrice(tokenId,ownerAddress));
-
-
-        require(msg.value >= projectNFT.getTokenBuyPrice(tokenId,ownerAddress), 
+        require(msg.value >= projectNFT.getTokenBuyPrice(tokenId, projectBuyer), 
             'Need to pay buy price to buy token');
 
-        console.log("Checks passed, will call transfer payment");
-
         // Pay projects owner
-        //projectNFT.transferPayment(tokenId, msg.value, ownerAddress);
-        projectNFT.transferPayment{value: msg.value}(tokenId, ownerAddress);
+        projectNFT.transferPayment{value: msg.value}(tokenId, projectBuyer);
         
-
-        console.log("Payed creators, will set ownership");
+        console.log("-> Payment transfer to creator completed, will set ownership of project");
 
         // Set ownership
-        _addressToTokens[ownerAddress][tokenId] = true;
+        _addressToTokens[projectBuyer][tokenId] = true;
 
         // Set expiration time
         uint256 expirationTime = block.timestamp + 60*60*24*31*3; // add 3 months
-        _ownershipExpirationTime[keccak256(abi.encodePacked(ownerAddress, tokenId))] = expirationTime;
+        _ownershipExpirationTime[keccak256(abi.encodePacked(projectBuyer, tokenId))] = expirationTime;
 
-        return ownerAddress;
+        return projectBuyer;
     }
 }

@@ -172,7 +172,7 @@ export const useNFTsStore = defineStore('nfts', () => {
       .send({ 
         from: accountStore.getAccount, 
         to: contractAddress.value, 
-        value: web3.utils.toWei(2*buyPrice+'', 'ether') 
+        value: web3.utils.toWei(buyPrice+'', 'ether') 
       });
   }
 

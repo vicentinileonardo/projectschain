@@ -128,41 +128,38 @@ contract ProjectNFT is ERC721URIStorage, CustomChainlinkClient {
     }
 
     
-    function transferPayment(uint256 tokenId, address buyerProject) public payable{
+    function transferPayment(uint256 tokenId, address projectBuyer) public payable{
         uint256 amount = msg.value;
         tokenIdCheck(tokenId);
 
-        console.log("amount ", msg.value);
+        console.log("Starting payment trasnfer for project ", tokenId);
+        console.log(" -> Buyer: ", projectBuyer);
+        console.log(" -> Received pay amount: ", amount);
+        
+        uint256 amountToPay = getTokenBuyPrice(tokenId, projectBuyer);
 
-        uint256 amountToPay = getTokenBuyPrice(tokenId,buyerProject);
-        console.log("amountToPay ", amountToPay);
+        console.log(" -> Amount to pay for project: ", amountToPay);
 
-        require(msg.value >= amountToPay, 'Pay amount is not price of project');
+        require(msg.value >= amountToPay, 
+            'Pay amount is not enough to pay for price of project');
 
         address payable owner = payable(ownerOf(tokenId));
 
-        console.log("Checks passed will start paying from amount ", msg.value);
-
-        console.log("Paying owner ", owner);
-
-        if(buyerProject != owner){
-            
-            console.log("before transfer");
-            console.log("price ", _tokenInfos[tokenId].price);
-
+        if (projectBuyer != owner) {
             uint256 priceInWei = _tokenInfos[tokenId].price * 1 ether;
-            console.log("priceInWei ", priceInWei);
+            
+            console.log(" --> Owner of project: ", owner);
+            console.log(" --> Paying price in Wei ", priceInWei);
 
             owner.transfer(priceInWei);
-            console.log("after transfer");
 
-            
+            console.log("-> Transfer to owner successful!");
 
             amount = amount - priceInWei;
-            console.log("after amount");
 
             _platformAddress.transfer(priceInWei*5/100);
-            console.log("after transfer of platform");
+            console.log("-> Transfer to platform for fees successful!");
+
             amount = amount - (priceInWei*5/100);
         }
 
@@ -170,15 +167,20 @@ contract ProjectNFT is ERC721URIStorage, CustomChainlinkClient {
             uint256 componentTokenId = _tokenInfos[tokenId].components[i];
             address payable componentOwner = payable(ownerOf(componentTokenId));
 
-            console.log("Paying owner of component ", componentOwner);
+            if (projectBuyer != componentOwner) {
+                uint256 royaltyPriceInWei = _tokenInfos[componentTokenId].royaltyPrice * 1 ether;
+                
+                console.log(" --> Owner of component: ", componentOwner);
+                console.log(" --> Paying royalty price in Wei ", royaltyPriceInWei);
+                
+                componentOwner.transfer(royaltyPriceInWei);
+                amount = amount - royaltyPriceInWei;
 
-            if(buyerProject != componentOwner){
-            uint256 royaltyPriceInWei = _tokenInfos[componentTokenId].royaltyPrice * 1 ether;
-            componentOwner.transfer(royaltyPriceInWei);
-            amount = amount - royaltyPriceInWei;
+                console.log("-> Transfer to owner of component successfull!");
 
-            _platformAddress.transfer(royaltyPriceInWei*5/100);
-            amount = amount - (royaltyPriceInWei*5/100);
+                _platformAddress.transfer(royaltyPriceInWei*5/100);
+                amount = amount - (royaltyPriceInWei*5/100);
+                console.log("-> Transfer to platform for fees successfull!");
             }
         }
     }

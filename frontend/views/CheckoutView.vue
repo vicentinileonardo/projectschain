@@ -57,6 +57,9 @@ async function onBuy() {
         </div>
 
         <div class="price">
+            <p>Price to pay for project: it includes the base price of the project 
+                plus the roaylties of its components (if any) 
+                and a 5% commission fee for the platform.</p>
             <p><b>Base price: </b>{{ buyPrice?.base }}ETH</p>
             <p><b>Royalty price: </b>{{ buyPrice?.royaltyPrice }}ETH</p>
             <hr />
