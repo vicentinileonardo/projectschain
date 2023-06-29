@@ -2,14 +2,25 @@
 import type { NFT } from '@/model/nft';
 import { Icon } from '@iconify/vue';
 import AppButton from '@/components/AppButton.vue';
+import { computed, onMounted } from "vue";
+import { useAccountStore } from "@/stores/account.store";
 
+const accountStore = useAccountStore();
 
 const props = defineProps<{
   project: NFT
   hideBuyButton?: boolean;
 }>();
 
+onMounted(() => {
+  console.log(props.project);
+})
+
 const emits = defineEmits(['info']);
+
+const bought = computed(() => {
+  return props.project.manufacturers.includes(accountStore.getAccount);
+})
 
 function getThumbnail() {
   return new URL('../public/' + props.project.imageLink, import.meta.url);
@@ -29,7 +40,7 @@ function getThumbnail() {
     </div>
 
     <div class="card-buttons">
-      <RouterLink :to="`/checkout/${props.project?.tokenId}`" v-if="!props.hideBuyButton">
+      <RouterLink :to="`/checkout/${props.project?.tokenId}`" v-if="!props.hideBuyButton && !bought">
         <AppButton class="centered" >
           <Icon icon="material-symbols:shopping-cart" />
           Buy

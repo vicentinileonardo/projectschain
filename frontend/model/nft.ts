@@ -31,4 +31,7 @@ export interface NFT {
 
     //Link to thumbnail
     imageLink?: string,
+
+    // List of accounts that bought project
+    manufacturers: string[],
 }
