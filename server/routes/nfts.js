@@ -542,6 +542,7 @@ module.exports = (app, repository, Moralis) => {
                 let response = {};
                 response['status'] = 'error';
                 response['message'] = 'NFT not found';
+                console.log("error, nft not found");
                 res.status(404).send(response);
                 return;
             }
@@ -549,6 +550,7 @@ module.exports = (app, repository, Moralis) => {
                 let response = {};
                 response['status'] = 'error';
                 response['message'] = 'Multiple NFTs found, something went wrong';
+                console.log("error, multiple nfts found");
                 res.status(500).send(response);
                 return;
             }

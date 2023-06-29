@@ -1,0 +1,68 @@
+eth_sendRawTransaction
+Starting buy for token  1n
+With amount  1000000000000000000n
+From address  0x14dd9d095a7edb0b32aa8768c0e68f57729f1e91
+Checks passed, will call transfer payment
+amount  1000000000000000000n
+amountToPay  1n
+Checks passed will start paying from amount  1000000000000000000n
+Paying owner  0xebff132bca90d2938fd523923d2924707e9ddc3a
+before transfer
+price  1n
+
+  Transaction: 0x80e67ea838069bf2df3b6f7a421726676ecc91f903b956237efe977877b88b7b
+  Gas usage: 72344
+  Block number: 26
+  Block time: Wed Jun 28 2023 23:23:20 GMT+0200 (Ora legale dell’Europa centrale)
+  Runtime error: revert
+
+-----
+
+eth_sendRawTransaction
+Starting buy for token  1n
+With amount  1000000000000000000n
+From address  0x14dd9d095a7edb0b32aa8768c0e68f57729f1e91
+msg.value 1000000000000000000n
+projectNFT.getTokenBuyPrice(tokenId,ownerAddress) 1n
+Checks passed, will call transfer payment
+amount  1000000000000000000n
+amountToPay  1n
+Checks passed will start paying from amount  1000000000000000000n
+Paying owner  0xebff132bca90d2938fd523923d2924707e9ddc3a
+before transfer
+price  1n
+priceInWei  1000000000000000000n
+
+  Transaction: 0x077bfc0a4cae7c53b76b7151782f297f8a463fb3d78ca68ddb3c9fb535a03696
+  Gas usage: 78254
+  Block number: 36
+  Block time: Wed Jun 28 2023 23:42:30 GMT+0200 (Ora legale dell’Europa centrale)
+  Runtime error: revert
+
+---
+WORKING Runtime
+
+eth_sendRawTransaction
+Starting buy for token  1n
+With amount  2000000000000000000n
+From address  0x14dd9d095a7edb0b32aa8768c0e68f57729f1e91
+msg.value 2000000000000000000n
+projectNFT.getTokenBuyPrice(tokenId,ownerAddress) 1n
+Checks passed, will call transfer payment
+amount  2000000000000000000n
+amountToPay  1n
+Checks passed will start paying from amount  2000000000000000000n
+Paying owner  0xebff132bca90d2938fd523923d2924707e9ddc3a
+before transfer
+price  1n
+priceInWei  1000000000000000000n
+after transfer
+after amount
+after transfer of platform
+Payed creators, will set ownership
+
+  Transaction: 0xc001ea25f8766bfa415ac95fb42405b4ff20a6443306b644754f9343784709a8
+  Gas usage: 140264
+  Block number: 42
+  Block time: Thu Jun 29 2023 00:08:46 GMT+0200 (Ora legale dell’Europa centrale)
+

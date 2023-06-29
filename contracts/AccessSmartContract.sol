@@ -19,23 +19,29 @@ contract AccessSmartContract {
         projectNFT = ProjectNFT(projectNFTAddress);
     }
 
-    function buyProject(uint256 tokenId, address ownerAddress, uint256 payAmount) public returns (address) {
+    function buyProject(uint256 tokenId, address ownerAddress) public payable returns (address) {
         // TODO require token exists;
         projectNFT.getTokenPrice(tokenId); //check if token exists
 
         console.log("Starting buy for token ", tokenId);
 
-        console.log("With amount ", payAmount);
+        console.log("With amount ", msg.value);
 
         console.log("From address ", ownerAddress);
 
-        require(payAmount >= projectNFT.getTokenBuyPrice(tokenId,ownerAddress), 
+        console.log("msg.value", msg.value);
+        console.log("projectNFT.getTokenBuyPrice(tokenId,ownerAddress)", projectNFT.getTokenBuyPrice(tokenId,ownerAddress));
+
+
+        require(msg.value >= projectNFT.getTokenBuyPrice(tokenId,ownerAddress), 
             'Need to pay buy price to buy token');
 
         console.log("Checks passed, will call transfer payment");
 
         // Pay projects owner
-        projectNFT.transferPayment(tokenId, payAmount, ownerAddress);
+        //projectNFT.transferPayment(tokenId, msg.value, ownerAddress);
+        projectNFT.transferPayment{value: msg.value}(tokenId, ownerAddress);
+        
 
         console.log("Payed creators, will set ownership");
 

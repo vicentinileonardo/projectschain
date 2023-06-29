@@ -24,8 +24,8 @@ export const useAccountStore = defineStore('account', () => {
       if (address !== account.value) {
         console.log('Address does not match web3 token');
 
-        // generating a token with 1 day of expiration time
-        let token = await Web3Token.sign(msg => web3.eth.personal.sign(msg, account.value), '1d');
+        // generating a token with 30 day of expiration time
+        let token = await Web3Token.sign(msg => web3.eth.personal.sign(msg, account.value), '30d');
         localStorage.setItem('token', 'Bearer ' + token);
         console.log("Bearer " + token);
       }

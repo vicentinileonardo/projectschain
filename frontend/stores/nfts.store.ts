@@ -84,11 +84,16 @@ export const useNFTsStore = defineStore('nfts', () => {
       throw new Error('Need to have account and master contract addresses');
     }
 
+    console.log("nft to mint", nft);
+
     // Pre-mint: post new project to backend for preliminary checks and hash
     const preMintedProject = await request('/api/v1/nfts', 'POST', nft);
 
-    console.log('Pre-mint successfull');
     console.log(preMintedProject);
+
+
+    console.log('Pre-mint successfull');
+    
 
     // Mint new project NFT on blockchain
 
@@ -96,10 +101,13 @@ export const useNFTsStore = defineStore('nfts', () => {
     masterContract.value.events.NewToken()
       .on('data', async (event: any) => {
         // TODO maybe check if event is for my address?
+
+        console.log("New token event", event);
+
         const address = event.returnValues[0];
         const tokenId = event.returnValues[1];
 
-        console.log(`Mint successfull with token id ${tokenId}`);
+        console.log(`Mint successful with token id ${tokenId}`);
 
         // Set tokenId
         preMintedProject.nft.tokenId = parseInt(tokenId);
@@ -107,10 +115,11 @@ export const useNFTsStore = defineStore('nfts', () => {
         // Need to simulate oracle: make put to complete minting with token id
         const mintedProject = await request(`/api/v1/nfts/${preMintedProject.nft.hash}`, 'PUT', preMintedProject.nft);
 
-        console.log(mintedProject);
+        console.log("minted project", mintedProject);
 
         // Add to store minted project from server
         myNfts.value.push(mintedProject.nft);
+
       });
 
     // Then send real transaction
@@ -160,7 +169,7 @@ export const useNFTsStore = defineStore('nfts', () => {
       .send({ 
         from: accountStore.getAccount, 
         to: contractAddress.value, 
-        value: web3.utils.toWei(buyPrice+'', 'ether') 
+        value: web3.utils.toWei(2*buyPrice+'', 'ether') 
       });
   }
 

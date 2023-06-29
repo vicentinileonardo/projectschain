@@ -122,24 +122,42 @@ contract ProjectNFT is ERC721URIStorage, CustomChainlinkClient {
     }
 
     
-    function transferPayment(uint256 tokenId, uint256 amount, address buyerProject) public {
+    function transferPayment(uint256 tokenId, address buyerProject) public payable{
+        uint256 amount = msg.value;
         tokenIdCheck(tokenId);
 
+        console.log("amount ", msg.value);
+
         uint256 amountToPay = getTokenBuyPrice(tokenId,buyerProject);
-        require(amount >= amountToPay, 'Pay amount is not price of project');
+        console.log("amountToPay ", amountToPay);
+
+        require(msg.value >= amountToPay, 'Pay amount is not price of project');
 
         address payable owner = payable(ownerOf(tokenId));
 
-        console.log("Checks passed will start paying from amount ", amount);
+        console.log("Checks passed will start paying from amount ", msg.value);
 
         console.log("Paying owner ", owner);
 
         if(buyerProject != owner){
-            owner.transfer(_tokenInfos[tokenId].price);
-            amount = amount - _tokenInfos[tokenId].price;
+            
+            console.log("before transfer");
+            console.log("price ", _tokenInfos[tokenId].price);
 
-            _platformAddress.transfer(_tokenInfos[tokenId].price*5/100);
-            amount = amount - (_tokenInfos[tokenId].price*5/100);
+            uint256 priceInWei = _tokenInfos[tokenId].price * 1 ether;
+            console.log("priceInWei ", priceInWei);
+
+            owner.transfer(priceInWei);
+            console.log("after transfer");
+
+            
+
+            amount = amount - priceInWei;
+            console.log("after amount");
+
+            _platformAddress.transfer(priceInWei*5/100);
+            console.log("after transfer of platform");
+            amount = amount - (priceInWei*5/100);
         }
 
         for (uint256 i=0; i < _tokenInfos[tokenId].components.length; i++) {
@@ -149,11 +167,12 @@ contract ProjectNFT is ERC721URIStorage, CustomChainlinkClient {
             console.log("Paying owner of component ", componentOwner);
 
             if(buyerProject != componentOwner){
-            componentOwner.transfer(_tokenInfos[componentTokenId].royaltyPrice);
-            amount = amount - _tokenInfos[componentTokenId].royaltyPrice;
+            uint256 royaltyPriceInWei = _tokenInfos[componentTokenId].royaltyPrice * 1 ether;
+            componentOwner.transfer(royaltyPriceInWei);
+            amount = amount - royaltyPriceInWei;
 
-            _platformAddress.transfer(_tokenInfos[componentTokenId].royaltyPrice*5/100);
-            amount = amount - (_tokenInfos[componentTokenId].royaltyPrice*5/100);
+            _platformAddress.transfer(royaltyPriceInWei*5/100);
+            amount = amount - (royaltyPriceInWei*5/100);
             }
         }
     }

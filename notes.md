@@ -23,3 +23,12 @@ By implementing these internal checks, you can ensure that the minting process i
 ## About manufactures and buyers lists
 
 These list are **whitelists**, so the platform that has our plugin can check if the manufacturer can use the project
+
+
+## about projectNFT transferPayment function
+
+we should be aware of the following points:
+
+Gas costs: In the transferPayment function, you're transferring Ether multiple times, which can be quite gas expensive. You might want to consider other designs that could reduce the number of Ether transfers.
+Security: When dealing with Ether transfers in Solidity, it's generally recommended to use the "withdrawal" pattern instead of the "push" pattern. This means instead of pushing the payments to the recipients (like you're doing with transfer), you would let the recipients withdraw their payments. This can help prevent re-entrancy attacks. However, this would require a significant redesign of your contracts.
+Error handling: In the transferPayment function, you're subtracting amounts from amount after each transfer. It would be a good idea to add checks to ensure that amount does not go below zero, which could potentially result in unexpected behavior
