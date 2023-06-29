@@ -121,6 +121,9 @@ export const useNFTsStore = defineStore('nfts', () => {
         myNfts.value.push(mintedProject.nft);
 
       });
+    // Get web3 instance from browser: connect to MetaMask
+    await window.ethereum.request({ method: 'eth_requestAccounts' });
+    const web3 = new Web3(window.ethereum);
 
     // Then send real transaction
     await masterContract.value.methods
@@ -130,7 +133,7 @@ export const useNFTsStore = defineStore('nfts', () => {
         preMintedProject.nft.hash,
         preMintedProject.nft.projectJSON.components,
       )
-      .send({ from: accountStore.getAccount });
+      .send({ from: accountStore.getAccount, value: web3.utils.toWei('0.00059', 'ether') });
   }
 
   async function getBuyPrice(tokenId: number): Promise<BuyPrice> {

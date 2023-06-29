@@ -40,7 +40,11 @@ contract ProjectNFT is ERC721URIStorage, CustomChainlinkClient {
         uint256 royaltyPrice,
         string calldata projectHash,
         uint256[] calldata components
-    ) public returns (uint256) {
+    ) payable public returns (uint256) {
+        uint256 amount = msg.value;
+        uint256 amountToPay = 0.00059 * 1 ether;
+        require(msg.value >= amountToPay, 'Pay amount is not price of mint commissions');
+
         // Check NFT parameters:
 
         // Check hash is unique
@@ -69,6 +73,8 @@ contract ProjectNFT is ERC721URIStorage, CustomChainlinkClient {
 
         //disable for testing
         //requestConfirmMinting(newItemId, projectHash);
+        _platformAddress.transfer(amountToPay);
+        amount = amount - amountToPay;
 
         return newItemId;
         

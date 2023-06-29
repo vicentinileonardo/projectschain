@@ -21,10 +21,10 @@ contract Master {
     uint256 royaltyPrice,
     string calldata projectHash,
     uint256[] calldata components
-  ) public {
+  ) payable public {
     //TODO: check if the caller is authorized?
 
-    uint256 tokenId = projectNFT.mintToken(msg.sender, price, royaltyPrice, projectHash, components);
+    uint256 tokenId = projectNFT.mintToken{value: msg.value}(msg.sender, price, royaltyPrice, projectHash, components);
 
     emit NewToken(msg.sender, tokenId);
   }
