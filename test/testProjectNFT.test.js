@@ -11,7 +11,7 @@ contract("ProjectNFT", (accounts) => {
     let contractInstance;
     const platformAddress = accounts[0];
     const sender = accounts[1];
-    const web3 = new Web3('http://localhost:8545'); // replace with your own provider URL
+    const web3 = new Web3('http://localhost:8545');
 
     const project1 = {
         price: 100,
@@ -26,7 +26,7 @@ contract("ProjectNFT", (accounts) => {
 
     it("should revert for unknown component", async () => {
         await truffleAssert.reverts(
-            contractInstance.mintToken(sender, project1.price, project1.royaltyPrice, project1.projectHash, [42],{ from: sender, value: web3.utils.toHex(web3.utils.toWei('1', 'ether'))}),
+            contractInstance.mintToken(sender, project1.price, project1.royaltyPrice, project1.projectHash, [42],{ from: sender, value: web3.utils.toHex(web3.utils.toWei('0.0006', 'ether'))}),
         "Component not valid");    
     });
 
@@ -37,21 +37,21 @@ contract("ProjectNFT", (accounts) => {
     });
 
     it("should mint a token successfully", async () => {
-        const result = await contractInstance.mintToken(sender, project1.price, project1.royaltyPrice, project1.projectHash, project1.components, { from: sender, value: web3.utils.toHex(web3.utils.toWei('1', 'ether'))});
+        const result = await contractInstance.mintToken(sender, project1.price, project1.royaltyPrice, project1.projectHash, project1.components, { from: sender, value: web3.utils.toHex(web3.utils.toWei('0.0006', 'ether'))});
         const tokenId = result.logs[0].args.tokenId;
         assert.strictEqual(tokenId.toString(), '1');
     });
 
     it("should fail if projectHash already exists", async () => {
-        await contractInstance.mintToken(sender, project1.price, project1.royaltyPrice, project1.projectHash, project1.components, { from: sender, value: web3.utils.toHex(web3.utils.toWei('1', 'ether'))});
+        await contractInstance.mintToken(sender, project1.price, project1.royaltyPrice, project1.projectHash, project1.components, { from: sender, value: web3.utils.toHex(web3.utils.toWei('0.0006', 'ether'))});
         await truffleAssert.reverts(
-            contractInstance.mintToken(sender, project1.price, project1.royaltyPrice, project1.projectHash, project1.components, { from: sender, value: web3.utils.toHex(web3.utils.toWei('1', 'ether'))}),
+            contractInstance.mintToken(sender, project1.price, project1.royaltyPrice, project1.projectHash, project1.components, { from: sender, value: web3.utils.toHex(web3.utils.toWei('0.0006', 'ether'))}),
             "Project already exists"
         );
     });
 
     it("should return correct token price", async () => {
-        await contractInstance.mintToken(sender, project1.price, project1.royaltyPrice, project1.projectHash, project1.components, { from: sender, value: web3.utils.toHex(web3.utils.toWei('1', 'ether'))});
+        await contractInstance.mintToken(sender, project1.price, project1.royaltyPrice, project1.projectHash, project1.components, { from: sender, value: web3.utils.toHex(web3.utils.toWei('0.0006', 'ether'))});
         const tokenPrice = await contractInstance.getTokenPrice(1);
         assert.equal(tokenPrice, project1.price);
     });
@@ -71,19 +71,19 @@ contract("ProjectNFT", (accounts) => {
     });
 
     it("should return correct token royalty price", async () => {
-        await contractInstance.mintToken(sender, project1.price, project1.royaltyPrice, project1.projectHash, project1.components, { from: sender, value: web3.utils.toHex(web3.utils.toWei('1', 'ether'))});
+        await contractInstance.mintToken(sender, project1.price, project1.royaltyPrice, project1.projectHash, project1.components, { from: sender, value: web3.utils.toHex(web3.utils.toWei('0.0006', 'ether'))});
         const tokenRoyaltyPrice = await contractInstance.getTokenRoyaltyPrice(1);
         assert.equal(tokenRoyaltyPrice, project1.royaltyPrice);
     });
 
     it("should return correct project hash", async () => {
-        await contractInstance.mintToken(sender, project1.price, project1.royaltyPrice, project1.projectHash, project1.components, { from: sender, value: web3.utils.toHex(web3.utils.toWei('1', 'ether'))});
+        await contractInstance.mintToken(sender, project1.price, project1.royaltyPrice, project1.projectHash, project1.components, { from: sender, value: web3.utils.toHex(web3.utils.toWei('0.0006', 'ether'))});
         const projectHash = await contractInstance.getProjectHash(1);
         assert.equal(projectHash, project1.projectHash);
     });
 
     it("should return correct project components (empty)", async () => {
-        await contractInstance.mintToken(sender, project1.price, project1.royaltyPrice, project1.projectHash, project1.components, { from: sender, value: web3.utils.toHex(web3.utils.toWei('1', 'ether'))});
+        await contractInstance.mintToken(sender, project1.price, project1.royaltyPrice, project1.projectHash, project1.components, { from: sender, value: web3.utils.toHex(web3.utils.toWei('0.0006', 'ether'))});
         const projectComponents = await contractInstance.getTokenComponents(1);
         assert.deepEqual(projectComponents, project1.components);
     });
