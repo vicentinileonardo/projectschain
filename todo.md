@@ -1,8 +1,13 @@
 # Cose da fare
 
-- [ ] Completare buy
-    - [x] Completare logica buy su contratto
-    - [ ] Emettere e ascoltare evento buy
-    - [ ] Calcolare prezzo buy lato frontend
-    - [ ] Fare chiamata payable con web3
+- [ ] prices not integer
 - [ ] Test
+    +  [ ] js
+    +  [ ] solidity
+- [ ] Security checks on smart contracts
+    - [] check msg.sender
+- [ ] Check on amount to pay, and amount that remains on the contract
+- [ ] Check on the amount of tokens to mint
+- [ ] Mine sepETH
+- [ ] Understand how to pass chainlink
+- [ ] Listen chainlinks events
