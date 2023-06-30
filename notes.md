@@ -9,6 +9,9 @@ Since the plugin has a catalog of NFTs
 
 Our plugin solution needs a centralized backend to work, this is because we need to perform some checks before minting the NFTs on the blockchain. This is a common practice in the NFT world, and it is generally a good idea to perform these checks before sending the minting transaction to the blockchain. This can help to ensure that the minting process is likely to succeed, and can help to avoid wasting gas fees on failed transactions.
 
+Mixed approach:
+This approach combines the benefits of centralized metadata storage with the decentralization and security provided by a smart contract. The metadata is stored on a centralized server, which can be more easily updated and managed, while the NFT creation process is handled by a smart contract, which ensures that the token ID is assigned in a predictable and secure manner.
+
 ## About pre checks:
 It is generally a good practice to perform internal checks on a centralized backend before sending a minting request on the blockchain. This approach can help to ensure that the minting process is likely to succeed, and can help to avoid wasting gas fees on failed transactions.
 
@@ -97,3 +100,40 @@ possibility to be discuss on a case by case basis: the platform will take care o
 
 thinking as a startup: first we need to get quite a lot of money to survive, so the first part of the strategy is the one that can provide us with the money to survive in a short term and fast way.
 The second part of the strategy could be the one that can provide us with the money to grow (hoping that the small platform will grow with us) (network effects, etc.)
+
+
+
+# on ownership
+spiegare l'ownership ha senso solo per cose hanno valore "intellettuale". non avrebbe senso fare nft per un progetto con all'interno una semplice sfera o cubo.
+
+# on centralization
+why storing nft metadata on our server and not entirely on IPFS?: 
+    * easier to manage a dapp with a catalog of nft
+    * easier to grant to manufacter the access to the nft metadata via auth
+
+
+Flow per ora:
+1. [FRONTEND]: POST su server con JSON, il json contiene tutti i dati del NFT e le geometrie. 
+Assumption: questo JSON ha gia' un array to tokenId che rappresenta i componenti del NFT, se presenti. E' compito del software cad stabilre quali sono i componenti presenti
+
+2. [BACKEND]: Arriva una risorsa NFT "parziale", mancano tokenid, link a ipfs
+3. [BACKEND]: Genera hash del JSON geometrico e controlli vari
+4. [BACKEND]: Pre-salva su Redis la risorsa, per ora indicizzata (individuabile) tramite hash
+4. [BACKEND]: Finiti i controlli interni ritorna un response al frontend (indicando via libera per mintare). I controlli in backend permettono di non usare la blockchain per un minting che non andrebbe a buon fine.
+
+5. [FRONTEND]: Chiama mintToken su master contract, passando hash, price, royalties
+
+6. [BLOCKCHAIN]: Controlli vari, minta token, genera tokenID
+DUBBIO 
+7. [BLOCKCHAIN]: Chiama Chainlink
+8. [CHAINLINK]: Chiama endpoint PUT su server per upload su IPFS e salvataggio definitivo su Redis,
+PUT  http://localhost:3000/api/v1/nfts/hash2345
+{
+    "tokenID": 1,
+}
+
+9. [BACKEND]: Upload su IPFS il JSON geometrico
+10. [BACKEND]: Salva su Redis, aggiungendo token id e link a ipfs
+11. [BACKEND]: Ritorna response a chainlink
+12. [CHAINLINK]: Chiama callback su blockchain
+13. [BLOCKCHAIN]: Emette evento di minting
