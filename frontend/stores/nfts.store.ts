@@ -91,17 +91,22 @@ export const useNFTsStore = defineStore('nfts', () => {
       throw new Error('Need to have account and master contract addresses');
     }
 
-    console.log("nft to mint", nft);
+    console.log("nft to mint", {
+      ...nft,
+      price: Number(convertFromEth(nft.price)),
+      royaltyPrice: Number(convertFromEth(nft.royaltyPrice))
+    });
 
     // Pre-mint: post new project to backend for preliminary checks and hash
-    const preMintedProject = await request('/api/v1/nfts', 'POST', nft);
+    const preMintedProject = await request('/api/v1/nfts', 'POST', {
+      ...nft,
+      price: Number(convertFromEth(nft.price)),
+      royaltyPrice: Number(convertFromEth(nft.royaltyPrice))
+    } as NFT);
 
     console.log(preMintedProject);
-
-
     console.log('Pre-mint successfull');
-    
-
+  
     // Mint new project NFT on blockchain
 
     // Listen for new tokenId event
@@ -202,6 +207,16 @@ export const useNFTsStore = defineStore('nfts', () => {
       });
   }
 
+  function convertFromEth(ethPrice: number) {
+    const web3 = new Web3(window.ethereum);
+    return web3.utils.toWei(String(ethPrice), 'ether');
+  }
+
+  function convertToEth(weiPrice: number) {
+    const web3 = new Web3(window.ethereum);
+    return web3.utils.fromWei(String(weiPrice), 'ether');
+  }
+
   async function request(url: string, method: "GET" | "POST" | "PUT" | "PATCH", data?: any) {
     const headers = new Headers();
     headers.append("authorization", localStorage.getItem("token")!);
@@ -221,5 +236,18 @@ export const useNFTsStore = defineStore('nfts', () => {
     }
   }
 
-  return { myNfts, boughtNfts, catalogNfts, setUp, getMyNfts, getBoughtNfts, getCatalogNfts, mintNewProject, getBuyPrice, buyProject }
+  return { 
+    myNfts, 
+    boughtNfts, 
+    catalogNfts, 
+    setUp,
+    convertFromEth,
+    convertToEth,
+    getMyNfts, 
+    getBoughtNfts, 
+    getCatalogNfts, 
+    mintNewProject, 
+    getBuyPrice, 
+    buyProject 
+  }
 });

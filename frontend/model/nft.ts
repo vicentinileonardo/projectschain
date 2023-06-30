@@ -33,5 +33,5 @@ export interface NFT {
     imageLink?: string,
 
     // List of accounts that bought project
-    manufacturers: string[],
+    manufacturers?: string[],
 }

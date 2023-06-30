@@ -103,12 +103,18 @@ const validSubmit = computed(() => {
 
     <div class="form-entry">
       <label for="price">Project price:</label>
-      <input type="number" id="price" v-model="projectNFT.price" />
+      <div class="input-eth">
+        <input type="number" id="price" v-model="projectNFT.price" />
+        <p>ETH</p>
+      </div>
     </div>
 
-    <div class="form-entry">
+    <div class="form-entry ">
       <label for="royalty-price">Project royalty price:</label>
-      <input type="number" id="royalty-price" v-model="projectNFT.royaltyPrice" />
+      <div class="input-eth">
+        <input type="number" id="royalty-price" v-model="projectNFT.royaltyPrice" />
+        <p>ETH</p>
+      </div>
     </div>
 
     <div class="form-entry">
@@ -214,5 +220,15 @@ textarea {
 
 .completed {
   text-align: center;
+}
+
+.input-eth {
+  display: flex;
+  width: 100%;
+  gap: 0.5rem;
+}
+
+.input-eth input {
+  width: 100%;
 }
 </style>

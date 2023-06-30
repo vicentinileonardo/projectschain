@@ -19,7 +19,7 @@ onMounted(() => {
 const emits = defineEmits(['info']);
 
 const bought = computed(() => {
-  return props.project.manufacturers.includes(accountStore.getAccount);
+  return props.project.manufacturers?.includes(accountStore.getAccount!);
 })
 
 function getThumbnail() {
