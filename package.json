@@ -10,6 +10,7 @@
     "frontend": "vite",
     "server": "node server/server.js",
     "server-dev": "nodemon server/server.js",
+    "ganache": "ganache",
     "test": "truffle test",
     "compile": "truffle compile",
     "deploy": "truffle migrate --network development",
