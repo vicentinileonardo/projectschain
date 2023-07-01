@@ -8,7 +8,7 @@ require('dotenv').config();
 
 const {HOST_MACHINE_IP, ORACLE, JOBID_1, JOBID_2} = process.env;
 
-contract("ProjectNFT", (accounts) => {
+contract("AccessSmartContract", (accounts) => {
     let contractInstance;
     let projectNFTInstance;
     const platformAddress = accounts[0];
