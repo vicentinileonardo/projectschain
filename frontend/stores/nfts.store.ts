@@ -147,8 +147,8 @@ export const useNFTsStore = defineStore('nfts', () => {
     // Then send real transaction
     await masterContract.value.methods
       .mintToken(
-        preMintedProject.nft.price,
-        preMintedProject.nft.royaltyPrice,
+        String(preMintedProject.nft.price),
+        String(preMintedProject.nft.royaltyPrice),
         preMintedProject.nft.hash,
         preMintedProject.nft.projectJSON.components,
       )
@@ -203,7 +203,7 @@ export const useNFTsStore = defineStore('nfts', () => {
       .send({ 
         from: accountStore.getAccount, 
         to: contractAddress.value, 
-        value: web3.utils.toWei(buyPrice+'', 'ether') 
+        value: buyPrice
       });
   }
 

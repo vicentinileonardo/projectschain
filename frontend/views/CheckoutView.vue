@@ -66,10 +66,10 @@ async function onBuy() {
             <p>Price to pay for project: it includes the base price of the project 
                 plus the royalties of its components (if any). 
                 For both costs, a 5% commission fee is included for the platform.</p>
-            <p><b>Base price: </b>{{ buyPrice?.base }}ETH</p>
-            <p><b>Royalty price: </b>{{ buyPrice?.royaltyPrice }}ETH</p>
+            <p v-if="buyPrice"><b>Base price: </b>{{ nftsStore.convertToEth(buyPrice?.base) }}ETH</p>
+            <p v-if="buyPrice"><b>Royalty price: </b>{{ nftsStore.convertToEth(buyPrice?.royaltyPrice) }}ETH</p>
             <hr />
-            <p><b>Total: </b>{{ buyPrice?.total }}ETH</p>
+            <p v-if="buyPrice"><b>Total: </b>{{ nftsStore.convertToEth(buyPrice?.total) }}ETH</p>
         </div>
 
         <AppButton class="bg-primary centered" v-if="!buying" @click="onBuy">

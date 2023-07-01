@@ -4,7 +4,9 @@ import { Icon } from '@iconify/vue';
 import AppButton from '@/components/AppButton.vue';
 import { computed, onMounted } from "vue";
 import { useAccountStore } from "@/stores/account.store";
+import { useNFTsStore } from "@/stores/nfts.store";
 
+const nftsStore = useNFTsStore();
 const accountStore = useAccountStore();
 
 const props = defineProps<{
@@ -36,7 +38,7 @@ function getThumbnail() {
 
     <div class="card-title">
       <h4>{{ props.project?.name }}</h4>
-      <p v-if="!props.hideBuyButton">{{ props.project?.price }}ETH</p>
+      <p v-if="!props.hideBuyButton">{{ nftsStore.convertToEth(props.project?.price) }}ETH</p>
     </div>
 
     <div class="card-buttons">

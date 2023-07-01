@@ -4,6 +4,9 @@ import type {NFT} from "@/model/nft";
 import {ref, watch} from "vue";
 import AppButton from "@/components/AppButton.vue";
 import {onClickOutside} from "@vueuse/core";
+import { useNFTsStore } from "@/stores/nfts.store";
+
+const nftsStore = useNFTsStore();
 
 const props = defineProps<{
   project?: NFT,
@@ -56,12 +59,16 @@ onClickOutside(modalContent, () => {
 
       <div class="info-element">
         <b>Project price:</b>
-        <p>{{ props.project?.price }}ETH</p>
+        <p v-if="props.project">
+          {{ nftsStore.convertToEth(props.project?.price) }}ETH
+        </p>
       </div>
 
       <div class="info-element">
         <b>Project royalty price:</b>
-        <p>{{ props.project?.royaltyPrice }}ETH</p>
+        <p v-if="props.project">
+          {{ nftsStore.convertToEth(props.project?.royaltyPrice) }}ETH
+        </p>
       </div>
 
       <AppButton @click="onCloseModal" class="centered">

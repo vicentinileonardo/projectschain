@@ -76,6 +76,12 @@ contract ProjectNFT is ERC721URIStorage, CustomChainlinkClient {
         _platformAddress.transfer(amountToPay);
         amount = amount - amountToPay;
 
+        console.log("Minted new project:");
+        console.log("-> tokenId = ", newItemId);
+        console.log("-> owner = ", sender);
+        console.log("-> price (wei) = ", price);
+        console.log("-> royalty price (wei) = ", royaltyPrice);
+
         return newItemId;
         
     }
@@ -132,7 +138,8 @@ contract ProjectNFT is ERC721URIStorage, CustomChainlinkClient {
         uint256 amount = msg.value;
         tokenIdCheck(tokenId);
 
-        console.log("Starting payment trasnfer for project ", tokenId);
+        console.log("Starting payment transfer for project ", tokenId);
+        console.log("-> starting balance of project contract: ", address(this).balance);
         console.log(" -> Buyer: ", projectBuyer);
         console.log(" -> Received pay amount: ", amount);
         
@@ -146,7 +153,7 @@ contract ProjectNFT is ERC721URIStorage, CustomChainlinkClient {
         address payable owner = payable(ownerOf(tokenId));
 
         if (projectBuyer != owner) {
-            uint256 priceInWei = _tokenInfos[tokenId].price * 1 ether;
+            uint256 priceInWei = _tokenInfos[tokenId].price * 1 wei;
             
             console.log(" --> Owner of project: ", owner);
             console.log(" --> Paying price in Wei ", priceInWei);
@@ -168,7 +175,7 @@ contract ProjectNFT is ERC721URIStorage, CustomChainlinkClient {
             address payable componentOwner = payable(ownerOf(componentTokenId));
 
             if (projectBuyer != componentOwner) {
-                uint256 royaltyPriceInWei = _tokenInfos[componentTokenId].royaltyPrice * 1 ether;
+                uint256 royaltyPriceInWei = _tokenInfos[componentTokenId].royaltyPrice * 1 wei;
                 
                 console.log(" --> Owner of component: ", componentOwner);
                 console.log(" --> Paying royalty price in Wei ", royaltyPriceInWei);
@@ -183,6 +190,8 @@ contract ProjectNFT is ERC721URIStorage, CustomChainlinkClient {
                 console.log("-> Transfer to platform for fees successfull!");
             }
         }
+
+        console.log("-> final balance of project contract: ", address(this).balance);
     }
 
 }
