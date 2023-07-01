@@ -20,15 +20,12 @@ contract AccessSmartContract {
     }
 
     function buyProject(uint256 tokenId, address projectBuyer) public payable returns (address) {
-        // TODO require token exists;
-        projectNFT.getTokenPrice(tokenId); //check if token exists
-
         console.log("New buy project from user ", projectBuyer);
         console.log("For token ", tokenId);
         console.log("With pay amount: ", msg.value);
-
-        require(msg.value >= projectNFT.getTokenBuyPrice(tokenId, projectBuyer), 
-            'Need to pay buy price to buy token');
+        
+        // Check user has not already bought project
+        require(!_addressToTokens[projectBuyer][tokenId], 'User has already bought this project');
 
         // Pay projects owner
         projectNFT.transferPayment{value: msg.value}(tokenId, projectBuyer);

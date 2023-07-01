@@ -86,7 +86,7 @@ contract ProjectNFT is ERC721URIStorage, CustomChainlinkClient {
         
     }
 
-    function tokenIdCheck(uint256 tokenId) private view{
+    function tokenIdCheck(uint256 tokenId) private view {
         require(_exists(tokenId), 'Token does not exist');
     }
 
