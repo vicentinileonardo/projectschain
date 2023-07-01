@@ -50,12 +50,12 @@ contract ProjectNFT is ERC721URIStorage, CustomChainlinkClient {
         // Check hash is unique
         require(!_hashes[projectHash], 'Project already exists');
 
+        tokenCounter.increment();
+        
         // Check components exists
         for (uint i = 0; i < components.length; i++) {
             require(components[i] < tokenCounter.current(), 'Component not valid');
         }
-
-        tokenCounter.increment();
 
         uint256 newItemId = tokenCounter.current();
        
@@ -86,7 +86,7 @@ contract ProjectNFT is ERC721URIStorage, CustomChainlinkClient {
         
     }
 
-    function tokenIdCheck(uint256 tokenId) private view{
+    function tokenIdCheck(uint256 tokenId) private view {
         require(_exists(tokenId), 'Token does not exist');
     }
 

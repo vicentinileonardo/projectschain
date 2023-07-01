@@ -11,6 +11,7 @@ contract("ProjectNFT", (accounts) => {
     let contractInstance;
     const platformAddress = accounts[0];
     const sender = accounts[1];
+    const sender2 = accounts[2];
     const web3 = new Web3('http://localhost:8545');
 
     const project1 = {
@@ -86,6 +87,57 @@ contract("ProjectNFT", (accounts) => {
         await contractInstance.mintToken(sender, project1.price, project1.royaltyPrice, project1.projectHash, project1.components, { from: sender, value: web3.utils.toHex(web3.utils.toWei('0.0006', 'ether'))});
         const projectComponents = await contractInstance.getTokenComponents(1);
         assert.deepEqual(projectComponents, project1.components);
+    });
+
+    it("should return correct project buy price when owner != buyer", async () => {
+        await contractInstance.mintToken(sender, project1.price, project1.royaltyPrice, project1.projectHash, project1.components, { from: sender, value: web3.utils.toHex(web3.utils.toWei('0.0006', 'ether'))});
+        const buyPrice = await contractInstance.getTokenBuyPrice(1, sender2);
+        const estimatedByPrice = project1.price+project1.price*5/100;
+        assert.equal(estimatedByPrice, buyPrice.words[0]);
+    });
+
+    it("should return correct project buy price when owner == buyer", async () => {
+        await contractInstance.mintToken(sender, project1.price, project1.royaltyPrice, project1.projectHash, project1.components, { from: sender, value: web3.utils.toHex(web3.utils.toWei('0.0006', 'ether'))});
+        const buyPrice = await contractInstance.getTokenBuyPrice(1, sender);
+        assert.equal(0, buyPrice.words[0]);
+    });
+
+    it("should return correct project buy price when owner == buyer for some subcomponents", async () => {
+        const result = await contractInstance.mintToken(sender2, project1.price, project1.royaltyPrice, "a", project1.components, { from: sender2, value: web3.utils.toHex(web3.utils.toWei('0.0006', 'ether'))});
+        await contractInstance.mintToken(sender, project1.price, project1.royaltyPrice, "b", [result.logs[0].args.tokenId], { from: sender, value: web3.utils.toHex(web3.utils.toWei('0.0006', 'ether'))});
+
+        const buyPrice = await contractInstance.getTokenBuyPrice(2, sender);
+        const estimatedByPrice = Math.floor(project1.royaltyPrice+project1.royaltyPrice*5/100);
+
+        assert.equal(estimatedByPrice, buyPrice.words[0]);
+    });
+
+    it("should return correct project buy price when owner == buyer for some subcomponents [effective commissions == 0]", async () => {
+        const result = await contractInstance.mintToken(sender2, project1.price, project1.royaltyPrice, "a", project1.components, { from: sender2, value: web3.utils.toHex(web3.utils.toWei('0.0006', 'ether'))});
+        await contractInstance.mintToken(sender, project1.price, project1.royaltyPrice, "b", [result.logs[0].args.tokenId], { from: sender, value: web3.utils.toHex(web3.utils.toWei('0.0006', 'ether'))});
+
+        const buyPrice = await contractInstance.getTokenBuyPrice(2, sender);
+        const estimatedByPrice = Math.floor(project1.royaltyPrice+project1.royaltyPrice*5/100);
+
+        assert.equal(estimatedByPrice, buyPrice.words[0]);
+    });
+
+    it("should return correct project buy price when owner == buyer for some subcomponents [effective commissions != 0]", async () => {
+        const result = await contractInstance.mintToken(sender2, project1.price, 30, "a", project1.components, { from: sender2, value: web3.utils.toHex(web3.utils.toWei('0.0006', 'ether'))});
+        await contractInstance.mintToken(sender, project1.price, project1.royaltyPrice, "b", [result.logs[0].args.tokenId], { from: sender, value: web3.utils.toHex(web3.utils.toWei('0.0006', 'ether'))});
+
+        const buyPrice = await contractInstance.getTokenBuyPrice(2, sender);
+        const estimatedByPrice = Math.floor(30+30*5/100);
+
+        assert.equal(estimatedByPrice, buyPrice.words[0]);
+    });
+
+    it("should return correct project buy price when owner == buyer in all subcomponents", async () => {
+        const result = await contractInstance.mintToken(sender, project1.price, project1.royaltyPrice, "a", project1.components, { from: sender, value: web3.utils.toHex(web3.utils.toWei('0.0006', 'ether'))});
+        await contractInstance.mintToken(sender, project1.price, project1.royaltyPrice, "b", [result.logs[0].args.tokenId], { from: sender, value: web3.utils.toHex(web3.utils.toWei('0.0006', 'ether'))});
+
+        const buyPrice = await contractInstance.getTokenBuyPrice(2, sender);
+        assert.equal(0, buyPrice.words[0]);
     });
 
 
