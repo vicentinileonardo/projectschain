@@ -18,13 +18,12 @@ https://docs.google.com/document/d/1N4C0VYREDxl1NqOsBbevRbWa5_r74DFTg6tUAF2v8X4/
 
 1. Setup a local Chainlink node by following the instructions in the [Chainlink documentation](https://docs.chain.link/chainlink-nodes/v1/running-a-chainlink-node).
 
-2. 
+2. Setup the Chainlink jobs on the node by following the instructions in the [Chainlink documentation](https://docs.chain.link/chainlink-nodes/v1/fulfilling-requests).
 
 #### 
 
 
 ## Technology
-
 
 ![HTML](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)
 ![CSS](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)
@@ -39,7 +38,8 @@ https://docs.google.com/document/d/1N4C0VYREDxl1NqOsBbevRbWa5_r74DFTg6tUAF2v8X4/
 ![ExpressJS](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white)
 ![Redis](https://img.shields.io/badge/redis-CC0000.svg?&style=for-the-badge&logo=redis&logoColor=white)
 
-
 ## Future improvements
 
 ## Acknowledgements
+
++ [Chainlink documentation](https://docs.chain.link/)

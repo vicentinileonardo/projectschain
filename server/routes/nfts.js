@@ -752,36 +752,24 @@ async function validateNft(nft_body, repository) {
 
     //check if price is valid
     if (nft_body.price) {
-        if (nft_body.price < 0) {
-            let response = {};
-            response['status'] = 'fail';
-            response['data'] = { price: 'Price must be greater than 0' };
-            return response;
-        }
 
-        //price must be integer
-        if (!Number.isInteger(nft_body.price)) {
+        //price must be greater than 1000000000000000 wei (0.001ETH)
+        if (nft_body.price < 1000000000000000) {
             let response = {};
             response['status'] = 'fail';
-            response['data'] = { price: 'Price must be integer' };
+            response['data'] = { price: 'Price must be greater than 0.001ETH' };
             return response;
         }
     }
 
     //check if royaltyPrice is valid
     if (nft_body.royaltyPrice) {
-        if (nft_body.royaltyPrice < 0) {
+        
+        //royaltyPrice must be greater than 1000000000000000 wei (0.001ETH)
+        if (nft_body.royaltyPrice < 1000000000000000) {
             let response = {};
             response['status'] = 'fail';
-            response['data'] = { royaltyPrice: 'royaltyPrice must be greater than 0' };
-            return response;
-        }
-
-        //royaltyPrice must be integer
-        if (!Number.isInteger(nft_body.royaltyPrice)) {
-            let response = {};
-            response['status'] = 'fail';
-            response['data'] = { royaltyPrice: 'royaltyPrice must be integer' };
+            response['data'] = { royaltyPrice: 'royaltyPrice must be greater than 0.001ETH' };
             return response;
         }
     }

@@ -38,6 +38,12 @@ contract CustomChainlinkClient is ChainlinkClient, ConfirmedOwner {
         _jobId_1 = jobId_1;
         _jobId_2 = jobId_2;
     }
+
+    //get LINK balance of the contract
+    function getLinkBalance() public view returns (uint256) {
+        LinkTokenInterface link = LinkTokenInterface(chainlinkTokenAddress());
+        return link.balanceOf(address(this));
+    }
     
     //called inside the mint function
     //internal modifier is used to allow the function to be called only from the contract itself
