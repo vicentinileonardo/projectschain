@@ -28,6 +28,7 @@ contract AccessSmartContract {
         require(!_addressToTokens[projectBuyer][tokenId], 'User has already bought this project');
 
         // Pay projects owner
+        // Will also make approriate checks on token id and price
         projectNFT.transferPayment{value: msg.value}(tokenId, projectBuyer);
         
         console.log("-> Payment transfer to creator completed, will set ownership of project");
