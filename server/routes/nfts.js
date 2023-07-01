@@ -5,6 +5,7 @@ const Moralis = require('moralis').default;
 const fs = require('fs').promises;
 const path = require('path');
 const flatten = require('flat');
+const ethUtil = require('ethereumjs-util');
 
 //const repository = await Repository.setupRepository();
 
@@ -491,11 +492,46 @@ module.exports = (app, repository, Moralis) => {
         nft.components = nft_body.components;
         nft.manufacturers = [];
         nft.buyers = [];
+        nft.signature = [];
 
         //console.log("nft: ", nft);
 
         // save the NFT to Redis
         try {
+            
+            //first version
+            //data to encrypt is price + royaltyPrice + owner + hash
+            
+            console.log("owner: ", nft.owner);
+
+            let priceString = nft.price.toString();
+            let royaltyPriceString = nft.royaltyPrice.toString();
+
+            let dataToEncrypt = priceString + royaltyPriceString + nft.hash;
+
+            console.log("dataToEncrypt: ", dataToEncrypt);
+
+            const encryptedData = ethUtil.keccak256(Buffer.from(dataToEncrypt));
+            
+            console.log("encryptedData: ", encryptedData);
+
+            console.log("Private Key: ", process.env.BACKEND_PRIVATE_KEY);
+            const privateKey = Buffer.from(process.env.BACKEND_PRIVATE_KEY, 'hex');
+            
+            // Check if private key is 32 bytes (64 characters)
+            if(privateKey.length !== 32) {
+                console.error("Private key should be 32 bytes long");
+            } else {
+                const sig = ethUtil.ecsign(encryptedData, privateKey);
+                console.log('v:', sig.v);
+                console.log('r:', '0x' + sig.r.toString('hex'));
+                console.log('s:', '0x' + sig.s.toString('hex'));
+
+                nft.signature = [sig.v.toString(),'0x' + sig.r.toString('hex'), '0x' + sig.s.toString('hex')]
+            }
+        
+
+
             let id = await repository.save(nft);
 
             console.log("id: ", id);
@@ -503,6 +539,7 @@ module.exports = (app, repository, Moralis) => {
             //in order to have the unflattened projectJSON in the response
             nft['entityFields']['projectJSON']['_value'] = nft_body.projectJSON;
 
+            
             let data = { nft: nft };
 
             //all validations passed and metadata saved

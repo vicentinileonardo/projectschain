@@ -47,7 +47,7 @@ contract CustomChainlinkClient is ChainlinkClient, ConfirmedOwner {
     
     //called inside the mint function
     //internal modifier is used to allow the function to be called only from the contract itself
-    function requestConfirmMinting(uint256 _tokenId, string memory _hash) internal onlyOwner {
+    function requestConfirmMinting(uint256 _tokenId, string memory _hash) internal {
 
         Chainlink.Request memory req = buildChainlinkRequest(
             stringToBytes32(_jobId_1),
@@ -81,7 +81,7 @@ contract CustomChainlinkClient is ChainlinkClient, ConfirmedOwner {
         uint256 _tokenId,
         string memory _key,
         address _assignee
-    ) public onlyOwner {
+    ) internal {
 
         //_key must be "buyer" or "manufacturer"
         require(

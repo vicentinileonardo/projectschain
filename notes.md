@@ -137,3 +137,28 @@ PUT  http://localhost:3000/api/v1/nfts/hash2345
 11. [BACKEND]: Ritorna response a chainlink
 12. [CHAINLINK]: Chiama callback su blockchain
 13. [BLOCKCHAIN]: Emette evento di minting
+
+
+# on the backend signature
+
+in the context of Ethereum and the ECDSA (Elliptic Curve Digital Signature Algorithm), r, s, and v are components of a digital signature.
+
+When an Ethereum transaction is signed using a private key, the signature is produced as a set of three components: r, s, and v.
+
+r and s are two 32-byte numbers that, together with the public key, prove the transaction was signed by the owner of the private key.
+v is a single byte (0 or 1) that represents the recovery id. It's used to recover the public key from the signature.
+
+Here's a brief explanation of each parameter and how it's used:
+
+r, s: These are two 32-byte numbers produced as part of the ECDSA signature. They are derived from the private key of the signer and the data being signed.
+v: This is the recovery id, a single byte derived during the signature creation process. It helps to recover the public key from the signature.
+price, royaltyPrice, projectHash, components: These are the data that was signed. It's hashed together into a single 32-byte hash.
+backendAccount: This is the Ethereum account expected to have signed the data. It's compared against the account recovered from the signature.
+The ecrecover function is used to recover the Ethereum account that signed the given data. If the recovered signer matches the backendAccount, the function proceeds to mint the token. Otherwise, it reverts with the message "Invalid signature"
+
+
+A digital signature is a mathematical technique used to verify the **authenticity** and **integrity** of a message or document. In this case, the private key of the backend is used to sign a message (the concatenation of price, royaltyPrice, and hash) using the keccak256 hashing algorithm. The resulting signature (v, r, and s) is then added to the nft object and sent to the frontend.
+
+In the frontend, the signature values are passed to the mintToken function of the Solidity contract. The keccak256 hash of the message is then generated again using the values of price, royaltyPrice, and hash to verify the signature. The ecrecover function is then used to recover the public key of the signer from the signature. The recovered public key is then compared to the address of the backend to ensure that the signature is valid.
+
+This process ensures that only the backend with the correct private key can sign messages and generate valid signatures, which helps to prevent unauthorized access to the mintToken function of the Solidity contract.

@@ -119,7 +119,7 @@ export const useNFTsStore = defineStore('nfts', () => {
         const address = event.returnValues[0];
         const tokenId = event.returnValues[1];
 
-        console.log(`Mint successful with token id ${tokenId}`);
+        //console.log(`Mint successful with token id ${tokenId}`);
 
         // Set tokenId
         preMintedProject.nft.tokenId = parseInt(tokenId);
@@ -129,20 +129,30 @@ export const useNFTsStore = defineStore('nfts', () => {
           // Need to simulate oracle: make put to complete minting with token id
           const mintedProject = await request(`/api/v1/nfts/${preMintedProject.nft.hash}`, 'PUT', preMintedProject.nft);
 
-          console.log("minted project", mintedProject);
+          console.log("minted project with token id", preMintedProject.nft.tokenId);
 
           // Add to store minted project from server
           myNfts.value.push(mintedProject.nft);
 
         } else {
           // wait for Chainlink event
-         console.log("Waiting for Chainlink event");
+          console.log("Waiting for Chainlink event");
         }
 
       });
     // Get web3 instance from browser: connect to MetaMask
     await window.ethereum.request({ method: 'eth_requestAccounts' });
     const web3 = new Web3(window.ethereum);
+
+    console.log(
+      String(preMintedProject.nft.price),
+      String(preMintedProject.nft.royaltyPrice),
+      preMintedProject.nft.hash,
+      preMintedProject.nft.projectJSON.components,
+      parseInt(preMintedProject.nft.signature[0].toString()),
+      preMintedProject.nft.signature[1].toString(),
+      preMintedProject.nft.signature[2].toString()
+    );
 
     // Then send real transaction
     await masterContract.value.methods
@@ -151,7 +161,10 @@ export const useNFTsStore = defineStore('nfts', () => {
         String(preMintedProject.nft.royaltyPrice),
         preMintedProject.nft.hash,
         preMintedProject.nft.projectJSON.components,
-      )
+        parseInt(preMintedProject.nft.signature[0].toString()),
+        preMintedProject.nft.signature[1].toString(),
+        preMintedProject.nft.signature[2].toString()
+        )
       .send({ from: accountStore.getAccount, value: web3.utils.toWei('0.00059', 'ether') });
   }
 
@@ -175,7 +188,7 @@ export const useNFTsStore = defineStore('nfts', () => {
         const address = event.returnValues[0];
         const tokenId = event.returnValues[1];
 
-        console.log(`Buy successfull for token ${tokenId} by ${address}`);
+        //console.log(`Buy successfull for token ${tokenId} by ${address}`);
 
         if(!CHAINLINK_ENABLED){
           const bought = await request(`/api/v1/nfts/${tokenId}`, 'PATCH', 
@@ -187,8 +200,11 @@ export const useNFTsStore = defineStore('nfts', () => {
           boughtNfts.value.push(bought.nft);
 
         } else {
-          //wait for chainlink event
-          console.log('Waiting for chainlink event');
+          // wait for Chainlink event
+          console.log("Waiting for Chainlink event");
+
+         
+
         }        
       });
 
