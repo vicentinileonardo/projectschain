@@ -66,7 +66,7 @@ funding the chainlink node:
 https://sepoliafaucet.com/ (by alchemy)
 
 
-# admin address (the one on metamask) [needs to be funded]
+# admin address (the one on metamask) [needs to be funded, to deploy the contracts]
 0x46D72b1e93D5daaD3b68104F437Dbe0a4b00e18c
 
 # node address [needs to be funded]

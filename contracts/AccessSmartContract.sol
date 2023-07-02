@@ -58,4 +58,28 @@ contract AccessSmartContract {
 
         return projectBuyer;
     }
+
+
+    function getTokensBought(address buyer) public view returns (uint256[] memory) {
+        uint256[] memory tokensOwned;
+        uint256 counter = 0;
+        for (uint256 i = 0; i <= projectNFT.totalSupply(); i++) {
+            
+            //check if not expired using _ownershipExpirationTime mapping
+            if (_addressToTokens[buyer][i]){
+                if (_ownershipExpirationTime[keccak256(abi.encodePacked(buyer, i))] > block.timestamp) {
+                    
+                    tokensOwned[counter] = i;
+                    counter++;
+                }
+                else {
+                    //remove ownership
+                    //temporary solution, better if done in automatic way
+                    //commented since we need a view function since it will be heaviliy used
+                    //_addressToTokens[buyer][i] = false;
+                }
+            }            
+        }
+        return tokensOwned;
+    }
 }

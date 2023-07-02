@@ -18,9 +18,10 @@ let nft_schema = new Schema(NFT, {
     imageLink: { type: 'string', required: true },
     ipfsLink: { type: 'string', required: true },
     projectJSON: { type: 'string', required: true },
-    manufacturers: {type: 'string[]', required: true },
-    buyers: {type: 'string[]', required: true },
-    signature: { type: 'string[]', required: true },
+    signature: { type: 'string[]', required: true }
+    //manufacturers: {type: 'string[]', required: true },
+    //buyers: {type: 'string[]', required: true },
+    
 });
 
 async function setupRepository() {

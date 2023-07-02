@@ -21,10 +21,10 @@ export const useAccountStore = defineStore('account', () => {
     let token = localStorage.getItem('token');
     if (token) {
       const { address, body } = await Web3Token.verify(token?.split(' ')[1]);
-      if (address !== account.value) {
+      if (address.toLowerCase() !== account.value.toLowerCase()) {
         console.log('Address does not match web3 token');
 
-        // generating a token with 30 day of expiration time
+        // generating a token with 30 days of expiration time
         let token = await Web3Token.sign(msg => web3.eth.personal.sign(msg, account.value), '30d');
         localStorage.setItem('token', 'Bearer ' + token);
         console.log("Bearer " + token);
@@ -32,8 +32,8 @@ export const useAccountStore = defineStore('account', () => {
     } else {
       console.log('No web3 token');
 
-      // generating a token with 1 day of expiration time
-      let token = await Web3Token.sign(msg => web3.eth.personal.sign(msg, account.value), '1d');
+      // generating a token with 30 days of expiration time
+      let token = await Web3Token.sign(msg => web3.eth.personal.sign(msg, account.value), '30d');
       localStorage.setItem('token', 'Bearer ' + token);
       console.log("Bearer " + token);
     }

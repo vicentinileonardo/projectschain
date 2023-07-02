@@ -213,4 +213,9 @@ contract ProjectNFT is ERC721URIStorage, CustomChainlinkClient {
         console.log("-> final balance of project contract: ", address(this).balance);
     }
 
+    //getter for totalsupply
+    function totalSupply() public view onlyAccessContract returns (uint256) {
+        return tokenCounter.current();
+    }
+
 }

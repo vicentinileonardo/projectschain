@@ -77,6 +77,7 @@ contract CustomChainlinkClient is ChainlinkClient, ConfirmedOwner {
         emit RequestConfirmMintingFulfilled(_tokenId ,_success);
     }
 
+    // not used for now due to implementation strategy 
     function requestUpdate(
         uint256 _tokenId,
         string memory _key,

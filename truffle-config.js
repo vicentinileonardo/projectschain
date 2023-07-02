@@ -43,7 +43,11 @@
 
 require("dotenv").config();
 const { INFURA_API_KEY, MNEMONIC } = process.env;
+
+//this gets the first account of the metamask wallet
 const HDWalletProvider = require("@truffle/hdwallet-provider");
+
+
 
 module.exports = {
   /**

@@ -6,8 +6,29 @@ const fs = require('fs').promises;
 const path = require('path');
 const flatten = require('flat');
 const ethUtil = require('ethereumjs-util');
+const Web3 = require('web3');
 
-//const repository = await Repository.setupRepository();
+
+// Connect to Ganache
+const web3 = new Web3('http://localhost:8545');
+
+const AccessSmartContractJSON = require('../../build/contracts/AccessSmartContract.json');
+
+const lastDeploy = Object.keys(AccessSmartContractJSON.networks).pop();
+
+
+const AccessSmartContractAddress = AccessSmartContractJSON.networks[lastDeploy].address;
+
+// Pass the ABI to the Contract constructor, not the entire JSON
+const AccessSmartContract = new web3.eth.Contract(AccessSmartContractJSON.abi, AccessSmartContractAddress);
+
+
+
+async function callGetTokensBought(buyerAddress) {
+    const result = await AccessSmartContract.methods.getTokensBought(buyerAddress).call();
+    console.log(result);
+}
+  
 
 const { error } = require('console');
 const Web3Token = require('web3-token');
@@ -19,6 +40,7 @@ module.exports = (app, repository, Moralis) => {
 
     //GET
 
+    //for testing purposes, no auth required
     router.get('/nfts', async (req, res) => {
 
         try {
@@ -36,9 +58,11 @@ module.exports = (app, repository, Moralis) => {
             nfts = unflattenJSONfield('projectJSON', nfts);
 
             //hide sensitive fields like projectJSON, hash, ipfsLink
+            let manufacturers = nfts[i].manufacturers;
+
             for (let i = 0; i < nfts.length; i++) {
                 let check1 = await verifyIfOwner(nfts[i].owner, req.headers['authorization'])
-                let check2 = await verifyIfManufacturer(nfts[i].manufacturers, req.headers['authorization'])
+                let check2 = await verifyIfManufacturer(manufacturers, req.headers['authorization'])
                 if (!check1 && !check2) {
                     nfts[i] = hideField('hash', nfts[i]);
                     nfts[i] = hideField('ipfsLink', nfts[i]);
@@ -75,6 +99,7 @@ module.exports = (app, repository, Moralis) => {
     router.get('/nfts/catalog', async (req, res) => {
 
         try {
+            console.log("headers", req.headers['authorization'])
             if (!req.headers['authorization']) {
                 let response = {};
                 response['status'] = 'error';
@@ -104,10 +129,13 @@ module.exports = (app, repository, Moralis) => {
                 //unflatten the projectJSON
                 nfts = unflattenJSONfield('projectJSON', nfts);
 
+                let manufacturers = await callGetTokensBought(ownerAddress);
+                console.log("manufacturers: ", manufacturers);
+
                 //hide sensitive fields like projectJSON, hash, ipfsLink
                 for (let i = 0; i < nfts.length; i++) {
                     let check1 = await verifyIfOwner(nfts[i].owner, req.headers['authorization'])
-                    let check2 = await verifyIfManufacturer(nfts[i].manufacturers, req.headers['authorization'])
+                    let check2 = await verifyIfManufacturer(manufacturers, req.headers['authorization'])
                     if (!check1 && !check2) {
                         nfts[i] = hideField('hash', nfts[i]);
                         nfts[i] = hideField('ipfsLink', nfts[i]);
@@ -490,8 +518,8 @@ module.exports = (app, repository, Moralis) => {
         nft.ipfsLink = url;
         nft.projectJSON = encodedProjectJson;
         nft.components = nft_body.components;
-        nft.manufacturers = [];
-        nft.buyers = [];
+        //nft.manufacturers = [];
+        //nft.buyers = [];
         nft.signature = [];
 
         //console.log("nft: ", nft);
@@ -610,7 +638,7 @@ module.exports = (app, repository, Moralis) => {
         }
     });
 
-    //update NFT, with manufacturer and buyers
+    //[NOT USED ANYMORE], update NFT, with manufacturer and buyers, 
     router.patch('/nfts/:tokenId', async (req, res) => {
 
         let tokenId = req.params.tokenId;
