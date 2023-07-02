@@ -7,6 +7,18 @@ import "truffle/Console.sol";
 contract AccessSmartContract {
     ProjectNFT private projectNFT;
 
+    address private _owner;
+    modifier onlyOwner() {
+        require(msg.sender == _owner, "Caller is not the owner of the contract");
+        _;
+    }
+
+    address private _masterContract; //is the only one authorized to buyProject
+    modifier onlyMasterContract() {
+        require(msg.sender == _masterContract, "Caller is not the master contract");
+        _;
+    }
+
     // Maps owner address to bought tokens
     mapping(address => mapping(uint256 => bool)) private _addressToTokens;
 
@@ -16,9 +28,14 @@ contract AccessSmartContract {
     
     constructor(address projectNFTAddress){
         projectNFT = ProjectNFT(projectNFTAddress);
+        _owner = msg.sender;
     }
 
-    function buyProject(uint256 tokenId, address projectBuyer) public payable returns (address) {
+    function setMasterContract(address masterContract) public onlyOwner(){
+        _masterContract = masterContract;
+    }
+
+    function buyProject(uint256 tokenId, address projectBuyer) public payable onlyMasterContract returns (address) {
         console.log("New buy project from user ", projectBuyer);
         console.log("For token ", tokenId);
         console.log("With pay amount: ", msg.value);
