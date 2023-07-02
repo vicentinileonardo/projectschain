@@ -40,7 +40,7 @@ contract("AccessSmartContract", (accounts) => {
         const tokenId = result.logs[0].args.tokenId;
         await truffleAssert.reverts(
             AccessSmartContractInstance.buyProject(tokenId,sender),
-            "Need to pay buy price to buy token"
+            "Pay amount is not enough to pay for price of project"
         );
     }); 
 
