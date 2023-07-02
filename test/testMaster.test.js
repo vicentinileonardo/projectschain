@@ -32,6 +32,8 @@ contract("Master", (accounts) => {
         projectNFTInstance = await ProjectNFT.new(platformAddress, HOST_MACHINE_IP, ORACLE, JOBID_1, JOBID_2);
         accessSmartContractInstance = await AccessSmartContract.new(projectNFTInstance.address);
         masterInstance = await Master.new(projectNFTInstance.address,accessSmartContractInstance.address);
+        await projectNFTInstance.setMasterContract(masterInstance.address);
+        await projectNFTInstance.setAccessContract(accessSmartContractInstance.address);
     });
 
     it("should revert for invalid signature", async () => {

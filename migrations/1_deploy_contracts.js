@@ -12,5 +12,8 @@ module.exports = async function (deployer) {
     await deployer.deploy(AccessSmartContract, projectNftDeployed.address);
     const accessContractDeployed = await AccessSmartContract.deployed();
     await deployer.deploy(Master, projectNftDeployed.address, accessContractDeployed.address);
+    const masterContractDeployed = await Master.deployed();
 
+    await projectNftDeployed.setMasterContract(masterContractDeployed.address);
+    await projectNftDeployed.setAccessContract(accessContractDeployed.address);
 };

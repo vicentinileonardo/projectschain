@@ -11,12 +11,9 @@ import "./CustomChainlinkClient.sol";
 
 
 contract ProjectNFT is ERC721URIStorage, CustomChainlinkClient {
-    
     using Counters for Counters.Counter;
      
     Counters.Counter private tokenCounter;
-
-    address payable _platformAddress; //where to pay commissions
 
     struct TokenInfo {
        uint256 price;
@@ -30,6 +27,20 @@ contract ProjectNFT is ERC721URIStorage, CustomChainlinkClient {
     // Map to check hashes are unique
     mapping(string => bool) private _hashes;
 
+    address payable private _platformAddress; //where to pay commissions
+
+    address private _masterContract; //is the only one authorized to mint tokens
+    modifier onlyMasterContract() {
+        require(msg.sender == _masterContract, "Caller is not the master contract Expected ");
+        _;
+    }
+
+    address private _accessContract; //is the only one authorized to transfer payments
+    modifier onlyAccessContract() {
+        require(msg.sender == _accessContract, "Caller is not the access contract");
+        _;
+    }
+
     constructor(address payable platformAddress, string memory host_machine_ip, address oracle, string memory jobId_1, string memory jobId_2) ERC721('ProjectNFT', 'PNFT') CustomChainlinkClient(host_machine_ip, oracle, jobId_1, jobId_2)  {
       _platformAddress = platformAddress;
     }
@@ -40,7 +51,7 @@ contract ProjectNFT is ERC721URIStorage, CustomChainlinkClient {
         uint256 royaltyPrice,
         string calldata projectHash,
         uint256[] calldata components
-    ) payable public returns (uint256) {
+    ) payable public onlyMasterContract returns (uint256) {
         uint256 amount = msg.value;
         uint256 amountToPay = 0.00059 * 1 ether;
         require(msg.value >= amountToPay, 'Pay amount is not price of mint commissions');
@@ -51,7 +62,7 @@ contract ProjectNFT is ERC721URIStorage, CustomChainlinkClient {
         require(!_hashes[projectHash], 'Project already exists');
 
         tokenCounter.increment();
-        
+
         // Check components exists
         for (uint i = 0; i < components.length; i++) {
             require(components[i] < tokenCounter.current(), 'Component not valid');
@@ -88,6 +99,14 @@ contract ProjectNFT is ERC721URIStorage, CustomChainlinkClient {
 
     function tokenIdCheck(uint256 tokenId) private view {
         require(_exists(tokenId), 'Token does not exist');
+    }
+
+    function setMasterContract(address masterContract) public onlyOwner(){
+        _masterContract = masterContract;
+    }
+    
+    function setAccessContract(address accessContract) public onlyOwner{
+        _accessContract = accessContract;
     }
 
     function getTokenPrice(uint256 tokenId) public view returns (uint256) {
@@ -134,7 +153,7 @@ contract ProjectNFT is ERC721URIStorage, CustomChainlinkClient {
     }
 
     
-    function transferPayment(uint256 tokenId, address projectBuyer) public payable{
+    function transferPayment(uint256 tokenId, address projectBuyer) public payable onlyAccessContract{
         uint256 amount = msg.value;
         tokenIdCheck(tokenId);
 
