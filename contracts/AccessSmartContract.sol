@@ -12,7 +12,6 @@ contract AccessSmartContract {
 
     // Maps ownership to expiration date
     // Key is hash of tuple (address, uint256) for address of owner and tokenId
-    // See https://stackoverflow.com/questions/56292828/can-i-use-tuple-as-a-key-in-mapping
     mapping(bytes32 => uint256) private _ownershipExpirationTime;
     
     constructor(address projectNFTAddress){

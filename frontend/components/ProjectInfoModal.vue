@@ -1,10 +1,11 @@
 <script setup lang="ts">
 
-import type {NFT} from "@/model/nft";
-import {ref, watch} from "vue";
+import type { NFT } from "@/model/nft";
+import { ref, watch } from "vue";
 import AppButton from "@/components/AppButton.vue";
-import {onClickOutside} from "@vueuse/core";
+import { onClickOutside } from "@vueuse/core";
 import { useNFTsStore } from "@/stores/nfts.store";
+import { Icon } from '@iconify/vue';
 
 const nftsStore = useNFTsStore();
 
@@ -37,7 +38,6 @@ onClickOutside(modalContent, () => {
 </script>
 
 <template>
-
   <dialog ref="modal">
     <div ref="modalContent" class="modal-content">
       <h3>Project NFT info</h3>
@@ -71,13 +71,19 @@ onClickOutside(modalContent, () => {
         </p>
       </div>
 
+      <a :href="props.project?.ipfsLink" target="_blank">
+        <AppButton class="centered bg-primary my2" v-if="props.project?.ipfsLink">
+          <Icon icon="material-symbols:download" />
+          <p>IPFS file</p>
+        </AppButton>
+      </a>
+
       <AppButton @click="onCloseModal" class="centered">
         Close
       </AppButton>
     </div>
 
   </dialog>
-
 </template>
 
 <style scoped>
@@ -110,7 +116,8 @@ dialog::backdrop {
   margin: 1rem 0;
 }
 
-.info-element b, p {
+.info-element b,
+p {
   margin: 0
 }
 </style>

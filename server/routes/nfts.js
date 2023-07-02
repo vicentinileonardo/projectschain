@@ -299,7 +299,7 @@ module.exports = (app, repository, Moralis) => {
         for (let i = 0; i < nfts.length; i++) {
             let check1 = await verifyIfOwner(nfts[i].owner, req.headers['authorization'])
             let check2 = await verifyIfManufacturer(nfts[i].manufacturers, req.headers['authorization'])
-            if (!check1 && !check2) {
+            if (!check1 || !check2) {
                 nfts[i] = hideField('hash', nfts[i]);
                 nfts[i] = hideField('ipfsLink', nfts[i]);
                 nfts[i] = hideField('projectJSON', nfts[i]);
@@ -1063,7 +1063,7 @@ async function verifyIfOwner(nftOwner, token) {
         const { address, body } = await Web3Token.verify(token);
         console.log("ADDRESS RECOVERED ", address, body)
 
-        if (address == nftOwner) {
+        if (address.toLowerCase() == nftOwner.toLowerCase()) {
             return true;
         } else {
             return false;
@@ -1080,9 +1080,9 @@ async function verifyIfManufacturer(nftManufacturers, token) {
         token = token.split(' ')[1];
 
         const { address, body } = await Web3Token.verify(token);
-        console.log("ADDRESS RECOVERED ", address, body)
+        console.log("ADDRESS RECOVERED ", address, body);
 
-        if (nftManufacturers.includes(address)) {
+        if (nftManufacturers.map(a => a.toLowerCase()).includes(address.toLowerCase())) {
             return true;
         } else {
             return false;
