@@ -2,7 +2,7 @@
 import type { NFT } from '@/model/nft';
 import { Icon } from '@iconify/vue';
 import AppButton from '@/components/AppButton.vue';
-import { computed, onMounted } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useAccountStore } from "@/stores/account.store";
 import { useNFTsStore } from "@/stores/nfts.store";
 
@@ -14,14 +14,18 @@ const props = defineProps<{
   hideBuyButton?: boolean;
 }>();
 
-onMounted(() => {
+const price = ref<number | null>(null);
+
+onMounted(async () => {
   console.log(props.project);
+  const buyPrice = await nftsStore.getBuyPrice(props.project.tokenId!);
+  price.value = buyPrice.base + buyPrice.royaltyPrice;
 })
 
 const emits = defineEmits(['info']);
 
 const bought = computed(() => {
-  return props.project.manufacturers?.includes(accountStore.getAccount!);
+  return props.project.ipfsLink != null;
 })
 
 function getThumbnail() {
@@ -38,7 +42,7 @@ function getThumbnail() {
 
     <div class="card-title">
       <h4>{{ props.project?.name }}</h4>
-      <p v-if="!props.hideBuyButton">{{ nftsStore.convertToEth(props.project?.price) }}ETH</p>
+      <p v-if="!props.hideBuyButton && price">{{ nftsStore.convertToEth(price) }}ETH</p>
     </div>
 
     <div class="card-buttons">
