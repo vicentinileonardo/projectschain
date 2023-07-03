@@ -5,6 +5,7 @@ import { useAccountStore } from './account.store';
 import Web3 from 'web3';
 import type { AbiItem } from 'web3-utils';
 import contractABI from '../../build/contracts/Master.json';
+import projectABI from '../../build/contracts/ProjectNFT.json';
 
 
 //with Chainlink we must import also ProjectNFT since the Chainlink events are emitted by the ProjectNFT contract and not by the Master contract
@@ -33,7 +34,9 @@ export const useNFTsStore = defineStore('nfts', () => {
   const myNfts = ref<NFT[]>([]);
   const boughtNfts = ref<NFT[]>([]);
   const contractAddress = ref<string | null>(null);
+  const projectAddress = ref<string | null>(null);
   const masterContract = ref<any | null>(null);
+  const projectContract = ref<any | null>(null);
 
   async function setUp() {
     if(!SEPOLIA_ENABLED) {
@@ -42,12 +45,18 @@ export const useNFTsStore = defineStore('nfts', () => {
       if (lastDeploy) {
         contractAddress.value = (contractABI.networks as any)[lastDeploy].address;
       }
+
+      const projectLastDeploy = Object.keys(projectABI.networks).pop();
+      if (projectLastDeploy) {
+        projectAddress.value = (projectABI.networks as any)[projectLastDeploy].address;
+      }
     } else {
       contractAddress.value = (contractABI.networks as any)[SEPOLIA_NETWORK_ID].address;
+      projectAddress.value = (projectABI.networks as any)[SEPOLIA_NETWORK_ID].address;
     }
     
 
-    if (contractAddress.value) {
+    if (contractAddress.value && projectAddress.value) {
       try {
         // Get web3 instance from browser: connect to MetaMask
         await window.ethereum.request({ method: 'eth_requestAccounts' });
@@ -55,6 +64,7 @@ export const useNFTsStore = defineStore('nfts', () => {
 
         // Setup contract
         masterContract.value = new web3.eth.Contract(contractABI.abi as AbiItem[], contractAddress.value);
+        projectContract.value = new web3.eth.Contract(projectABI.abi as AbiItem[], projectAddress.value);
       } catch (err) {
         console.error("Error in setting up connection to blockchain", err);
       }
@@ -117,9 +127,7 @@ export const useNFTsStore = defineStore('nfts', () => {
 
     // Listen for new tokenId event
     masterContract.value.events.NewToken()
-
       .on('data', async (event: any) => {
-        // TODO maybe check if event is for my address?
 
         console.log("New token event", event);
 
@@ -145,10 +153,26 @@ export const useNFTsStore = defineStore('nfts', () => {
 
         } else {
           // wait for Chainlink event
-          console.log("Waiting for Chainlink event");
+          console.log("Need to wait for Chainlink event to load minted nft!");
         }
 
       });
+
+    projectContract.value.events.RequestConfirmMintingFulfilled()
+      .on('data', async (event: any) => {
+        console.log("New token event from Chainlink", event);
+        
+        const tokenId = event.returnValues[0];
+        const success = event.returnValues[1];
+
+        console.log("Mint successful for token ", tokenId);
+
+        const nft = await request(`/api/v1/nfts/${tokenId}`, 'GET');
+
+        // Add to store minted project from server
+        myNfts.value.push(nft.nft);
+      });
+
     // Get web3 instance from browser: connect to MetaMask
     console.log("Requesting accounts");
 
@@ -200,10 +224,12 @@ export const useNFTsStore = defineStore('nfts', () => {
         const address = event.returnValues[0];
         const tokenId = event.returnValues[1];
 
-        console.log('Project bought')
+        console.log('Project bought');
 
-        boughtNfts.value.push(nft);
-     
+        const nft = await request(`/api/v1/nfts/${tokenId}`, 'GET');
+
+        boughtNfts.value.push(nft.nft);
+        
       });
 
     console.log(`${accountStore.getAccount} is buying token ${nft.tokenId} for ${buyPrice}ETH`);
