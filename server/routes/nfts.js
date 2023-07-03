@@ -10,23 +10,32 @@ const Web3 = require('web3');
 const { error } = require('console');
 const Web3Token = require('web3-token');
 
+const SEPOLIA_ENABLED = false;
 
-// Connecting to Ganache from backend lead to issues
-//so using Infura and Sepolia testnet instead
-
-var web3 = new Web3(process.env.INFURA_API_KEY); 
-
-let sepolia_network_id = process.env.SEPOLIA_NETWORK_ID;
+let web3;
+let AccessSmartContractAddress;
 
 const AccessSmartContractJSON = require('../../build/contracts/AccessSmartContract.json');
 
-const AccessSmartContractAddress = AccessSmartContractJSON.networks[sepolia_network_id].address;
-console.log("AccessSmartContractAddress: ", AccessSmartContractAddress);
+if (SEPOLIA_ENABLED) {
+    // Use Sepholia
+    web3 = new Web3(process.env.INFURA_API_KEY);
+    const sepolia_network_id = process.env.SEPOLIA_NETWORK_ID;
+    AccessSmartContractAddress = AccessSmartContractJSON.networks[sepolia_network_id].address;
+} else {
+    // Use Ganache
+    web3 = new Web3();
+    web3.setProvider(new web3.providers.HttpProvider('http://127.0.0.1:8545'));
+    
+    // Get contract address: read last network deployment
+    const lastDeploy = Object.keys(AccessSmartContractJSON.networks).pop();
+    AccessSmartContractAddress = (AccessSmartContractJSON.networks)[lastDeploy].address;
+
+    console.log("AccessSmartContractAddress: ", AccessSmartContractAddress);    
+}
 
 // Pass the ABI to the Contract constructor, not the entire JSON
 const AccessSmartContract = new web3.eth.Contract(AccessSmartContractJSON.abi, AccessSmartContractAddress);
-
-
 
 async function callGetTokensBought(buyerAddress) {
     const result = await AccessSmartContract.methods.getTokensBought(buyerAddress).call();

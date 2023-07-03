@@ -10,7 +10,7 @@ import contractABI from '../../build/contracts/Master.json';
 //with Chainlink we must import also ProjectNFT since the Chainlink events are emitted by the ProjectNFT contract and not by the Master contract
 
 const CHAINLINK_ENABLED = false;
-const SEPOLIA_ENABLED = true;
+const SEPOLIA_ENABLED = false;
 const SEPOLIA_NETWORK_ID = '11155111';
 
 
