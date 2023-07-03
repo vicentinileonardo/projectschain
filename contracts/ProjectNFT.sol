@@ -31,7 +31,7 @@ contract ProjectNFT is ERC721URIStorage, CustomChainlinkClient {
 
     address private _masterContract; //is the only one authorized to mint tokens
     modifier onlyMasterContract() {
-        require(msg.sender == _masterContract, "Caller is not the master contract Expected ");
+        require(msg.sender == _masterContract, "Caller is not the master contract");
         _;
     }
 
