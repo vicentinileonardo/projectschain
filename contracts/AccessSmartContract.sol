@@ -61,9 +61,12 @@ contract AccessSmartContract {
 
 
     function getTokensBought(address buyer) public view returns (uint256[] memory) {
-        uint256[] memory tokensOwned;
+        uint256[] memory tokensOwned = new uint256[](projectNFT.totalSupply());
         uint256 counter = 0;
-        for (uint256 i = 0; i <= projectNFT.totalSupply(); i++) {
+        if (projectNFT.totalSupply() == 0) {
+            return tokensOwned;
+        }
+        for (uint256 i = 1; i <= projectNFT.totalSupply(); i++) {
             
             //check if not expired using _ownershipExpirationTime mapping
             if (_addressToTokens[buyer][i]){

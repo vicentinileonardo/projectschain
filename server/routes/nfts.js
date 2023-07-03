@@ -7,17 +7,21 @@ const path = require('path');
 const flatten = require('flat');
 const ethUtil = require('ethereumjs-util');
 const Web3 = require('web3');
+const { error } = require('console');
+const Web3Token = require('web3-token');
 
 
-// Connect to Ganache
-const web3 = new Web3('http://localhost:8545');
+// Connecting to Ganache from backend lead to issues
+//so using Infura and Sepolia testnet instead
+
+var web3 = new Web3(process.env.INFURA_API_KEY); 
+
+let sepolia_network_id = process.env.SEPOLIA_NETWORK_ID;
 
 const AccessSmartContractJSON = require('../../build/contracts/AccessSmartContract.json');
 
-const lastDeploy = Object.keys(AccessSmartContractJSON.networks).pop();
-
-
-const AccessSmartContractAddress = AccessSmartContractJSON.networks[lastDeploy].address;
+const AccessSmartContractAddress = AccessSmartContractJSON.networks[sepolia_network_id].address;
+console.log("AccessSmartContractAddress: ", AccessSmartContractAddress);
 
 // Pass the ABI to the Contract constructor, not the entire JSON
 const AccessSmartContract = new web3.eth.Contract(AccessSmartContractJSON.abi, AccessSmartContractAddress);
@@ -26,12 +30,9 @@ const AccessSmartContract = new web3.eth.Contract(AccessSmartContractJSON.abi, A
 
 async function callGetTokensBought(buyerAddress) {
     const result = await AccessSmartContract.methods.getTokensBought(buyerAddress).call();
-    console.log(result);
+    return result;
 }
   
-
-const { error } = require('console');
-const Web3Token = require('web3-token');
 
 //Exposing a key-value table of owners and respective NFTs
 module.exports = (app, repository, Moralis) => {
@@ -40,11 +41,12 @@ module.exports = (app, repository, Moralis) => {
 
     //GET
 
-    //for testing purposes, no auth required
+    //ONLY FOR TESTING PURPOSES, no auth required
     router.get('/nfts', async (req, res) => {
 
         try {
             let nfts = await repository.search().where('status').eq('minted').returnAll();
+            //let nfts = await repository.search().returnAll();
 
             if (nfts.length === 0) {
                 let response = {};
@@ -58,18 +60,9 @@ module.exports = (app, repository, Moralis) => {
             nfts = unflattenJSONfield('projectJSON', nfts);
 
             //hide sensitive fields like projectJSON, hash, ipfsLink
-            let manufacturers = nfts[i].manufacturers;
+            //let manufacturers = nfts[i].manufacturers;
 
-            for (let i = 0; i < nfts.length; i++) {
-                let check1 = await verifyIfOwner(nfts[i].owner, req.headers['authorization'])
-                let check2 = await verifyIfManufacturer(manufacturers, req.headers['authorization'])
-                if (!check1 && !check2) {
-                    nfts[i] = hideField('hash', nfts[i]);
-                    nfts[i] = hideField('ipfsLink', nfts[i]);
-                    nfts[i] = hideField('projectJSON', nfts[i]);
-                }
-            }
-
+            
             //hide entityId (redis key)
             for (let i = 0; i < nfts.length; i++) {
                 nfts[i] = hideField('entityId', nfts[i]);
@@ -99,7 +92,7 @@ module.exports = (app, repository, Moralis) => {
     router.get('/nfts/catalog', async (req, res) => {
 
         try {
-            console.log("headers", req.headers['authorization'])
+            //console.log("headers", req.headers['authorization'])
             if (!req.headers['authorization']) {
                 let response = {};
                 response['status'] = 'error';
@@ -129,18 +122,26 @@ module.exports = (app, repository, Moralis) => {
                 //unflatten the projectJSON
                 nfts = unflattenJSONfield('projectJSON', nfts);
 
-                let manufacturers = await callGetTokensBought(ownerAddress);
-                console.log("manufacturers: ", manufacturers);
+                let tokensBought = await callGetTokensBought(ownerAddress);
+                tokensBought = tokensBought.map(function(x){ return parseInt(x, 10); });
+                console.log("tokensBought: ", tokensBought);
+                console.log("tokensBought.length: ", tokensBought.length);
+
+                //loop tokensBought and remove 0s
+                tokensBought = tokensBought.filter(function (el) {
+                    return el != 0;
+                });
+
+                console.log("tokensBought: ", tokensBought);
 
                 //hide sensitive fields like projectJSON, hash, ipfsLink
                 for (let i = 0; i < nfts.length; i++) {
-                    let check1 = await verifyIfOwner(nfts[i].owner, req.headers['authorization'])
-                    let check2 = await verifyIfManufacturer(manufacturers, req.headers['authorization'])
-                    if (!check1 && !check2) {
+
+                    if(!tokensBought.includes(nfts[i].tokenId)) {
                         nfts[i] = hideField('hash', nfts[i]);
                         nfts[i] = hideField('ipfsLink', nfts[i]);
                         nfts[i] = hideField('projectJSON', nfts[i]);
-                    }
+                    }        
                 }
 
                 //hide entityId (redis key)
@@ -170,6 +171,14 @@ module.exports = (app, repository, Moralis) => {
 
         try {
 
+            if (!req.headers['authorization']) {
+                let response = {};
+                response['status'] = 'error';
+                response['message'] = 'Authorization token missing';
+                res.status(401).send(response);
+                return;
+            }
+
             let ownerAddress = req.params.ownerAddress;
             if (ownerAddress === undefined) {
                 let response = {};
@@ -181,6 +190,8 @@ module.exports = (app, repository, Moralis) => {
 
             //get all nfts from repository that have the owner passed in the request
             let nfts = await repository.search().where('status').eq('minted').and('owner').eq(ownerAddress).returnAll();
+
+            console.log("/owners/:ownerAddress/nfts, -> nfts: ", nfts);
 
             let response = {};
             response['status'] = 'success';
@@ -196,8 +207,8 @@ module.exports = (app, repository, Moralis) => {
                 //hide sensitive fields like projectJSON, hash, ipfsLink
                 for (let i = 0; i < nfts.length; i++) {
                     let check1 = await verifyIfOwner(nfts[i].owner, req.headers['authorization'])
-                    let check2 = await verifyIfManufacturer(nfts[i].manufacturers, req.headers['authorization'])
-                    if (!check1 && !check2) {
+                                       
+                    if (!check1) {
                         nfts[i] = hideField('hash', nfts[i]);
                         nfts[i] = hideField('ipfsLink', nfts[i]);
                         nfts[i] = hideField('projectJSON', nfts[i]);
@@ -230,6 +241,20 @@ module.exports = (app, repository, Moralis) => {
 
         try {
 
+            if (!req.headers['authorization']) {
+                let response = {};
+                response['status'] = 'error';
+                response['message'] = 'Authorization token missing';
+                res.status(401).send(response);
+                return;
+            }
+
+            let token = req.headers['authorization'];
+            token = token.split(' ')[1];
+            const { address, body } = await Web3Token.verify(token);
+
+            let realManufacturerAddress = address;
+
             let manufacturerAddress = req.params.manufacturerAddress;
             if (manufacturerAddress === undefined) {
                 let response = {};
@@ -239,9 +264,48 @@ module.exports = (app, repository, Moralis) => {
                 return;
             }
 
-            //get all nfts from repository that have the owner passed in the request
-            let nfts = await repository.search().where('status').eq('minted').and('manufacturers').contains(manufacturerAddress).returnAll();
+            if (manufacturerAddress.toLowerCase() !== realManufacturerAddress.toLowerCase()) {
+                let response = {};
+                response['status'] = 'error';
+                response['message'] = 'Buyer address not match the real address';
+                res.status(400).send(response);
+                return;
+            }
 
+            //get all nfts from repository that have the owner passed in the request
+            
+            let tokensBought = await callGetTokensBought(manufacturerAddress);
+            tokensBought = tokensBought.map(function(x){ return parseInt(x, 10); });
+            console.log("tokensBought: ", tokensBought);
+            console.log("tokensBought.length: ", tokensBought.length);
+
+            tokensBought = tokensBought.filter(function (el) {
+                return el != 0;
+            });
+
+            console.log("tokensBought: ", tokensBought);
+
+            if(tokensBought.length === 0) {
+                let response = {};
+                response['status'] = 'error';
+                response['message'] = 'NFTs not found';
+                response['data'] = { nfts: []};
+                res.status(404).send(response);
+                return;
+            }
+
+            console.log("tokensBought: ", tokensBought);
+
+            
+            let nfts = [];
+            for(let i = 0; i < tokensBought.length; i++) {
+                let nft = await repository.search().where('status').eq('minted').and('tokenId').eq(tokensBought[i]).returnAll();
+                nfts.push(nft[0]);
+            }
+
+            console.log("/buyers/:manufacturerAddress/nfts, -> nfts: ", nfts);
+            console.log("/buyers/:manufacturerAddress/nfts, -> nfts.length: ", nfts.length);
+            
             let response = {};
             response['status'] = 'success';
             response['message'] = 'NFTs found';
@@ -255,7 +319,12 @@ module.exports = (app, repository, Moralis) => {
                 //hide sensitive fields like projectJSON, hash, ipfsLink
                 for (let i = 0; i < nfts.length; i++) {
                     let check1 = await verifyIfOwner(nfts[i].owner, req.headers['authorization'])
-                    let check2 = await verifyIfManufacturer(nfts[i].manufacturers, req.headers['authorization'])
+                    
+                    var check2 = true;
+                    if(!tokensBought.includes(nfts[i].tokenId)){
+                        check2 = false;
+                    }
+                       
                     if (!check1 && !check2) {
                         nfts[i] = hideField('hash', nfts[i]);
                         nfts[i] = hideField('ipfsLink', nfts[i]);
@@ -323,11 +392,41 @@ module.exports = (app, repository, Moralis) => {
         //unflatten the projectJSON
         nfts = unflattenJSONfield('projectJSON', nfts);
 
+        if(!req.headers['authorization']) {
+            let response = {};
+            response['status'] = 'error';
+            response['message'] = 'Authorization token missing';
+            res.status(401).send(response);
+            return;
+        }
+
+        let token = req.headers['authorization'];
+        token = token.split(' ')[1];
+        const { address, body } = await Web3Token.verify(token);
+
+        let ownerAddress = address;
+
+        let tokensBought = await callGetTokensBought(ownerAddress);
+        tokensBought = tokensBought.map(function(x){ return parseInt(x, 10); });
+        console.log("tokensBought: ", tokensBought);
+        console.log("tokensBought.length: ", tokensBought.length);
+
+        tokensBought = tokensBought.filter(function (el) {
+            return el != 0;
+        });
+
+        console.log("tokensBought: ", tokensBought);
+
         //hide sensitive fields like projectJSON, hash, ipfsLink
         for (let i = 0; i < nfts.length; i++) {
             let check1 = await verifyIfOwner(nfts[i].owner, req.headers['authorization'])
-            let check2 = await verifyIfManufacturer(nfts[i].manufacturers, req.headers['authorization'])
-            if (!check1 || !check2) {
+           
+            let check2 = true;
+            if(!tokensBought.includes(nfts[i].tokenId)){
+                check2 = false;
+            }
+
+            if (!check1 && !check2) {
                 nfts[i] = hideField('hash', nfts[i]);
                 nfts[i] = hideField('ipfsLink', nfts[i]);
                 nfts[i] = hideField('projectJSON', nfts[i]);
@@ -981,6 +1080,7 @@ async function mintNft(req, res, nft, repository) {
 }
 
 // in order to add manufacturers and owners
+/*
 async function updateNft(req, res, nft, repository) {
     //check if status exist and is minted
     if (!nft.status) {
@@ -1019,7 +1119,7 @@ async function updateNft(req, res, nft, repository) {
         return;
     }
 
-    /* TODO: add WEB3 library and test 
+    TODO: add WEB3 library and test 
     //check if manufacturer is a valid address
     if(req.body.manufacturer) {
         if(!web3.utils.isAddress(req.body.manufacturer)) {
@@ -1041,7 +1141,7 @@ async function updateNft(req, res, nft, repository) {
             return;
         }
     }
-    */
+    
 
     if (req.body.manufacturer) {
         if (nft.manufacturers.includes(req.body.manufacturer)) {
@@ -1082,6 +1182,7 @@ async function updateNft(req, res, nft, repository) {
     res.status(200).send(response);
     return;
 }
+*/
 
 async function verifyIfOwner(nftOwner, token) {
     try {

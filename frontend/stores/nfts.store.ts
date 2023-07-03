@@ -10,7 +10,8 @@ import contractABI from '../../build/contracts/Master.json';
 //with Chainlink we must import also ProjectNFT since the Chainlink events are emitted by the ProjectNFT contract and not by the Master contract
 
 const CHAINLINK_ENABLED = false;
-
+const SEPOLIA_ENABLED = true;
+const SEPOLIA_NETWORK_ID = '11155111';
 
 
 interface ApiError {
@@ -35,11 +36,16 @@ export const useNFTsStore = defineStore('nfts', () => {
   const masterContract = ref<any | null>(null);
 
   async function setUp() {
-    // Get contract address: read last network deployment
-    const lastDeploy = Object.keys(contractABI.networks).pop();
-    if (lastDeploy) {
-      contractAddress.value = (contractABI.networks as any)[lastDeploy].address;
+    if(!SEPOLIA_ENABLED) {
+      // Get contract address: read last network deployment
+      const lastDeploy = Object.keys(contractABI.networks).pop();
+      if (lastDeploy) {
+        contractAddress.value = (contractABI.networks as any)[lastDeploy].address;
+      }
+    } else {
+      contractAddress.value = (contractABI.networks as any)[SEPOLIA_NETWORK_ID].address;
     }
+    
 
     if (contractAddress.value) {
       try {
@@ -111,6 +117,7 @@ export const useNFTsStore = defineStore('nfts', () => {
 
     // Listen for new tokenId event
     masterContract.value.events.NewToken()
+
       .on('data', async (event: any) => {
         // TODO maybe check if event is for my address?
 
@@ -123,11 +130,13 @@ export const useNFTsStore = defineStore('nfts', () => {
 
         // Set tokenId
         preMintedProject.nft.tokenId = parseInt(tokenId);
+        console.log("preMintedProject", preMintedProject);
 
         if(!CHAINLINK_ENABLED) {
 
           // Need to simulate oracle: make put to complete minting with token id
           const mintedProject = await request(`/api/v1/nfts/${preMintedProject.nft.hash}`, 'PUT', preMintedProject.nft);
+          console.log("minted project", mintedProject);
 
           console.log("minted project with token id", preMintedProject.nft.tokenId);
 
@@ -141,8 +150,11 @@ export const useNFTsStore = defineStore('nfts', () => {
 
       });
     // Get web3 instance from browser: connect to MetaMask
+    console.log("Requesting accounts");
+
     await window.ethereum.request({ method: 'eth_requestAccounts' });
     const web3 = new Web3(window.ethereum);
+
 
     console.log(
       String(preMintedProject.nft.price),
@@ -188,24 +200,10 @@ export const useNFTsStore = defineStore('nfts', () => {
         const address = event.returnValues[0];
         const tokenId = event.returnValues[1];
 
-        //console.log(`Buy successfull for token ${tokenId} by ${address}`);
+        console.log('Project bought')
 
-        if(!CHAINLINK_ENABLED){
-          const bought = await request(`/api/v1/nfts/${tokenId}`, 'PATCH', 
-            { manufacturer: accountStore.getAccount }
-          );
-
-          console.log('Project bought and patched buyer to backend, got nft: ', bought);
-
-          boughtNfts.value.push(bought.nft);
-
-        } else {
-          // wait for Chainlink event
-          console.log("Waiting for Chainlink event");
-
-         
-
-        }        
+        boughtNfts.value.push(nft);
+     
       });
 
     console.log(`${accountStore.getAccount} is buying token ${nft.tokenId} for ${buyPrice}ETH`);

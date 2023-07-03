@@ -162,3 +162,8 @@ A digital signature is a mathematical technique used to verify the **authenticit
 In the frontend, the signature values are passed to the mintToken function of the Solidity contract. The keccak256 hash of the message is then generated again using the values of price, royaltyPrice, and hash to verify the signature. The ecrecover function is then used to recover the public key of the signer from the signature. The recovered public key is then compared to the address of the backend to ensure that the signature is valid.
 
 This process ensures that only the backend with the correct private key can sign messages and generate valid signatures, which helps to prevent unauthorized access to the mintToken function of the Solidity contract.
+
+
+# on frontend bugs
+
+switching account on metamask does not work all the time, it is necessary to refresh the page in order to make it work
