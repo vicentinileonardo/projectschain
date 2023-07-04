@@ -296,10 +296,10 @@ module.exports = (app, repository, Moralis) => {
 
             if(tokensBought.length === 0) {
                 let response = {};
-                response['status'] = 'error';
-                response['message'] = 'NFTs not found';
+                response['status'] = 'success';
+                response['message'] = 'but no NFTs found';
                 response['data'] = { nfts: []};
-                res.status(404).send(response);
+                res.status(200).send(response);
                 return;
             }
 

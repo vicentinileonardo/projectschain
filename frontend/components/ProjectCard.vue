@@ -17,7 +17,6 @@ const props = defineProps<{
 const price = ref<number | null>(null);
 
 onMounted(async () => {
-  console.log(props.project);
   const buyPrice = await nftsStore.getBuyPrice(props.project.tokenId!);
   price.value = buyPrice.base + buyPrice.royaltyPrice;
 })
