@@ -11,6 +11,6 @@ server/temp/*.json
 
 # dotenv environment variables file
 .env
-.env.test
+
 
 build/contracts/*.json

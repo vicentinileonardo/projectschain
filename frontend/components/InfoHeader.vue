@@ -4,7 +4,7 @@
 
 <template>
     <div class="info-header">
-        <img src="@/assets/blockchain.png" height="200" />
+        <img src="@/assets/blockchain.png" height="350" />
         <h2 class="info-header-title">ProjectsChain</h2>
         <p class="info-header-text">
             Protect the intellectual property of your 3D projects and manage royalties using Smart

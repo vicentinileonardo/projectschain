@@ -76,7 +76,7 @@ https://sepoliafaucet.com/ (by alchemy)
 0xe367a0f5E216dE86a90FD9E0d8aea27d6a4956bd
 
 # Job #1 ID
-38d2757024be4f4ba47f80bcd173ca6a
+0f2a6669ba5b48b993301c917d01098c
 
 # Job #2 ID
 de80a02e11e540fea0de2177bb55f717
@@ -93,6 +93,7 @@ de80a02e11e540fea0de2177bb55f717
 ifconfig | grep 'inet ' | grep -v 127.0.0.1 | awk '{print $2}'
 ifconfig | grep 'inet ' | grep -v 127.0.0.1 | awk '{print $2}' | head -1
 192.168.1.238
+192.168.1.5
 
 start the container with --network=host and then you can use localhost instead of the ip address, 
 this should work on linux but not on mac

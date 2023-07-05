@@ -12,7 +12,7 @@ Our plugin solution needs a centralized backend to work, this is because we need
 Mixed approach:
 This approach combines the benefits of centralized metadata storage with the decentralization and security provided by a smart contract. The metadata is stored on a centralized server, which can be more easily updated and managed, while the NFT creation process is handled by a smart contract, which ensures that the token ID is assigned in a predictable and secure manner.
 
-## About pre checks:
+## OK About pre checks:
 It is generally a good practice to perform internal checks on a centralized backend before sending a minting request on the blockchain. This approach can help to ensure that the minting process is likely to succeed, and can help to avoid wasting gas fees on failed transactions.
 
 By performing pre-checks on the centralized backend, you can verify that all necessary data is available and formatted correctly, and that the minting request meets any additional requirements or constraints that may exist. For example, you may want to check that the user has sufficient balance, that the requested NFT metadata exists and is valid, or that the requested NFT name is not already in use.
@@ -164,6 +164,6 @@ In the frontend, the signature values are passed to the mintToken function of th
 This process ensures that only the backend with the correct private key can sign messages and generate valid signatures, which helps to prevent unauthorized access to the mintToken function of the Solidity contract.
 
 
-# on frontend bugs
+# OK on frontend bugs
 
 switching account on metamask does not work all the time, it is necessary to refresh the page in order to make it work

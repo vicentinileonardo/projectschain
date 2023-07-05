@@ -21,6 +21,7 @@ contract CustomChainlinkClient is ChainlinkClient, ConfirmedOwner {
     
     event RequestConfirmMintingFulfilled(
         uint256 indexed tokenId,
+        string indexed hash,
         string success
     );
 
@@ -63,6 +64,7 @@ contract CustomChainlinkClient is ChainlinkClient, ConfirmedOwner {
             string(abi.encodePacked('{"tokenId":',Strings.toString(_tokenId),'}'))
         );
         req.add("tokenId", Strings.toString(_tokenId));
+        req.add("hash", _hash);
 
         sendChainlinkRequestTo(_oracle, req, ORACLE_PAYMENT);
 
@@ -71,10 +73,11 @@ contract CustomChainlinkClient is ChainlinkClient, ConfirmedOwner {
     function fulfillConfirmMinting(
         bytes32 _requestId,
         uint256 _tokenId,
+        string memory _hash,
         string memory _success
     ) public recordChainlinkFulfillment(_requestId) {
 
-        emit RequestConfirmMintingFulfilled(_tokenId ,_success);
+        emit RequestConfirmMintingFulfilled(_tokenId , _hash, _success);
     }
 
     // not used for now due to implementation strategy 
