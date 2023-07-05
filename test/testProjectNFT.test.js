@@ -46,7 +46,7 @@ contract("ProjectNFT", (accounts) => {
                 "projectHash": _projectHash,
                 "projectJSON": {
                     "components": project1.components,
-                    "C2": "test",
+                    "C2": _projectHash,
                     "C3": "test"
                 }
             })
@@ -105,8 +105,8 @@ contract("ProjectNFT", (accounts) => {
         assert.equal(tokenRoyaltyPrice, project1.royaltyPrice);
     });
 
-    /*
-    it("should return the right project buy price", async () => {
+    
+    it("should return the right project buy price if not owner", async () => {
 
         let resultSignature = await computeSignature();
         let v = resultSignature[0];
@@ -122,12 +122,81 @@ contract("ProjectNFT", (accounts) => {
         s = resultSignature[2];
         projectHash = resultSignature[3];
 
-        await masterInstance.mintToken(project1.price, project1.royaltyPrice, projectHash, project1.components, v,r,s, { from: sender, value: amountToValue(0.006)});
+        await masterInstance.mintToken(project1.price, project1.royaltyPrice, projectHash, [1], v,r,s, { from: sender, value: amountToValue(0.006)});
 
         const tokenBuyPrice = await projectNFTInstance.getTokenBuyPrice(2,sender2,{ from: sender2 });
-        const expectedTokenBuyPrice = Math.floor((project1.royaltyPrice + project1.price)*5/100);
+        const expectedTokenBuyPrice = Math.floor(project1.price+project1.royaltyPrice+(project1.royaltyPrice + project1.price)*5/100);
         assert.equal(tokenBuyPrice, expectedTokenBuyPrice);
-    }); */
+    }); 
+
+    it("should return the right project buy price if owner of the final project", async () => {
+
+        let resultSignature = await computeSignature();
+        let v = resultSignature[0];
+        let r = resultSignature[1];
+        let s = resultSignature[2];
+        let projectHash = resultSignature[3];
+
+        await masterInstance.mintToken(project1.price, project1.royaltyPrice, projectHash, project1.components, v,r,s, { from: sender, value: amountToValue(0.006)});
+
+        resultSignature = await computeSignature("0x321");
+        v = resultSignature[0];
+        r = resultSignature[1];
+        s = resultSignature[2];
+        projectHash = resultSignature[3];
+
+        await masterInstance.mintToken(project1.price, project1.royaltyPrice, projectHash, [1], v,r,s, { from: sender2, value: amountToValue(0.006)});
+
+        const tokenBuyPrice = await projectNFTInstance.getTokenBuyPrice(2,sender2,{ from: sender2 });
+        const expectedTokenBuyPrice = Math.floor(project1.price+project1.price*5/100);
+        assert.equal(tokenBuyPrice, expectedTokenBuyPrice);
+    }); 
+
+    it("should return the right project buy price if owner of a component", async () => {
+
+        let resultSignature = await computeSignature();
+        let v = resultSignature[0];
+        let r = resultSignature[1];
+        let s = resultSignature[2];
+        let projectHash = resultSignature[3];
+
+        await masterInstance.mintToken(project1.price, project1.royaltyPrice, projectHash, project1.components, v,r,s, { from: sender, value: amountToValue(0.006)});
+
+        resultSignature = await computeSignature("0x321");
+        v = resultSignature[0];
+        r = resultSignature[1];
+        s = resultSignature[2];
+        projectHash = resultSignature[3];
+
+        await masterInstance.mintToken(project1.price, project1.royaltyPrice, projectHash, [1], v,r,s, { from: sender2, value: amountToValue(0.006)});
+
+        const tokenBuyPrice = await projectNFTInstance.getTokenBuyPrice(2,sender,{ from: sender });
+        const expectedTokenBuyPrice = Math.floor(project1.price+project1.price*5/100);
+        assert.equal(tokenBuyPrice, expectedTokenBuyPrice);
+    }); 
+
+    it("should return the right project buy price if owner of the project and of its subcomponents", async () => {
+
+        let resultSignature = await computeSignature();
+        let v = resultSignature[0];
+        let r = resultSignature[1];
+        let s = resultSignature[2];
+        let projectHash = resultSignature[3];
+
+        await masterInstance.mintToken(project1.price, project1.royaltyPrice, projectHash, project1.components, v,r,s, { from: sender, value: amountToValue(0.006)});
+
+        resultSignature = await computeSignature("0x321");
+        v = resultSignature[0];
+        r = resultSignature[1];
+        s = resultSignature[2];
+        projectHash = resultSignature[3];
+
+        await masterInstance.mintToken(project1.price, project1.royaltyPrice, projectHash, [1], v,r,s, { from: sender, value: amountToValue(0.006)});
+
+        const tokenBuyPrice = await projectNFTInstance.getTokenBuyPrice(2,sender,{ from: sender });
+        const expectedTokenBuyPrice = 0;
+        assert.equal(tokenBuyPrice, expectedTokenBuyPrice);
+    }); 
 
     it("should return the right project hash", async () => {
 
