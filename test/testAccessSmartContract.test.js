@@ -28,24 +28,7 @@ contract("AccessSmartContract", (accounts) => {
         owner: "0x46D72b1e93D5daaD3b68104F437Dbe0a4b00e18"
     };
 
-    beforeEach(async () => {
-        projectNFTInstance = await ProjectNFT.new(platformAddress, HOST_MACHINE_IP, ORACLE, JOBID_1, JOBID_2);
-        accessSmartContractInstance = await AccessSmartContract.new(projectNFTInstance.address);
-        masterInstance = await Master.new(projectNFTInstance.address,accessSmartContractInstance.address);
-        await accessSmartContractInstance.setMasterContract(masterInstance.address);
-        await projectNFTInstance.setMasterContract(masterInstance.address);
-        await projectNFTInstance.setAccessContract(accessSmartContractInstance.address);
-    });
-
-    it("should revert on buyProject because doesn't allowed to call it", async () => {
-        await truffleAssert.reverts(
-            accessSmartContractInstance.buyProject(1,sender, { from: sender, value: web3.utils.toHex(web3.utils.toWei('0.0006', 'ether'))}),
-            "Caller is not the master contract"
-        );
-    });
-
-    it("should get right tokens bought by an account", async () => {
-
+    async function computeSignature() {
         let deleteResponse = await fetch(`http://localhost:3000/api/v1/nfts/`, {
             method: 'DELETE'});
 
@@ -75,9 +58,39 @@ contract("AccessSmartContract", (accounts) => {
         //console.log('projectHash', projectHash);
 
         let signature = response.data.nft.signature;
-        let v = parseInt(signature[0].toString());
-        let r = signature[1].toString();
-        let s = signature[2].toString();
+        var v = parseInt(signature[0].toString());
+        var r = signature[1].toString();
+        var s = signature[2].toString();
+        return [v,r,s,projectHash];
+    };
+
+    function amountToValue(amount){
+        let amountString = amount.toString();
+        return web3.utils.toHex(web3.utils.toWei(amountString, 'ether'));
+    };
+
+    beforeEach(async () => {
+        projectNFTInstance = await ProjectNFT.new(platformAddress, HOST_MACHINE_IP, ORACLE, JOBID_1, JOBID_2);
+        accessSmartContractInstance = await AccessSmartContract.new(projectNFTInstance.address);
+        masterInstance = await Master.new(projectNFTInstance.address,accessSmartContractInstance.address);
+        await accessSmartContractInstance.setMasterContract(masterInstance.address);
+        await projectNFTInstance.setMasterContract(masterInstance.address);
+        await projectNFTInstance.setAccessContract(accessSmartContractInstance.address);
+    });
+
+    it("should revert on buyProject because doesn't allowed to call it", async () => {
+        await truffleAssert.reverts(
+            accessSmartContractInstance.buyProject(1,sender, { from: sender, value: amountToValue(0.006)}),
+            "Caller is not the master contract"
+        );
+    });
+
+    it("should get right tokens bought by an account", async () => {
+        const resultSignature = await computeSignature();
+        const v = resultSignature[0];
+        const r = resultSignature[1];
+        const s = resultSignature[2];
+        const projectHash = resultSignature[3];
 
         const result = await masterInstance.mintToken(project1.price, project1.royaltyPrice, projectHash, project1.components, v,r,s, { from: sender, value: web3.utils.toHex(web3.utils.toWei('0.0006', 'ether'))});
         
