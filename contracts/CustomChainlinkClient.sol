@@ -21,7 +21,7 @@ contract CustomChainlinkClient is ChainlinkClient, ConfirmedOwner {
     
     event RequestConfirmMintingFulfilled(
         uint256 indexed tokenId,
-        string indexed hash,
+        string projectHash,
         string success
     );
 

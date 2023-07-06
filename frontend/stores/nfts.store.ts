@@ -3,7 +3,7 @@ import { defineStore } from 'pinia';
 import type { NFT } from '@/model/nft';
 import { useAccountStore } from './account.store';
 import Web3 from 'web3';
-import type { AbiItem } from 'web3-utils';
+import type { AbiItem} from 'web3-utils';
 import contractABI from '../../build/contracts/Master.json';
 import projectABI from '../../build/contracts/ProjectNFT.json';
 
@@ -127,14 +127,22 @@ export const useNFTsStore = defineStore('nfts', () => {
     await window.ethereum.request({ method: 'eth_requestAccounts' });
     const web3 = new Web3(window.ethereum);
 
+    const optionsNewTokenEvent = {
+      filter: {
+        projectHash: preMintedProject.nft.hash,
+      },
+    };
+
     // Add event listener for NewToken
-    masterContract.value.events.NewToken()
+    masterContract.value.events.NewToken(optionsNewTokenEvent)
       .on('data', async (event: any) => {
 
         console.log("New token event", event);
 
         const address = event.returnValues[0];
         const tokenId = event.returnValues[1];
+
+        console.log("project hash", event.returnValues[2]);
 
         // Set tokenId
         preMintedProject.nft.tokenId = parseInt(tokenId);
@@ -159,13 +167,21 @@ export const useNFTsStore = defineStore('nfts', () => {
 
       });
 
+    const optionsConfirmMintingEvent = {
+      filter: {
+        projectHash: preMintedProject.nft.hash,
+      },
+    };
+
     // Add event listener for RequestConfirmMintingFulfilled
-    projectContract.value.events.RequestConfirmMintingFulfilled()
+    projectContract.value.events.RequestConfirmMintingFulfilled(optionsConfirmMintingEvent)
       .on('data', async (event: any) => {
         console.log("New token event from Chainlink", event);
         
         const tokenId = event.returnValues[0];
-        const success = event.returnValues[1];
+        const success = event.returnValues[2];
+
+        console.log("project hash", event.returnValues[1]);
 
         console.log("Mint successful for token ", tokenId);
 

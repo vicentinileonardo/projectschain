@@ -14,9 +14,9 @@ contract Master {
 
   address private backendAccount = 0xdA9555ed6CB366BB53CA0714CF13bC526C732DEB;
 
-  event NewToken(address owner, uint256 tokenId);
+  event NewToken(address owner, uint256 tokenId, string projectHash);
 
-  event NewBuyer(address buyer, uint256 tokenId);
+  event NewBuyer(address buyer, uint256 indexed tokenId);
 
   constructor(address projectNFTAddress, address accessContractAddress) {
     projectNFT = ProjectNFT(projectNFTAddress);
@@ -58,7 +58,7 @@ contract Master {
 
     uint256 tokenId = projectNFT.mintToken{value: msg.value}(msg.sender, price, royaltyPrice, projectHash, components);
 
-    emit NewToken(msg.sender, tokenId);
+    emit NewToken(msg.sender, tokenId, projectHash);
   }
 
   function buyToken(uint256 tokenId) payable public {
