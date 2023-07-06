@@ -152,8 +152,8 @@ contract("Master", (accounts) => {
 
         const result = await masterInstance.mintToken(project1.price, project1.royaltyPrice, projectHash, project1.components, v,r,s, { from: sender, value: amountToValue(0.006)});
         
-        var buyPrice=(project1.price*105/100).toString(10);
-        await masterInstance.buyToken(1,{ from: sender2, value: web3.utils.toHex(web3.utils.toWei(buyPrice, 'ether'))});
+        var buyPrice=(project1.price*105/100)/(10**18);
+        await masterInstance.buyToken(1,{ from: sender2, value: amountToValue(buyPrice)});
     });
 
     it("should revert on buyToken for not sufficient value sent", async () => {

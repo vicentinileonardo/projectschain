@@ -92,13 +92,14 @@ contract("AccessSmartContract", (accounts) => {
         const s = resultSignature[2];
         const projectHash = resultSignature[3];
 
-        const result = await masterInstance.mintToken(project1.price, project1.royaltyPrice, projectHash, project1.components, v,r,s, { from: sender, value: web3.utils.toHex(web3.utils.toWei('0.0006', 'ether'))});
+        await masterInstance.mintToken(project1.price, project1.royaltyPrice, projectHash, project1.components, v,r,s, { from: sender, value: amountToValue(0.0006)});
         
-        var buyPrice=(project1.price*105/100).toString(10);
-        await masterInstance.buyToken(1,{ from: sender2, value: web3.utils.toHex(web3.utils.toWei(buyPrice, 'ether'))});
+        var buyPrice=(project1.price*105/100)/(10**18);
+        await masterInstance.buyToken(1,{ from: sender2, value: amountToValue(buyPrice)});
 
         const tokensBought = await accessSmartContractInstance.getTokensBought(sender2);
+        const result = tokensBought[0].words.filter(element => element !== '');
 
-        assert.deepEqual(tokensBought, [1]);
+        assert.deepEqual(result, [1]);
     });
 });
