@@ -32,12 +32,12 @@ Perform pre-minting checks: Perform additional checks specific to your use case 
 Handle errors gracefully: If any validation or pre-minting check fails, handle the error gracefully and provide appropriate feedback to the user. This can help avoid unnecessary transactions on the blockchain and improve the user experience.
 By implementing these internal checks, you can ensure that the minting process is more reliable and efficient. However, it is important to note that these checks should complement the inherent validation mechanisms provided by the smart contract itself, as the blockchain is ultimately the authoritative source of truth for the minting process.
 
-## About manufactures and buyers lists
+## REMOVED About manufactures and buyers lists
 
 These list are **whitelists**, so the platform that has our plugin can check if the manufacturer can use the project
 
 
-## about projectNFT transferPayment function
+## OK, about projectNFT transferPayment function
 
 we should be aware of the following points:
 
@@ -52,7 +52,7 @@ goal: reduce gas costs and code size since size is a factor for gas costs and a 
 - rimane invece il mapping: mapping(string => bool) private _hashes;
 - un require usato tante volte l’ho messo come funzione
 
-- enabling the compiler optimizer and setting the runs: 1,
+- enabling the compiler optimizer and setting the runs to 1 so even if a function is called once it will be optimized
 
 # Chainlink
 

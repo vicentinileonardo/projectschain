@@ -20,6 +20,13 @@ https://docs.google.com/document/d/1N4C0VYREDxl1NqOsBbevRbWa5_r74DFTg6tUAF2v8X4/
 
 2. Setup the Chainlink jobs on the node by following the instructions in the [Chainlink documentation](https://docs.chain.link/chainlink-nodes/v1/fulfilling-requests).
 
+3. Configure a new job on the Chainlink using tht TOML file named `mint_job.toml` in the `config/chainlink` folder.
+
+4. Update the environment variables in the `.env` file with:
++ the `HOST_MACHINE_IP` of the machine running the Chainlink node
++ the `ORACLE` address of the smart contract `Oracle.sol` deployed on the blockchain
++ the value of `JOBID_1` with the Job ID of the job created in the previous step (without the dashes)
+
 #### 
 
 ## Security
@@ -34,6 +41,8 @@ https://docs.google.com/document/d/1N4C0VYREDxl1NqOsBbevRbWa5_r74DFTg6tUAF2v8X4/
 ### Digital signature
 
 <img src="readme_assets/digital_signature.png">
+
+### Chainlink request
 
 
 
