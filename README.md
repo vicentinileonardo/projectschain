@@ -10,6 +10,8 @@ https://docs.google.com/document/d/1N4C0VYREDxl1NqOsBbevRbWa5_r74DFTg6tUAF2v8X4/
 
 ## UML diagram of smart contracts 
 
+<img src="readme_assets/uml.png">
+
 ## How to run
 
 ### Prerequisites
