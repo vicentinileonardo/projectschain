@@ -62,7 +62,7 @@ Update the access control lists / whitelists
 
 # difficulty of testing chainlink
 
-Chainlink is not support by ganache 
+Chainlink is not supported by ganache 
 All the setup must be done on a testnet, Sepolia was used
 Problem: getting LINK token is quite easy but getting SepETH from faucet it takes times
 Testing resulted in a very slow process
