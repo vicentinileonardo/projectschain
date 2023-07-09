@@ -72,7 +72,7 @@ redis-server /usr/local/etc/redis/redis.conf
 redis-server
 ```
 
-### Compile and deploy the smart contracts
+### Compile, test and deploy the smart contracts
 
 1. Compile the smart contracts by running the following command:
 
@@ -80,7 +80,13 @@ redis-server
 npm run compile
 ```
 
-2. Deploy the smart contracts on Ganache or Sepolia by running the following command:
+2. Test the smart contracts by running the following command:
+
+```sh
+npm run test
+```
+
+3. Deploy the smart contracts on Ganache or Sepolia by running the following command:
 
 ```sh
 npm run deploy
@@ -107,7 +113,6 @@ const SEPOLIA_ENABLED = true;
 ```
 
 
-
 ### Run the server
 
 1. Install the dependencies by running the following command:
@@ -129,14 +134,6 @@ npm run server
 
 ```sh
 npm run frontend
-```
-
-## How to test
-
-1. Run the tests by running the following command:
-
-```sh
-npm run test
 ```
 
 
