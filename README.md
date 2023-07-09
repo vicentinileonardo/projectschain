@@ -142,7 +142,9 @@ npm run test
 
 ## Digital signature diagram
 
-<img src="readme_assets/digital_signature.png">
+<p align="center">
+    <img src="readme_assets/digital_signature.png">
+</p>
 
 
 
