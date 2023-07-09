@@ -55,7 +55,7 @@ There is an example of a .env file in the root of the project named .env.test. Y
 
 #### Database (Redis) 
 
-1. Install Redis on your machine by runnng the following command:
+1. Install and run Redis on your machine as a docker container by running the following command:
 
 ```bash
 docker run -d --name redis-stack \
@@ -66,11 +66,7 @@ docker run -d --name redis-stack \
 redis/redis-stack:6.2.6-v7 \
 redis-server /usr/local/etc/redis/redis.conf
 ```
-2. Start the Redis server by running the following command:
 
-```sh
-redis-server
-```
 
 ### Compile, test and deploy the smart contracts
 
