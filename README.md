@@ -1,4 +1,4 @@
-# ProjectChain
+# ProjectsChain
 
 <p align="center">
     <img src="frontend/assets/blockchain.png" width="400">
