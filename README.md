@@ -1,12 +1,16 @@
 # ProjectChain
 
-<img src="frontend/assets/blockchain.png" width="600">
+<p align="center">
+    <img src="frontend/assets/blockchain.png" width="400">
+</p>
 
 ProjectsChain is a plugin developed in order to be integrated with already existing e-shops of industrial designs and is able to grant, using the public blockchain and through smart contracts, the intellectual property of the projects, even without keeping them secret, and a fair royalty distribution between coauthors of the same final project. The straightforward and transparent mechanism developed also will prevent non-payment and miscommunication risks, representing common scenarios among freelancers.
 
 ## Architecture diagram
 
-<img src="readme_assets/architecture_diagram.png" width="600">
+<p align="center">
+    <img src="readme_assets/architecture_diagram.png" width="600">
+</p>
 
 
 ## Technology
@@ -26,7 +30,9 @@ ProjectsChain is a plugin developed in order to be integrated with already exist
 
 ## UML diagram of smart contracts 
 
-<img src="readme_assets/uml.png" width="600">
+<p align="center">
+    <img src="readme_assets/uml.png" width="600">
+</p>
 
 ## How to run
 
