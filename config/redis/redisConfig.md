@@ -30,7 +30,7 @@ docker run -d --name redis-stack \
 -p 6379:6379 \
 -p 8001:8001 \
 -v <path-to-local-folder-to-mount>:/data \
--v <path-to-local-folder-of-redis-conf-file>/redis.conf:/usr/local/etc/redis/redis.conf \
+-v <path-to-local-project-folder>/blockchain-project/config/redis/redis.conf:/usr/local/etc/redis/redis.conf \
 redis/redis-stack:6.2.6-v7 \
 redis-server /usr/local/etc/redis/redis.conf
 
