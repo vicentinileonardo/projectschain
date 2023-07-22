@@ -18,7 +18,7 @@ redis/redis-stack:latest
 docker run -d --name redis-stack \
 -p 6379:6379 -p 8001:8001 \
 -v /Users/leonardovicentini/Desktop/Magistrale/Blockchain/Redis:/data \
--v /Users/leonardovicentini/Desktop/Magistrale/Blockchain/blockchain-project/config/redis.conf:/usr/local/etc/redis/redis.conf \
+-v /Users/leonardovicentini/Desktop/Magistrale/Blockchain/projectschain/config/redis.conf:/usr/local/etc/redis/redis.conf \
 redis/redis-stack:latest \
 redis-server /usr/local/etc/redis/redis.conf
 
@@ -30,7 +30,7 @@ docker run -d --name redis-stack \
 -p 6379:6379 \
 -p 8001:8001 \
 -v <path-to-local-folder-to-mount>:/data \
--v <path-to-local-project-folder>/blockchain-project/config/redis/redis.conf:/usr/local/etc/redis/redis.conf \
+-v <path-to-local-project-folder>/projectschain/config/redis/redis.conf:/usr/local/etc/redis/redis.conf \
 redis/redis-stack:6.2.6-v7 \
 redis-server /usr/local/etc/redis/redis.conf
 
@@ -41,7 +41,7 @@ docker run -d --name redis-stack \
 -p 6379:6379 \
 -p 8001:8001 \
 -v /Users/leonardovicentini/Desktop/Magistrale/Blockchain/Redis:/data \
--v /Users/leonardovicentini/Desktop/Magistrale/Blockchain/blockchain-project/config/redis/redis.conf:/usr/local/etc/redis/redis.conf \
+-v /Users/leonardovicentini/Desktop/Magistrale/Blockchain/projectschain/config/redis/redis.conf:/usr/local/etc/redis/redis.conf \
 redis/redis-stack:6.2.6-v7 \
 redis-server /usr/local/etc/redis/redis.conf
 
